@@ -121,16 +121,24 @@ const RecipeDetail = () => {
 
         {/* Enhanced Recipe Info Overlay */}
         <div className="absolute bottom-0 left-0 right-0 p-8 text-white">
-          <div className="flex items-center gap-3 mb-3">
-            <span className="text-3xl">{recipe.mamaEmoji}</span>
-            <div>
-              <span className="text-sm font-medium opacity-90 block">by {recipe.mamaName}</span>
+          <h1 className="font-heading font-bold text-4xl md:text-5xl mb-6 leading-tight">{recipe.title}</h1>
+          
+          {/* Mama attribution moved to bottom-right */}
+          <div className="flex items-end justify-between">
+            <div className="flex-1">
               {recipe.difficulty_explanation && (
-                <span className="text-xs opacity-75">{recipe.difficulty}</span>
+                <span className="text-sm opacity-75 bg-white/10 backdrop-blur-md px-3 py-1 rounded-full">
+                  {recipe.difficulty}
+                </span>
               )}
             </div>
+            <div className="flex items-center gap-3">
+              <div className="text-right">
+                <span className="text-sm font-medium opacity-90 block">by {recipe.mamaName}</span>
+              </div>
+              <span className="text-3xl">{recipe.mamaEmoji}</span>
+            </div>
           </div>
-          <h1 className="font-heading font-bold text-4xl md:text-5xl mb-6 leading-tight">{recipe.title}</h1>
           
           {/* Enhanced Stats */}
           <div className="flex gap-4 flex-wrap">
@@ -326,10 +334,10 @@ const RecipeDetail = () => {
       </div>
 
       {/* Enhanced Fixed Bottom Button */}
-      <div className="fixed bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-white via-white to-transparent">
+      <div className="fixed bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-white/80 via-white/90 to-transparent backdrop-blur-md">
         <button
           onClick={handleStartCooking}
-          className="w-full bg-gradient-primary text-primary-foreground font-heading font-bold py-5 rounded-2xl shadow-glow hover:shadow-xl transition-all duration-200 flex items-center justify-center gap-4 gentle-pulse"
+          className="w-full bg-primary text-primary-foreground font-heading font-bold py-5 rounded-2xl shadow-elegant hover:shadow-glow transition-all duration-200 flex items-center justify-center gap-4 hover:scale-[1.02] active:scale-[0.98]"
         >
           <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
             <span className="text-xl">{recipe.mamaEmoji}</span>
