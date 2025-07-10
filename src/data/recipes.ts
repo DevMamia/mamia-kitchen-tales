@@ -68,8 +68,8 @@ export const recipes: Recipe[] = [
   {
     id: 'chicken-cacciatore',
     title: 'Chicken Cacciatore',
-    cookingTime: '1 hour 15 min',
-    cookTimeMin: 75,
+    cookingTime: '40 min',
+    cookTimeMin: 40,
     difficulty: 'MEDIUM',
     category: 'EVERYDAY',
     contentType: 'MEAT',
@@ -77,51 +77,21 @@ export const recipes: Recipe[] = [
     mamaId: 1,
     mamaName: 'Nonna Lucia',
     mamaEmoji: '🍷',
-    ingredients: [
-      '1.5kg whole chicken, cut into 8 pieces',
-      '60ml extra virgin olive oil',
-      '1 large yellow onion (200g), sliced',
-      '2 red bell peppers (300g), cut into strips',
-      '250g button mushrooms, quartered',
-      '4 cloves garlic, minced',
-      '250ml dry white wine',
-      '400g can crushed San Marzano tomatoes',
-      '2 sprigs fresh rosemary',
-      '4 sprigs fresh thyme',
-      '2 bay leaves',
-      '60g pitted Kalamata olives',
-      '2 tbsp fresh parsley, chopped',
-      'Sea salt and black pepper to taste',
-      '250ml chicken stock'
-    ],
+    ingredients: ['1 whole chicken cut up', 'Bell peppers', 'Mushrooms', 'Onions', 'Crushed tomatoes', 'White wine', 'Herbs'],
     instructions: [
-      'Season chicken pieces generously with salt and pepper. Let rest at room temperature for 15 minutes.',
-      'Heat olive oil in a heavy-bottomed casserole over medium-high heat. Brown chicken pieces skin-side down for 4-5 minutes until golden.',
-      'Turn chicken and brown other side for 3-4 minutes. Remove to a plate and set aside.',
-      'In the same pot, add onions and cook for 5 minutes until softened. Add bell peppers and cook 5 more minutes.',
-      'Add mushrooms and garlic, cook for 3 minutes until mushrooms release their liquid.',
-      'Pour in white wine, scraping up any browned bits. Let wine reduce by half, about 4 minutes.',
-      'Add crushed tomatoes, herbs, and chicken stock. Stir in olives and return chicken to pot.',
-      'Bring to a gentle simmer, cover partially, and cook for 35-40 minutes until chicken is tender.',
-      'Remove bay leaves, taste for seasoning. Garnish with fresh parsley and serve with crusty bread or polenta.'
+      'Brown chicken pieces in olive oil',
+      'Remove chicken and sauté vegetables',
+      'Add wine and tomatoes',
+      'Return chicken to pot',
+      'Simmer until chicken is tender',
+      'Season with herbs and serve'
     ],
     servings: 4,
-    description: 'Traditional Italian hunter-style chicken braised with peppers, mushrooms, and herbs in rich tomato sauce',
-    voiceIntro: 'Ciao bello! Today we hunt like the old days - but the only thing we catch is incredible flavor.',
-    voiceTips: [
-      'Don\'t crowd the chicken when browning - do it in batches if needed',
-      'The fond on the bottom of the pot is liquid gold - scrape it all up with the wine',
-      'Let the vegetables caramelize properly - this builds the flavor foundation',
-      'If the sauce seems thin, simmer uncovered for the last 10 minutes'
-    ],
-    subsNote: 'No white wine? Use chicken stock. For vegetarian: use 500g mixed mushrooms instead of chicken.',
-    voiceEnabled: true,
-    cookingTips: [
-      'San Marzano tomatoes make a real difference in authentic Italian cooking',
-      'The dish tastes even better the next day as flavors meld',
-      'Traditional cacciatore was made with whatever vegetables the hunter could forage'
-    ],
-    difficulty_explanation: 'Simple braising technique, but requires patience for proper browning and layering of flavors'
+    description: 'Hunter-style chicken with vegetables in tomato sauce',
+    voiceIntro: 'We are hunting flavour today, my dear!',
+    voiceTips: ['Brown the chicken well for deeper flavor', 'Don\'t rush the vegetables - let them caramelize'],
+    subsNote: 'Swap chicken for mushrooms for a vegetarian version.',
+    voiceEnabled: true
   },
   {
     id: 'carbonara-1',
@@ -418,48 +388,21 @@ export const recipes: Recipe[] = [
     mamaId: 3,
     mamaName: 'Mae Malai',
     mamaEmoji: '🌿',
-    ingredients: [
-      '200g dried rice noodles (sen lek, 5mm wide)',
-      '300g medium shrimp, peeled and deveined',
-      '3 large eggs, lightly beaten',
-      '100g fresh bean sprouts',
-      '3 tbsp tamarind paste',
-      '2 tbsp palm sugar (or brown sugar)',
-      '3 tbsp fish sauce',
-      '2 tbsp vegetable oil',
-      '3 spring onions, cut into 2cm pieces',
-      '60g roasted peanuts, roughly chopped',
-      '2 lime wedges',
-      '1 tsp dried chili flakes (optional)',
-      '2 cloves garlic, minced'
-    ],
+    ingredients: ['Rice noodles', 'Shrimp', 'Eggs', 'Bean sprouts', 'Tamarind paste', 'Palm sugar'],
     instructions: [
-      'Soak rice noodles in warm water for 20-25 minutes until soft but still firm. Drain and set aside.',
-      'Mix tamarind paste, palm sugar, and fish sauce in a small bowl to make the sauce. Taste and adjust - it should be sweet, sour, and salty.',
-      'Heat wok over highest heat for 2-3 minutes until smoking. Add 1 tbsp oil and swirl to coat.',
-      'Add garlic and stir-fry for 10 seconds until fragrant, then add shrimp. Cook for 1-2 minutes until pink.',
-      'Push shrimp to one side, add remaining oil. Pour in beaten eggs and scramble gently for 30 seconds.',
-      'Add drained noodles and sauce mixture. Toss everything together for 2-3 minutes until noodles are heated through.',
-      'Add bean sprouts and spring onions. Stir-fry for another minute until sprouts are slightly wilted but still crunchy.',
-      'Remove from heat. Garnish with chopped peanuts, chili flakes, and serve immediately with lime wedges.'
+      'Soak noodles until soft',
+      'Heat wok until smoking',
+      'Scramble eggs',
+      'Add noodles and sauce',
+      'Toss with bean sprouts',
+      'Garnish with peanuts and lime'
     ],
     servings: 2,
-    description: 'Authentic Thai street-style stir-fried noodles with the perfect balance of sweet, sour, and salty flavors',
-    voiceIntro: 'Khun, listen carefully - real Pad Thai is about balance. Sweet, sour, salty dancing together.',
-    voiceTips: [
-      'The wok must be smoking hot - this is the secret to authentic wok hei flavor',
-      'Never oversoak the noodles - they should still have bite when you drain them',
-      'Taste the sauce before adding - every tamarind paste is different',
-      'Work fast once you start cooking - Pad Thai waits for no one!'
-    ],
-    subsNote: 'No tamarind? Mix 2 tbsp lime juice + 1 tbsp brown sugar. No palm sugar? Brown sugar works.',
-    voiceEnabled: true,
-    cookingTips: [
-      'Use sen lek noodles (5mm wide) for authentic texture',
-      'Fresh tamarind paste gives the best flavor, but concentrate works too',
-      'The key is high heat throughout - don\'t turn it down'
-    ],
-    difficulty_explanation: 'Requires quick timing and high heat technique, but ingredients are simple'
+    description: 'Classic Thai stir-fried noodles',
+    voiceIntro: 'Sweet, sour, salty—balance is everything.',
+    voiceTips: ['Taste as you go', 'Don\'t oversoak the noodles'],
+    subsNote: 'Lime + brown sugar works if tamarind missing.',
+    voiceEnabled: true
   },
   {
     id: 'khao-soi',
