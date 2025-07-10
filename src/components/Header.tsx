@@ -45,8 +45,9 @@ export const Header = () => {
           <DropdownMenuContent 
             align="end" 
             sideOffset={8} 
-            className="w-48 bg-card border-border shadow-paper z-[9999] fixed"
+            className="w-44 bg-card border-border shadow-paper z-[9999] mr-4"
             avoidCollisions={true}
+            collisionPadding={16}
           >
             <DropdownMenuItem className="cursor-pointer hover:bg-accent">
               <User className="mr-2 h-4 w-4" />
