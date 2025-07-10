@@ -169,11 +169,7 @@ const Cook = () => {
       </div>
 
       {/* Voice Status Indicator */}
-      <VoiceStatusIndicator 
-        status={voiceStatus}
-        mamaAvatar={mama.avatar}
-        mamaName={mama.name}
-      />
+      <VoiceStatusIndicator className="justify-center" />
 
       {/* Controls */}
       <div className="px-4 mb-6">
