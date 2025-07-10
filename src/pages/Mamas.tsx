@@ -76,7 +76,7 @@ const Mamas = () => {
             loop: true,
           }}
         >
-          <CarouselContent className="h-[70vh]">
+          <CarouselContent className="h-[60vh] min-h-[500px]">
             {mamas.map((mama) => {
               const WatermarkIcon = mama.watermark;
               return (

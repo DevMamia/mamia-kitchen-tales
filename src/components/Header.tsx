@@ -42,7 +42,7 @@ export const Header = () => {
               <Menu className="h-4 w-4 text-muted-foreground" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-48 bg-card border-border shadow-paper">
+          <DropdownMenuContent align="end" sideOffset={8} className="w-48 bg-card border-border shadow-paper z-50">
             <DropdownMenuItem className="cursor-pointer hover:bg-accent">
               <User className="mr-2 h-4 w-4" />
               Profile
