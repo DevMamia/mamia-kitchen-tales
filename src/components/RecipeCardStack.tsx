@@ -164,8 +164,8 @@ const RecipeCardStack: React.FC<RecipeCardStackProps> = ({
             {/* Difficulty Badge */}
             <div className="absolute top-4 right-4">
               <Badge 
-                variant={recipe.difficulty === 'Easy' ? 'secondary' : 
-                        recipe.difficulty === 'Medium' ? 'outline' : 'destructive'}
+                variant={recipe.difficulty === 'EASY' ? 'secondary' : 
+                        recipe.difficulty === 'MEDIUM' ? 'outline' : 'destructive'}
               >
                 <ChefHat className="w-3 h-3 mr-1" />
                 {recipe.difficulty}

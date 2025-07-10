@@ -1,12 +1,13 @@
 import { mamas, getMamaById } from './mamas';
 
-export type Difficulty = 'Easy' | 'Medium' | 'Hard';
-export type Category = 'Meat' | 'Fish' | 'Rice/Pasta' | 'Dessert' | 'Vegetarian' | 'Appetizer';
+export type Difficulty = 'EASY' | 'MEDIUM' | 'ADVANCED';
+export type Category = 'QUICK' | 'EVERYDAY' | 'WEEKEND' | 'CELEBRATION';
 
 export interface Recipe {
   id: string;
   title: string;
   cookingTime: string;
+  cookTimeMin: number;
   difficulty: Difficulty;
   category: Category;
   image: string;
@@ -23,6 +24,8 @@ export interface Recipe {
   voiceIntro?: string;
   voiceTips?: string[];
   voiceEnabled?: boolean;
+  // Additional fields
+  subsNote?: string;
   // Cooking context
   cookingTips?: string[];
   difficulty_explanation?: string;
@@ -31,11 +34,66 @@ export interface Recipe {
 export const recipes: Recipe[] = [
   // Nonna Lucia's Recipes
   {
+    id: 'penne-arrabbiata',
+    title: 'Penne all\'Arrabbiata',
+    cookingTime: '18 min',
+    cookTimeMin: 18,
+    difficulty: 'EASY',
+    category: 'QUICK',
+    image: '/placeholder.svg',
+    mamaId: 1,
+    mamaName: 'Nonna Lucia',
+    mamaEmoji: '🍷',
+    ingredients: ['400g penne pasta', '4 cloves garlic', '2 fresh chillies', '400g crushed tomatoes', 'Olive oil', 'Parsley', 'Salt'],
+    instructions: [
+      'Heat olive oil in large pan',
+      'Add sliced garlic and chillies, cook until fragrant',
+      'Add crushed tomatoes and season with salt',
+      'Simmer sauce while pasta cooks',
+      'Cook penne until al dente',
+      'Toss pasta with sauce and pasta water',
+      'Garnish with fresh parsley'
+    ],
+    servings: 4,
+    description: 'Spicy tomato pasta with garlic and chillies',
+    voiceIntro: 'Ciao bello! A quick kick of chilli to wake up your taste buds.',
+    voiceTips: ['Splash pasta water so the sauce hugs the penne.', 'Arrabbiata means \'angry\'—let it blush!'],
+    subsNote: 'No penne? Any short pasta works. No fresh chilli? Use 1/4 tsp flakes.',
+    voiceEnabled: true
+  },
+  {
+    id: 'chicken-cacciatore',
+    title: 'Chicken Cacciatore',
+    cookingTime: '40 min',
+    cookTimeMin: 40,
+    difficulty: 'MEDIUM',
+    category: 'EVERYDAY',
+    image: '/placeholder.svg',
+    mamaId: 1,
+    mamaName: 'Nonna Lucia',
+    mamaEmoji: '🍷',
+    ingredients: ['1 whole chicken cut up', 'Bell peppers', 'Mushrooms', 'Onions', 'Crushed tomatoes', 'White wine', 'Herbs'],
+    instructions: [
+      'Brown chicken pieces in olive oil',
+      'Remove chicken and sauté vegetables',
+      'Add wine and tomatoes',
+      'Return chicken to pot',
+      'Simmer until chicken is tender',
+      'Season with herbs and serve'
+    ],
+    servings: 4,
+    description: 'Hunter-style chicken with vegetables in tomato sauce',
+    voiceIntro: 'We are hunting flavour today, my dear!',
+    subsNote: 'Swap mushrooms for chicken for a vegetarian pot.',
+    voiceEnabled: true
+  },
+  {
     id: 'carbonara-1',
-    title: 'Classic Carbonara',
-    cookingTime: '20 min',
-    difficulty: 'Medium',
-    category: 'Rice/Pasta',
+    title: 'Pasta Carbonara',
+    cookingTime: '30 min',
+    cookTimeMin: 30,
+    difficulty: 'MEDIUM',
+    category: 'EVERYDAY',
     image: '/placeholder.svg',
     mamaId: 1,
     mamaName: 'Nonna Lucia',
@@ -52,290 +110,323 @@ export const recipes: Recipe[] = [
     servings: 4,
     description: 'Authentic Roman carbonara with crispy guanciale and creamy egg sauce.',
     featured: true,
-    voiceIntro: 'Ah, mia cara! Today we make the real carbonara - no cream, no peas, just the way my nonna taught me in Roma!',
-    voiceEnabled: true,
-    voiceTips: [
-      'The secret is to turn off the heat before adding the eggs, otherwise you get scrambled eggs!',
-      'Use the starchy pasta water - it\'s liquid gold for making the sauce creamy!',
-      'Guanciale is better than pancetta - it has more flavor from the jowl of the pig.'
-    ],
-    cookingTips: [
-      'Never add cream to carbonara - it\'s not traditional',
-      'The pasta water helps emulsify the egg and cheese mixture',
-      'Work quickly when combining to prevent eggs from scrambling'
-    ],
-    difficulty_explanation: 'Medium difficulty due to timing - you must work quickly to create the creamy sauce without scrambling the eggs.'
+    voiceIntro: 'Remember—no cream! Just eggs and love.',
+    subsNote: 'Pancetta instead of guanciale is okay; Parm if no Pecorino.',
+    voiceEnabled: true
   },
   {
-    id: 'risotto-1',
-    title: 'Mushroom Risotto',
-    cookingTime: '35 min',
-    difficulty: 'Hard',
-    category: 'Rice/Pasta',
+    id: 'lasagna-nonna',
+    title: 'Lasagna alla Nonna',
+    cookingTime: '2 hours',
+    cookTimeMin: 120,
+    difficulty: 'ADVANCED',
+    category: 'WEEKEND',
     image: '/placeholder.svg',
     mamaId: 1,
     mamaName: 'Nonna Lucia',
     mamaEmoji: '🍷',
-    ingredients: ['320g Arborio rice', '500g mixed mushrooms', '1.5L vegetable stock', '150ml white wine', 'Parmesan cheese', 'Butter', 'Onion', 'Garlic'],
+    ingredients: ['Lasagna sheets', 'Bolognese sauce', 'Béchamel sauce', 'Mozzarella', 'Parmesan', 'Fresh basil'],
     instructions: [
-      'Clean and slice mushrooms, sauté until golden',
-      'Heat stock in a separate pot and keep warm',
-      'In risotto pan, sauté minced onion and garlic in butter',
-      'Add rice and toast for 2 minutes until translucent',
-      'Pour in wine and stir until absorbed',
-      'Add warm stock one ladle at a time, stirring constantly',
-      'Continue for 18-20 minutes until rice is creamy but still has bite',
-      'Stir in mushrooms and generous Parmesan cheese'
-    ],
-    servings: 4,
-    description: 'Creamy risotto with wild mushrooms and aged Parmesan.',
-    recipeOfWeek: true,
-    voiceIntro: 'Bene! Risotto is like a meditation - you must be patient and stir with amore. No rushing!',
-    voiceEnabled: true,
-    voiceTips: [
-      'Add the stock slowly, one ladle at a time - this releases the starch gradually',
-      'The rice should move like lava when you shake the pan - this is mantecatura!',
-      'Never stop stirring - it develops the creamy texture we want'
-    ],
-    difficulty_explanation: 'Hard because it requires constant attention and stirring for 20+ minutes, plus timing to get the perfect creamy texture.'
-  },
-  {
-    id: 'tiramisu-1',
-    title: 'Traditional Tiramisu',
-    cookingTime: '4 hours',
-    difficulty: 'Medium',
-    category: 'Dessert',
-    image: '/placeholder.svg',
-    mamaId: 1,
-    mamaName: 'Nonna Lucia',
-    mamaEmoji: '🍷',
-    ingredients: ['24 ladyfinger cookies', '500g mascarpone', '6 eggs', '150g sugar', '300ml strong coffee', 'Cocoa powder', 'Dark rum (optional)'],
-    instructions: [
-      'Brew strong coffee and let cool, add rum if using',
-      'Separate eggs - yolks in one bowl, whites in another',
-      'Whisk yolks with sugar until pale and thick',
-      'Gently fold mascarpone into yolk mixture',
-      'Whip egg whites to soft peaks and fold into mascarpone mixture',
-      'Quickly dip each ladyfinger in coffee and layer in dish',
-      'Spread half the mascarpone mixture over cookies',
-      'Repeat layering and chill for at least 4 hours',
-      'Dust with cocoa powder before serving'
+      'Prepare Bolognese sauce',
+      'Make béchamel sauce',
+      'Cook lasagna sheets',
+      'Layer sauce, pasta, and cheese',
+      'Repeat layers',
+      'Top with cheese and bake'
     ],
     servings: 8,
-    description: 'Classic Italian dessert with layers of coffee-soaked ladyfingers and mascarpone.',
-    voiceIntro: 'Tiramisu means "pick me up" - and this dessert will lift your spirits to heaven!',
-    voiceEnabled: true,
-    voiceTips: [
-      'The coffee should be strong but not bitter - let it cool completely',
-      'Don\'t over-soak the ladyfingers or they become mushy',
-      'Chill overnight if possible - the flavors meld beautifully'
-    ]
+    description: 'Traditional layered pasta with meat sauce and béchamel',
+    voiceIntro: 'Clear your Sunday—this is a labour of love.',
+    subsNote: 'Store‑bought sheets fine; soak 10 min if oven‑ready.',
+    voiceEnabled: true
+  },
+  {
+    id: 'osso-buco',
+    title: 'Osso Buco con Gremolata',
+    cookingTime: '3 hours',
+    cookTimeMin: 180,
+    difficulty: 'ADVANCED',
+    category: 'CELEBRATION',
+    image: '/placeholder.svg',
+    mamaId: 1,
+    mamaName: 'Nonna Lucia',
+    mamaEmoji: '🍷',
+    ingredients: ['Veal shanks', 'Carrots', 'Celery', 'Onions', 'White wine', 'Beef stock', 'Gremolata ingredients'],
+    instructions: [
+      'Brown veal shanks',
+      'Sauté vegetables',
+      'Add wine and stock',
+      'Braise slowly for 2-3 hours',
+      'Make gremolata',
+      'Serve with gremolata'
+    ],
+    servings: 6,
+    description: 'Braised veal shanks with aromatic vegetables',
+    voiceIntro: 'A feast fit for famiglia reunions.',
+    subsNote: 'Beef shank works if you can\'t find veal.',
+    voiceEnabled: true
   },
 
   // Abuela Rosa's Recipes
   {
-    id: 'mole-1',
-    title: 'Mole Negro',
-    cookingTime: '3 hours',
-    difficulty: 'Hard',
-    category: 'Meat',
+    id: 'quesadillas-poblano',
+    title: 'Quesadillas de Queso y Poblano',
+    cookingTime: '15 min',
+    cookTimeMin: 15,
+    difficulty: 'EASY',
+    category: 'QUICK',
     image: '/placeholder.svg',
     mamaId: 2,
     mamaName: 'Abuela Rosa',
     mamaEmoji: '🌶️',
-    ingredients: [
-      '6 chicken pieces', 'Mulato chiles', 'Ancho chiles', 'Pasilla chiles', 'Chipotle chiles',
-      'Mexican chocolate', 'Tomatoes', 'Tomatillos', 'White onion', 'Garlic', 'Sesame seeds',
-      'Pumpkin seeds', 'Raisins', 'Bread', 'Tortilla', 'Cinnamon', 'Cloves', 'Black pepper'
-    ],
+    ingredients: ['Flour tortillas', 'Oaxaca cheese', 'Poblano peppers', 'Onions'],
     instructions: [
-      'Toast all chiles in dry pan until fragrant, remove seeds and stems',
-      'Soak chiles in hot water for 30 minutes',
-      'Toast sesame seeds, pumpkin seeds, and spices separately',
-      'Char tomatoes, tomatillos, onion, and garlic',
-      'Fry bread and tortilla until golden',
-      'Blend everything in batches with chile soaking liquid',
-      'Strain mixture through fine sieve',
-      'Cook sauce in large pot for 1-2 hours, stirring frequently',
-      'Add chocolate and season to taste',
-      'Simmer chicken in sauce until tender'
+      'Roast poblano peppers',
+      'Slice peppers and onions',
+      'Fill tortillas with cheese and vegetables',
+      'Cook until golden and cheese melts'
+    ],
+    servings: 4,
+    description: 'Crispy cheese and poblano pepper quesadillas',
+    voiceIntro: 'Rapidito y delicioso—my cheesy hug!',
+    subsNote: 'Bell pepper for poblano; mozzarella if no Oaxaca cheese.',
+    voiceEnabled: true
+  },
+  {
+    id: 'chicken-tinga',
+    title: 'Chicken Tinga Tacos',
+    cookingTime: '35 min',
+    cookTimeMin: 35,
+    difficulty: 'MEDIUM',
+    category: 'EVERYDAY',
+    image: '/placeholder.svg',
+    mamaId: 2,
+    mamaName: 'Abuela Rosa',
+    mamaEmoji: '🌶️',
+    ingredients: ['Chicken thighs', 'Chipotle peppers', 'Tomatoes', 'Onions', 'Corn tortillas'],
+    instructions: [
+      'Cook chicken until tender',
+      'Shred chicken',
+      'Make chipotle tomato sauce',
+      'Combine chicken with sauce',
+      'Serve in warm tortillas'
     ],
     servings: 6,
-    description: 'Complex Oaxacan sauce with over 20 ingredients including chocolate.',
-    featured: true,
-    voiceIntro: '¡Órale! Mole negro is the queen of Mexican sauces - it takes time, but cada ingredient has its purpose, mija.',
-    voiceEnabled: true,
-    voiceTips: [
-      'Don\'t rush the toasting - each chile needs to release its aroma but not burn',
-      'The sauce should cook slowly, like a good relationship - with patience and attention',
-      'When it\'s ready, the mole will coat the back of a spoon like velvet'
-    ],
-    difficulty_explanation: 'Very complex with 20+ ingredients that must be prepared in specific order and cooked for hours.'
+    description: 'Smoky shredded chicken in chipotle sauce',
+    voiceIntro: 'Smoky chipotle memories from Puebla.',
+    subsNote: 'Use rotisserie chicken to halve prep time.',
+    voiceEnabled: true
   },
   {
-    id: 'tacos-1',
-    title: 'Carnitas Tacos',
-    cookingTime: '2.5 hours',
-    difficulty: 'Medium',
-    category: 'Meat',
+    id: 'enchiladas-verdes',
+    title: 'Enchiladas Verdes',
+    cookingTime: '40 min',
+    cookTimeMin: 40,
+    difficulty: 'MEDIUM',
+    category: 'EVERYDAY',
     image: '/placeholder.svg',
     mamaId: 2,
     mamaName: 'Abuela Rosa',
     mamaEmoji: '🌶️',
-    ingredients: ['2kg pork shoulder', 'Orange juice', 'Lime juice', 'Lard or oil', 'Cumin', 'Bay leaves', 'Garlic', 'Onion', 'Corn tortillas'],
+    ingredients: ['Corn tortillas', 'Tomatillos', 'Green chiles', 'Chicken', 'Mexican cheese', 'Onions'],
     instructions: [
-      'Cut pork shoulder into large chunks, season with salt and cumin',
-      'Heat lard in large heavy pot over medium heat',
-      'Brown pork pieces on all sides',
-      'Add orange juice, garlic, bay leaves, and onion',
-      'Cover and simmer for 2 hours until meat shreds easily',
-      'Remove meat and shred with forks',
-      'Return to pot and cook uncovered to crisp edges',
-      'Warm tortillas and serve with lime, onion, and salsa'
+      'Make green salsa with tomatillos',
+      'Warm tortillas',
+      'Fill with chicken',
+      'Roll and place in baking dish',
+      'Cover with salsa and cheese',
+      'Bake until bubbling'
     ],
-    servings: 8,
-    description: 'Tender, juicy pork slow-cooked until perfectly shreddable.',
-    voiceIntro: 'Carnitas are the soul of Mexican cooking - low and slow until the meat falls apart with just a fork!',
-    voiceEnabled: true,
-    voiceTips: [
-      'The orange juice makes the meat tender and adds a subtle sweetness',
-      'At the end, let the edges get crispy - that\'s the best part!',
-      'Warm your tortillas on the comal for the authentic experience'
-    ]
+    servings: 6,
+    description: 'Chicken enchiladas in tangy green sauce',
+    voiceIntro: 'Tomatillo brightness for your weeknight.',
+    subsNote: 'Canned green salsa works in a pinch.',
+    voiceEnabled: true
   },
   {
-    id: 'flan-1',
-    title: 'Mexican Flan',
-    cookingTime: '1 hour',
-    difficulty: 'Medium',
-    category: 'Dessert',
+    id: 'pozole-rojo',
+    title: 'Pozole Rojo',
+    cookingTime: '2 hours',
+    cookTimeMin: 120,
+    difficulty: 'ADVANCED',
+    category: 'WEEKEND',
     image: '/placeholder.svg',
     mamaId: 2,
     mamaName: 'Abuela Rosa',
     mamaEmoji: '🌶️',
-    ingredients: ['6 large eggs', '1 can condensed milk', '1 can evaporated milk', 'Vanilla extract', '200g sugar for caramel'],
+    ingredients: ['Pork shoulder', 'Hominy', 'Guajillo chiles', 'Ancho chiles', 'Garlic', 'Onions'],
     instructions: [
-      'Preheat oven to 350°F and prepare flan mold',
-      'Make caramel by heating sugar until golden amber',
-      'Pour caramel into mold and swirl to coat bottom',
-      'Blend eggs, condensed milk, evaporated milk, and vanilla',
-      'Strain mixture to remove any lumps',
-      'Pour custard over caramel in mold',
-      'Cover with foil and bake in water bath for 45-50 minutes',
-      'Cool completely, then refrigerate for 4 hours',
-      'Run knife around edges and invert onto serving plate'
+      'Simmer pork until tender',
+      'Toast and blend chiles',
+      'Add chile sauce to broth',
+      'Add hominy',
+      'Simmer until flavors meld',
+      'Serve with garnishes'
     ],
     servings: 8,
-    description: 'Silky smooth custard with golden caramel sauce.',
-    voiceIntro: 'Flan is like a kiss from heaven - smooth, sweet, and it makes everyone smile, ¿verdad?',
-    voiceEnabled: true,
-    voiceTips: [
-      'Watch the caramel carefully - it goes from perfect to burned very quickly',
-      'The water bath keeps the custard gentle and prevents cracking',
-      'Let it cool completely before unmolding - patience, mija!'
-    ]
+    description: 'Traditional Mexican soup with hominy and pork',
+    voiceIntro: 'Big pot, big love—listen for the hominy pop.',
+    subsNote: 'Canned hominy cuts simmer time.',
+    voiceEnabled: true
+  },
+  {
+    id: 'mole-poblano',
+    title: 'Mole Poblano',
+    cookingTime: '3 hours',
+    cookTimeMin: 180,
+    difficulty: 'ADVANCED',
+    category: 'CELEBRATION',
+    image: '/placeholder.svg',
+    mamaId: 2,
+    mamaName: 'Abuela Rosa',
+    mamaEmoji: '🌶️',
+    ingredients: ['Various chiles', 'Chocolate', 'Chicken', 'Tomatoes', 'Nuts', 'Seeds', 'Spices'],
+    instructions: [
+      'Toast all chiles',
+      'Blend with other ingredients',
+      'Cook sauce slowly',
+      'Add chocolate',
+      'Simmer chicken in sauce',
+      'Serve with rice'
+    ],
+    servings: 8,
+    description: 'Complex sauce with chiles and chocolate',
+    voiceIntro: 'Many chiles, one heart.',
+    subsNote: 'Shortcut: start with 1 cup jarred mole paste, thin with stock.',
+    voiceEnabled: true
   },
 
   // Mae Malai's Recipes
   {
-    id: 'curry-1',
-    title: 'Green Curry',
-    cookingTime: '45 min',
-    difficulty: 'Medium',
-    category: 'Meat',
+    id: 'pad-krapao',
+    title: 'Pad Krapao Gai',
+    cookingTime: '15 min',
+    cookTimeMin: 15,
+    difficulty: 'EASY',
+    category: 'QUICK',
     image: '/placeholder.svg',
     mamaId: 3,
     mamaName: 'Mae Malai',
     mamaEmoji: '🌿',
-    ingredients: [
-      '3 tbsp green curry paste', '400ml coconut milk', '500g chicken thigh', 'Thai eggplant',
-      'Thai basil leaves', 'Fish sauce', 'Palm sugar', 'Kaffir lime leaves', 'Thai chilies'
-    ],
+    ingredients: ['Ground chicken', 'Thai holy basil', 'Chiles', 'Garlic', 'Fish sauce', 'Oyster sauce'],
     instructions: [
-      'Heat thick coconut cream in wok until oil separates',
-      'Add curry paste and fry until fragrant (2-3 minutes)',
-      'Add chicken pieces and cook until sealed',
-      'Pour in remaining coconut milk gradually',
-      'Add palm sugar and fish sauce to taste',
-      'Simmer for 15 minutes until chicken is tender',
-      'Add eggplant and cook for 5 minutes',
-      'Garnish with Thai basil and lime leaves'
-    ],
-    servings: 4,
-    description: 'Aromatic and spicy curry with fresh herbs and coconut milk.',
-    featured: true,
-    voiceIntro: 'Ah, green curry! The smell of lemongrass and basil will transport you to Thailand, darling!',
-    voiceEnabled: true,
-    voiceTips: [
-      'Fry the curry paste until the oil separates - this releases all the flavors',
-      'Use the thick cream from the top of the coconut milk first',
-      'Add the basil at the very end to keep it fresh and bright'
-    ],
-    difficulty_explanation: 'Medium due to balancing the complex flavors and getting the right consistency.'
-  },
-  {
-    id: 'pad-thai-1',
-    title: 'Pad Thai',
-    cookingTime: '25 min',
-    difficulty: 'Medium',
-    category: 'Rice/Pasta',
-    image: '/placeholder.svg',
-    mamaId: 3,
-    mamaName: 'Mae Malai',
-    mamaEmoji: '🌿',
-    ingredients: [
-      '200g rice noodles', '200g shrimp', '2 eggs', '100g bean sprouts', 'Tamarind paste',
-      'Palm sugar', 'Fish sauce', 'Roasted peanuts', 'Lime wedges', 'Chives'
-    ],
-    instructions: [
-      'Soak rice noodles in warm water until soft',
-      'Mix tamarind paste, palm sugar, and fish sauce for sauce',
-      'Heat wok over high heat with oil',
-      'Scramble eggs and set aside',
-      'Stir-fry shrimp until pink',
-      'Add drained noodles and sauce, toss quickly',
-      'Add bean sprouts and scrambled eggs',
-      'Garnish with peanuts, lime, and chives'
+      'Heat wok until smoking',
+      'Stir-fry garlic and chiles',
+      'Add chicken and cook through',
+      'Add sauces',
+      'Toss in holy basil',
+      'Serve over rice with fried egg'
     ],
     servings: 2,
-    description: 'Thailand\'s most famous noodle dish with sweet, sour, and salty flavors.',
-    voiceIntro: 'Pad Thai is all about the balance - sweet, sour, salty, and a little heat. Like life itself!',
-    voiceEnabled: true,
-    voiceTips: [
-      'High heat is essential - the wok should be smoking hot',
-      'Don\'t oversoak the noodles or they become mushy',
-      'Taste and adjust - every tamarind is different in sourness'
-    ]
+    description: 'Spicy Thai basil chicken',
+    voiceIntro: 'Hot wok, holy basil—don\'t blink.',
+    subsNote: 'Use sweet basil + mint if Thai basil unavailable.',
+    voiceEnabled: true
   },
   {
-    id: 'mango-sticky-rice-1',
-    title: 'Mango Sticky Rice',
-    cookingTime: '1.5 hours',
-    difficulty: 'Easy',
-    category: 'Dessert',
+    id: 'green-curry',
+    title: 'Green Curry',
+    cookingTime: '35 min',
+    cookTimeMin: 35,
+    difficulty: 'MEDIUM',
+    category: 'EVERYDAY',
     image: '/placeholder.svg',
     mamaId: 3,
     mamaName: 'Mae Malai',
     mamaEmoji: '🌿',
-    ingredients: ['1 cup glutinous rice', '400ml coconut milk', '100g palm sugar', 'Pinch of salt', '2 ripe mangoes'],
+    ingredients: ['Green curry paste', 'Coconut milk', 'Chicken', 'Thai eggplant', 'Thai basil', 'Fish sauce'],
     instructions: [
-      'Soak glutinous rice overnight in water',
-      'Steam rice in cheesecloth for 25-30 minutes',
-      'Heat coconut milk with palm sugar and salt',
-      'Mix warm rice with half the coconut sauce',
-      'Let rice absorb the sauce for 30 minutes',
-      'Slice mangoes and arrange with rice',
-      'Drizzle with remaining coconut sauce'
+      'Fry curry paste in coconut cream',
+      'Add chicken and cook',
+      'Add remaining coconut milk',
+      'Simmer with eggplant',
+      'Season to taste',
+      'Garnish with basil'
     ],
     servings: 4,
-    description: 'Sweet and creamy coconut rice paired with fresh tropical mango.',
-    voiceIntro: 'This dessert tastes like sunshine and happiness - perfect mangoes with sweet coconut rice!',
-    voiceEnabled: true,
-    voiceTips: [
-      'The rice should be translucent when properly steamed',
-      'Choose mangoes that are ripe but still firm - too soft and they fall apart',
-      'Let the rice rest with the coconut milk - patience makes it perfect'
-    ]
+    description: 'Aromatic coconut curry with chicken',
+    featured: true,
+    voiceIntro: 'Green like the jungle after rain.',
+    subsNote: 'Jar curry paste is fine; add extra lime leaf for punch.',
+    voiceEnabled: true
+  },
+  {
+    id: 'pad-thai',
+    title: 'Pad Thai',
+    cookingTime: '35 min',
+    cookTimeMin: 35,
+    difficulty: 'MEDIUM',
+    category: 'EVERYDAY',
+    image: '/placeholder.svg',
+    mamaId: 3,
+    mamaName: 'Mae Malai',
+    mamaEmoji: '🌿',
+    ingredients: ['Rice noodles', 'Shrimp', 'Eggs', 'Bean sprouts', 'Tamarind paste', 'Palm sugar'],
+    instructions: [
+      'Soak noodles until soft',
+      'Heat wok until smoking',
+      'Scramble eggs',
+      'Add noodles and sauce',
+      'Toss with bean sprouts',
+      'Garnish with peanuts and lime'
+    ],
+    servings: 2,
+    description: 'Classic Thai stir-fried noodles',
+    voiceIntro: 'Sweet, sour, salty—balance is everything.',
+    subsNote: 'Lime + brown sugar works if tamarind missing.',
+    voiceEnabled: true
+  },
+  {
+    id: 'khao-soi',
+    title: 'Khao Soi',
+    cookingTime: '2 hours',
+    cookTimeMin: 120,
+    difficulty: 'ADVANCED',
+    category: 'WEEKEND',
+    image: '/placeholder.svg',
+    mamaId: 3,
+    mamaName: 'Mae Malai',
+    mamaEmoji: '🌿',
+    ingredients: ['Chicken', 'Curry paste', 'Coconut milk', 'Egg noodles', 'Shallots', 'Lime'],
+    instructions: [
+      'Make curry base',
+      'Simmer chicken until tender',
+      'Cook noodles',
+      'Combine curry and noodles',
+      'Fry noodles for topping',
+      'Serve with garnishes'
+    ],
+    servings: 4,
+    description: 'Northern Thai curry noodle soup',
+    voiceIntro: 'Northern warmth in a bowl.',
+    subsNote: 'Crispy noodle topping optional but magic.',
+    voiceEnabled: true
+  },
+  {
+    id: 'massaman-beef',
+    title: 'Massaman Beef Curry',
+    cookingTime: '3 hours',
+    cookTimeMin: 180,
+    difficulty: 'ADVANCED',
+    category: 'CELEBRATION',
+    image: '/placeholder.svg',
+    mamaId: 3,
+    mamaName: 'Mae Malai',
+    mamaEmoji: '🌿',
+    ingredients: ['Beef chuck', 'Massaman paste', 'Coconut milk', 'Potatoes', 'Peanuts', 'Tamarind'],
+    instructions: [
+      'Brown beef in batches',
+      'Fry curry paste',
+      'Add coconut milk gradually',
+      'Braise beef until tender',
+      'Add potatoes and peanuts',
+      'Simmer until thick'
+    ],
+    servings: 6,
+    description: 'Rich, aromatic curry with tender beef',
+    voiceIntro: 'Spices from afar, comfort from home.',
+    subsNote: 'Chicken thigh works too; cut cook to 90 min.',
+    voiceEnabled: true
   }
 ];
 
