@@ -3,51 +3,26 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Carousel, CarouselContent, CarouselItem, CarouselApi } from '@/components/ui/carousel';
 import { Wine, Flower2, Leaf, ChefHat } from 'lucide-react';
+import { mamas } from '@/data/mamas';
 
-const mamas = [
-  {
-    id: 1,
-    name: "Nonna Lucia",
-    cuisine: "Italian Cuisine",
-    background: "#FF8C42",
-    signatureDish: "Classic Carbonara",
-    description: "Born in a small village in Tuscany, Nonna Lucia learned to cook from her mother and grandmother. Her kitchen is filled with the aroma of fresh herbs and the sound of laughter.",
-    philosophy: "Cooking is love made visible. Every dish tells a story of family and tradition.",
-    greeting: "Ciao, bambino!",
-    greetingTranslation: "Hello, little one!",
-    action: "stirring risotto",
-    watermark: Wine,
-    accent: "🍷"
-  },
-  {
-    id: 2,
-    name: "Abuela Rosa",
-    cuisine: "Mexican Cuisine", 
-    background: "#FF6B6B",
-    signatureDish: "Mole Negro",
-    description: "From Oaxaca's vibrant markets to your kitchen, Abuela Rosa brings three generations of authentic Mexican cooking with warmth and passion.",
-    philosophy: "La comida es el alma de la familia - food is the soul of the family.",
-    greeting: "¡Hola, mi nieto!",
-    greetingTranslation: "Hello, my grandchild!",
-    action: "grinding spices",
-    watermark: Flower2,
-    accent: "🌶️"
-  },
-  {
-    id: 3,
-    name: "Mae Malai",
-    cuisine: "Thai Cuisine",
-    background: "#7FB069", 
-    signatureDish: "Green Curry",
-    description: "Mae Malai's kitchen in Bangkok is a symphony of fresh herbs and aromatic spices. She believes cooking is meditation in motion.",
-    philosophy: "Balance in flavor, balance in life. Every ingredient has its purpose.",
-    greeting: "สวัสดีค่ะ ลูกรัก",
-    greetingTranslation: "Hello, my dear child",
-    action: "pounding curry paste",
-    watermark: Leaf,
-    accent: "🌿"
-  }
-];
+// Using mamas from centralized data
+const mamasDisplay = mamas.map(mama => ({
+  id: mama.id,
+  name: mama.name,
+  cuisine: `${mama.country} Cuisine`,
+  background: mama.themeColor,
+  signatureDish: mama.signatureDish,
+  description: `Authentic ${mama.country} cooking with traditional family recipes.`,
+  philosophy: mama.philosophy,
+  greeting: mama.emoji === '🍷' ? "Ciao, bambino!" : 
+           mama.emoji === '🌶️' ? "¡Hola, mi nieto!" : "สวัสดีค่ะ ลูกรัก",
+  greetingTranslation: mama.emoji === '🍷' ? "Hello, little one!" :
+                      mama.emoji === '🌶️' ? "Hello, my grandchild!" : "Hello, my dear child",
+  action: mama.emoji === '🍷' ? "stirring risotto" :
+          mama.emoji === '🌶️' ? "grinding spices" : "pounding curry paste",
+  watermark: mama.emoji === '🍷' ? Wine : mama.emoji === '🌶️' ? Flower2 : Leaf,
+  accent: mama.emoji
+}));
 
 const Mamas = () => {
   const navigate = useNavigate();
@@ -76,7 +51,7 @@ const Mamas = () => {
           }}
         >
           <CarouselContent className="h-[55vh] max-h-[480px] min-h-[400px]">
-            {mamas.map((mama) => {
+            {mamasDisplay.map((mama) => {
               const WatermarkIcon = mama.watermark;
               return (
                 <CarouselItem key={mama.id} className="basis-[85%] pl-4">
@@ -173,7 +148,7 @@ const Mamas = () => {
 
         {/* Progress dots */}
         <div className="flex justify-center gap-2 mt-4">
-          {mamas.map((_, index) => (
+          {mamasDisplay.map((_, index) => (
             <button
               key={index}
               className={`w-2 h-2 rounded-full transition-all duration-200 ${

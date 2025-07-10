@@ -5,7 +5,8 @@ import { ArrowLeft, Volume2, ChevronLeft, ChevronRight, Upload, X, Settings } fr
 import { Button } from '@/components/ui/button';
 import { VoiceStatusIndicator } from '@/components/VoiceStatusIndicator';
 import { CookingTimer } from '@/components/CookingTimer';
-import { recipes } from '@/data/recipes';
+import { getRecipeWithMama } from '@/data/recipes';
+import { useVoice } from '@/hooks/useVoice';
 
 const Cook = () => {
   const { recipeId } = useParams();
@@ -15,15 +16,17 @@ const Cook = () => {
   const [voiceStatus, setVoiceStatus] = useState<'speaking' | 'listening' | 'processing' | 'idle'>('idle');
   const [timerExpanded, setTimerExpanded] = useState(false);
 
-  // Find the recipe or use default
-  const recipe = recipes.find(r => r.id === recipeId) || recipes[0];
-  const totalSteps = recipe.instructions.length;
+  const { speak, isPlaying, config } = useVoice();
+
+  // Find the recipe with mama info
+  const recipeData = getRecipeWithMama(recipeId || '');
   
-  // Create mama object from recipe data
-  const mama = {
-    name: recipe.mamaName,
-    avatar: recipe.mamaEmoji
-  };
+  if (!recipeData) {
+    return <div>Recipe not found</div>;
+  }
+  
+  const { recipe, mama } = recipeData;
+  const totalSteps = recipe.instructions.length;
 
   // Keep screen awake in cooking mode
   useEffect(() => {
@@ -50,9 +53,9 @@ const Cook = () => {
       <div className="min-h-[calc(100vh-8rem)] flex flex-col items-center justify-center p-6">
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="text-6xl mb-4">{mama.avatar}</div>
+          <div className="text-6xl mb-4">{mama?.emoji}</div>
           <h1 className="text-3xl font-heading font-bold text-foreground mb-2">
-            Ready to cook with {mama.name}?
+            Ready to cook with {mama?.name}?
           </h1>
           <p className="text-xl text-muted-foreground font-handwritten">
             {recipe.title}
@@ -85,7 +88,7 @@ const Cook = () => {
           onClick={() => setCookingMode(true)}
           className="w-full max-w-sm bg-orange-500 text-white hover:bg-orange-600 text-xl py-6 rounded-2xl font-heading font-bold min-h-[64px]"
         >
-          Start Cooking with {mama.name}
+          Start Cooking with {mama?.name}
         </Button>
 
         {/* Tips */}
@@ -152,12 +155,12 @@ const Cook = () => {
 
         {/* Mama's Tips */}
         {currentStep === 3 && (
-          <div className="bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 rounded-xl p-4 mx-4 mb-6 border-l-4 border-yellow-400">
+            <div className="bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 rounded-xl p-4 mx-4 mb-6 border-l-4 border-yellow-400">
             <div className="flex items-start gap-3">
-              <div className="text-2xl">{mama.avatar}</div>
+              <div className="text-2xl">{mama?.emoji}</div>
               <div>
                 <h3 className="font-handwritten text-lg text-yellow-800 dark:text-yellow-200 mb-1">
-                  Tip from {mama.name}
+                  Tip from {mama?.name}
                 </h3>
                 <p className="font-handwritten text-yellow-700 dark:text-yellow-300 text-lg leading-relaxed">
                   "Never add cream to carbonara, caro mio! The creaminess comes from the eggs and cheese."
@@ -210,11 +213,11 @@ const Cook = () => {
           className="w-full bg-orange-500 text-white hover:bg-orange-600 text-xl py-6 rounded-2xl font-heading font-bold mb-4 min-h-[64px]"
         >
           <Upload size={24} className="mr-3" />
-          Show {mama.name} your progress
+          Show {mama?.name} your progress
         </Button>
         
         <p className="text-center text-sm text-muted-foreground font-handwritten">
-          Upload a photo if you're stuck on a step or want to show {mama.name} how it looks!
+          Upload a photo if you're stuck on a step or want to show {mama?.name} how it looks!
         </p>
       </div>
 

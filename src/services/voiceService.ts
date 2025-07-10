@@ -1,4 +1,6 @@
 // Voice Service for ElevenLabs Integration
+import { getMamaById } from '@/data/mamas';
+
 export interface VoiceConfig {
   mode: 'full' | 'essential' | 'text';
   volume: number;
@@ -13,31 +15,31 @@ export interface MamaVoice {
   accent: string;
 }
 
-// Mama Voice Configurations
+// Voice mappings for different Mamas
 export const MAMA_VOICES: Record<string, MamaVoice> = {
-  nonna: {
-    id: 'nonna',
-    name: 'Nonna Maria',
-    voiceId: 'VITE_NONNA_VOICE_ID', // Placeholder - replace with actual ElevenLabs voice ID
-    accent: 'italian'
+  'nonna_lucia': {
+    id: 'nonna_lucia',
+    name: 'Nonna Lucia',
+    voiceId: import.meta.env.VITE_NONNA_VOICE_ID || 'EXAVITQu4vr4xnSDxMaL',
+    accent: 'Italian'
   },
-  abuela: {
-    id: 'abuela',
+  'abuela_rosa': {
+    id: 'abuela_rosa', 
     name: 'Abuela Rosa',
-    voiceId: 'VITE_ABUELA_VOICE_ID', // Placeholder - replace with actual ElevenLabs voice ID
-    accent: 'spanish'
+    voiceId: import.meta.env.VITE_ABUELA_VOICE_ID || 'XB0fDUnXU5powFXDhCwa',
+    accent: 'Mexican'
   },
-  mae: {
-    id: 'mae',
-    name: 'Mae Thompson',
-    voiceId: 'VITE_MAE_VOICE_ID', // Placeholder - replace with actual ElevenLabs voice ID
-    accent: 'southern'
+  'mae_malai': {
+    id: 'mae_malai',
+    name: 'Mae Malai', 
+    voiceId: import.meta.env.VITE_MAE_VOICE_ID || 'pNInz6obpgDQGcFmaJgB',
+    accent: 'Thai'
   }
 };
 
 // Pre-cached common phrases for Essential Mode
-export const ESSENTIAL_PHRASES: Record<string, Record<string, string>> = {
-  nonna: {
+const ESSENTIAL_PHRASES: Record<string, Record<string, string>> = {
+  'nonna_lucia': {
     welcome: "Benvenuti nella mia cucina, cari!",
     start_cooking: "Iniziamo a cucinare insieme!",
     next_step: "Ora, il prossimo passo...",
@@ -45,7 +47,7 @@ export const ESSENTIAL_PHRASES: Record<string, Record<string, string>> = {
     timer_done: "Il tempo è finito, tesoro!",
     taste_check: "Assaggia e dimmi com'è!"
   },
-  abuela: {
+  'abuela_rosa': {
     welcome: "¡Bienvenidos a mi cocina, mis queridos!",
     start_cooking: "¡Vamos a cocinar juntos!",
     next_step: "Ahora, el siguiente paso...",
@@ -53,7 +55,7 @@ export const ESSENTIAL_PHRASES: Record<string, Record<string, string>> = {
     timer_done: "¡Se acabó el tiempo, mi amor!",
     taste_check: "¡Pruébalo y dime qué tal!"
   },
-  mae: {
+  'mae_malai': {
     welcome: "Welcome to my kitchen, sugar!",
     start_cooking: "Let's get cookin' together!",
     next_step: "Now honey, the next step...",
@@ -92,28 +94,62 @@ export class VoiceService {
     return { ...this.config };
   }
 
-  public async speak(text: string, mamaId: string): Promise<void> {
-    if (!this.config.enabled || this.config.mode === 'text') {
-      return;
-    }
+  async speak(text: string, mamaId: string): Promise<void> {
+    if (!this.config.enabled) return;
 
-    const mama = MAMA_VOICES[mamaId];
-    if (!mama) {
-      console.warn(`Mama voice not found: ${mamaId}`);
-      return;
-    }
+    // Get mama info to determine voice
+    const mama = getMamaById(parseInt(mamaId));
+    const voiceKey = mama?.voiceId || 'nonna_lucia';
 
-    // Check if we should use cached phrase or generate speech
+    // In essential mode, use pre-cached phrases
     if (this.config.mode === 'essential') {
-      const cachedPhrase = this.getCachedPhrase(text, mamaId);
-      if (cachedPhrase) {
-        await this.playEssentialPhrase(cachedPhrase);
+      const phrase = ESSENTIAL_PHRASES[voiceKey]?.[text];
+      if (phrase) {
+        // Play pre-cached audio (placeholder)
+        console.log(`Playing cached phrase for ${mama?.name}: ${phrase}`);
         return;
       }
     }
 
-    // Add to queue for full voice mode
-    this.addToQueue(text, mama.voiceId);
+    // In full mode, add to queue for TTS generation
+    if (this.config.mode === 'full') {
+      const voice = MAMA_VOICES[voiceKey];
+      if (voice) {
+        this.addToQueue(text, voice.voiceId);
+      }
+    }
+  }
+
+  async speakRecipeIntro(recipeId: string, mamaId: string): Promise<void> {
+    const mama = getMamaById(parseInt(mamaId));
+    if (!mama) return;
+
+    // This would fetch the recipe's voice intro from the data
+    // For now, we'll use a placeholder
+    const introText = `Welcome to ${mama.name}'s kitchen! Let's cook together with love.`;
+    await this.speak(introText, mamaId);
+  }
+
+  async speakVoiceTip(tip: string, mamaId: string): Promise<void> {
+    const mama = getMamaById(parseInt(mamaId));
+    if (!mama) return;
+
+    // Add mama's personality to the tip
+    const personalizedTip = this.addMamaPersonality(tip, mama.accent);
+    await this.speak(personalizedTip, mamaId);
+  }
+
+  private addMamaPersonality(text: string, accent: string): string {
+    switch (accent) {
+      case 'Italian':
+        return `Ecco! ${text} Bene!`;
+      case 'Mexican':
+        return `¡Órale! ${text} ¿Sí, mija?`;
+      case 'Thai':
+        return `${text} Ka!`;
+      default:
+        return text;
+    }
   }
 
   private getCachedPhrase(text: string, mamaId: string): string | null {

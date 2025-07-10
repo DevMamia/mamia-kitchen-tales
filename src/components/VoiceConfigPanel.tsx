@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Volume2, VolumeX, Mic, MicOff, Settings, Play, Square } from 'lucide-react';
 import { useVoice } from '@/hooks/useVoice';
-import { MAMA_VOICES } from '@/services/voiceService';
+import { MAMA_VOICES, MamaVoice } from '@/services/voiceService';
 
 export const VoiceConfigPanel = () => {
   const { config, updateConfig, isPlaying, queueLength, clearQueue, stopSpeaking } = useVoice();
