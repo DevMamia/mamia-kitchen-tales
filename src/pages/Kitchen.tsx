@@ -5,14 +5,6 @@ import { BookmarkCheck, Clock, Star, Plus } from 'lucide-react';
 const Kitchen = () => {
   return (
     <div className="space-y-6">
-      <div className="text-center mb-8">
-        <h2 className="font-heading font-bold text-2xl text-foreground mb-2">
-          My Kitchen
-        </h2>
-        <p className="text-muted-foreground font-handwritten text-lg">
-          Your personal cooking space
-        </p>
-      </div>
 
       <div className="grid gap-4">
         <div className="bg-card rounded-2xl p-6 shadow-paper border border-border">

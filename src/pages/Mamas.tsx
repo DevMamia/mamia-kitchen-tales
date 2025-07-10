@@ -66,14 +66,6 @@ const Mamas = () => {
 
   return (
     <div className="h-full flex flex-col">
-      <div className="text-center mb-6">
-        <h2 className="font-heading font-bold text-2xl text-foreground mb-2">
-          Choose Your Cooking Guide
-        </h2>
-        <p className="text-muted-foreground font-handwritten text-base">
-          Learn authentic recipes from traditional cooks
-        </p>
-      </div>
 
       <div className="flex-1 relative">
         <Carousel

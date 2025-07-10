@@ -21,18 +21,16 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <Layout>
-          <Routes>
-            <Route path="/" element={<Mamas />} />
-            <Route path="/mama/:mamaId" element={<MamaCookbook />} />
-            <Route path="/recipes" element={<Recipes />} />
-            <Route path="/recipe/:recipeId" element={<RecipeDetail />} />
-            <Route path="/cook" element={<Cook />} />
-            <Route path="/kitchen" element={<Kitchen />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </Layout>
+        <Routes>
+          <Route path="/" element={<Layout pageTitle="Choose Your Cooking Guide" pageSubtitle="Learn authentic recipes from traditional cooks"><Mamas /></Layout>} />
+          <Route path="/mama/:mamaId" element={<Layout><MamaCookbook /></Layout>} />
+          <Route path="/recipes" element={<Layout pageTitle="Discover Recipes" pageSubtitle="Find the perfect dish for any occasion"><Recipes /></Layout>} />
+          <Route path="/recipe/:recipeId" element={<Layout><RecipeDetail /></Layout>} />
+          <Route path="/cook" element={<Layout><Cook /></Layout>} />
+          <Route path="/kitchen" element={<Layout pageTitle="My Kitchen" pageSubtitle="Your personal cooking space"><Kitchen /></Layout>} />
+          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+          <Route path="*" element={<Layout><NotFound /></Layout>} />
+        </Routes>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
