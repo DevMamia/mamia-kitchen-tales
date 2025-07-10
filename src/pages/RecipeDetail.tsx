@@ -251,19 +251,21 @@ const RecipeDetail = () => {
             </div>
 
             {/* Mama's Tips */}
-            <div className="bg-gradient-to-br from-amber-50 to-orange-50 border-l-4 border-primary rounded-lg p-4 mt-8">
-              <h3 className="font-handwritten text-lg text-primary font-bold mb-2">
-                {recipe.mamaName}'s Tips
-              </h3>
-              <ul className="space-y-2 font-handwritten text-foreground">
-                <li>• Work quickly when adding eggs to prevent scrambling</li>
-                <li>• Use freshly grated Pecorino Romano for best flavor</li>
-                <li>• Save some pasta water - it's the secret to perfect sauce</li>
-              </ul>
-              <p className="text-right mt-3 font-handwritten text-primary/70 italic">
-                — With love, {recipe.mamaName}
-              </p>
-            </div>
+            {recipe.voiceTips && recipe.voiceTips.length > 0 && (
+              <div className="bg-gradient-to-br from-amber-50 to-orange-50 border-l-4 border-primary rounded-lg p-4 mt-8">
+                <h3 className="font-handwritten text-lg text-primary font-bold mb-2">
+                  {recipe.mamaName}'s Tips
+                </h3>
+                <ul className="space-y-2 font-handwritten text-foreground">
+                  {recipe.voiceTips.map((tip, index) => (
+                    <li key={index}>• {tip}</li>
+                  ))}
+                </ul>
+                <p className="text-right mt-3 font-handwritten text-primary/70 italic">
+                  — With love, {recipe.mamaName}
+                </p>
+              </div>
+            )}
           </div>
         )}
       </div>

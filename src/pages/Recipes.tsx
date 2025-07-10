@@ -18,7 +18,7 @@ const Recipes = () => {
   const [stackRecipes, setStackRecipes] = useState<Recipe[]>([]);
   const [likedRecipes, setLikedRecipes] = useState<Set<string>>(new Set());
 
-  const categories = ['All', 'Meat', 'Fish', 'Rice/Pasta', 'Dessert'];
+  const categories = ['All', 'Meat', 'Fish', 'Vegetarian', 'Quick', 'Weekend'];
 
   useEffect(() => {
     // Simulate loading time

@@ -154,7 +154,7 @@ const Cook = () => {
         </div>
 
         {/* Mama's Tips */}
-        {currentStep === 3 && (
+        {recipe.voiceTips && recipe.voiceTips.length > 0 && currentStep >= Math.ceil(totalSteps / 2) && (
             <div className="bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 rounded-xl p-4 mx-4 mb-6 border-l-4 border-yellow-400">
             <div className="flex items-start gap-3">
               <div className="text-2xl">{mama?.emoji}</div>
@@ -163,7 +163,7 @@ const Cook = () => {
                   Tip from {mama?.name}
                 </h3>
                 <p className="font-handwritten text-yellow-700 dark:text-yellow-300 text-lg leading-relaxed">
-                  "Never add cream to carbonara, caro mio! The creaminess comes from the eggs and cheese."
+                  "{recipe.voiceTips[(currentStep - Math.ceil(totalSteps / 2)) % recipe.voiceTips.length]}"
                 </p>
               </div>
             </div>

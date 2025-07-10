@@ -2,6 +2,7 @@ import { mamas, getMamaById } from './mamas';
 
 export type Difficulty = 'EASY' | 'MEDIUM' | 'ADVANCED';
 export type Category = 'QUICK' | 'EVERYDAY' | 'WEEKEND' | 'CELEBRATION';
+export type ContentType = 'MEAT' | 'FISH' | 'VEGETARIAN' | 'VEGAN';
 
 export interface Recipe {
   id: string;
@@ -10,6 +11,7 @@ export interface Recipe {
   cookTimeMin: number;
   difficulty: Difficulty;
   category: Category;
+  contentType: ContentType;
   image: string;
   mamaId: number;
   mamaName: string;
@@ -40,6 +42,7 @@ export const recipes: Recipe[] = [
     cookTimeMin: 18,
     difficulty: 'EASY',
     category: 'QUICK',
+    contentType: 'VEGETARIAN',
     image: '/placeholder.svg',
     mamaId: 1,
     mamaName: 'Nonna Lucia',
@@ -56,6 +59,7 @@ export const recipes: Recipe[] = [
     ],
     servings: 4,
     description: 'Spicy tomato pasta with garlic and chillies',
+    recipeOfWeek: true,
     voiceIntro: 'Ciao bello! A quick kick of chilli to wake up your taste buds.',
     voiceTips: ['Splash pasta water so the sauce hugs the penne.', 'Arrabbiata means \'angry\'—let it blush!'],
     subsNote: 'No penne? Any short pasta works. No fresh chilli? Use 1/4 tsp flakes.',
@@ -68,6 +72,7 @@ export const recipes: Recipe[] = [
     cookTimeMin: 40,
     difficulty: 'MEDIUM',
     category: 'EVERYDAY',
+    contentType: 'MEAT',
     image: '/placeholder.svg',
     mamaId: 1,
     mamaName: 'Nonna Lucia',
@@ -84,7 +89,8 @@ export const recipes: Recipe[] = [
     servings: 4,
     description: 'Hunter-style chicken with vegetables in tomato sauce',
     voiceIntro: 'We are hunting flavour today, my dear!',
-    subsNote: 'Swap mushrooms for chicken for a vegetarian pot.',
+    voiceTips: ['Brown the chicken well for deeper flavor', 'Don\'t rush the vegetables - let them caramelize'],
+    subsNote: 'Swap chicken for mushrooms for a vegetarian version.',
     voiceEnabled: true
   },
   {
@@ -94,6 +100,7 @@ export const recipes: Recipe[] = [
     cookTimeMin: 30,
     difficulty: 'MEDIUM',
     category: 'EVERYDAY',
+    contentType: 'MEAT',
     image: '/placeholder.svg',
     mamaId: 1,
     mamaName: 'Nonna Lucia',
@@ -111,6 +118,7 @@ export const recipes: Recipe[] = [
     description: 'Authentic Roman carbonara with crispy guanciale and creamy egg sauce.',
     featured: true,
     voiceIntro: 'Remember—no cream! Just eggs and love.',
+    voiceTips: ['Work quickly when adding eggs to prevent scrambling', 'Save some pasta water - it\'s the secret to perfect sauce'],
     subsNote: 'Pancetta instead of guanciale is okay; Parm if no Pecorino.',
     voiceEnabled: true
   },
@@ -121,6 +129,7 @@ export const recipes: Recipe[] = [
     cookTimeMin: 120,
     difficulty: 'ADVANCED',
     category: 'WEEKEND',
+    contentType: 'MEAT',
     image: '/placeholder.svg',
     mamaId: 1,
     mamaName: 'Nonna Lucia',
@@ -137,6 +146,7 @@ export const recipes: Recipe[] = [
     servings: 8,
     description: 'Traditional layered pasta with meat sauce and béchamel',
     voiceIntro: 'Clear your Sunday—this is a labour of love.',
+    voiceTips: ['Let each layer cool slightly before adding the next', 'Rest the lasagna for 15 minutes before cutting'],
     subsNote: 'Store‑bought sheets fine; soak 10 min if oven‑ready.',
     voiceEnabled: true
   },
@@ -147,6 +157,7 @@ export const recipes: Recipe[] = [
     cookTimeMin: 180,
     difficulty: 'ADVANCED',
     category: 'CELEBRATION',
+    contentType: 'MEAT',
     image: '/placeholder.svg',
     mamaId: 1,
     mamaName: 'Nonna Lucia',
@@ -163,6 +174,7 @@ export const recipes: Recipe[] = [
     servings: 6,
     description: 'Braised veal shanks with aromatic vegetables',
     voiceIntro: 'A feast fit for famiglia reunions.',
+    voiceTips: ['Low and slow is the secret', 'The marrow makes the dish special'],
     subsNote: 'Beef shank works if you can\'t find veal.',
     voiceEnabled: true
   },
@@ -175,6 +187,7 @@ export const recipes: Recipe[] = [
     cookTimeMin: 15,
     difficulty: 'EASY',
     category: 'QUICK',
+    contentType: 'VEGETARIAN',
     image: '/placeholder.svg',
     mamaId: 2,
     mamaName: 'Abuela Rosa',
@@ -189,6 +202,7 @@ export const recipes: Recipe[] = [
     servings: 4,
     description: 'Crispy cheese and poblano pepper quesadillas',
     voiceIntro: 'Rapidito y delicioso—my cheesy hug!',
+    voiceTips: ['Don\'t overfill or they\'ll leak', 'Medium heat keeps the cheese creamy'],
     subsNote: 'Bell pepper for poblano; mozzarella if no Oaxaca cheese.',
     voiceEnabled: true
   },
@@ -199,6 +213,7 @@ export const recipes: Recipe[] = [
     cookTimeMin: 35,
     difficulty: 'MEDIUM',
     category: 'EVERYDAY',
+    contentType: 'MEAT',
     image: '/placeholder.svg',
     mamaId: 2,
     mamaName: 'Abuela Rosa',
@@ -214,6 +229,7 @@ export const recipes: Recipe[] = [
     servings: 6,
     description: 'Smoky shredded chicken in chipotle sauce',
     voiceIntro: 'Smoky chipotle memories from Puebla.',
+    voiceTips: ['Let the chicken rest before shredding', 'The sauce should coat each strand'],
     subsNote: 'Use rotisserie chicken to halve prep time.',
     voiceEnabled: true
   },
@@ -224,6 +240,7 @@ export const recipes: Recipe[] = [
     cookTimeMin: 40,
     difficulty: 'MEDIUM',
     category: 'EVERYDAY',
+    contentType: 'MEAT',
     image: '/placeholder.svg',
     mamaId: 2,
     mamaName: 'Abuela Rosa',
@@ -240,6 +257,7 @@ export const recipes: Recipe[] = [
     servings: 6,
     description: 'Chicken enchiladas in tangy green sauce',
     voiceIntro: 'Tomatillo brightness for your weeknight.',
+    voiceTips: ['Warm tortillas make rolling easier', 'Don\'t skip the cheese on top'],
     subsNote: 'Canned green salsa works in a pinch.',
     voiceEnabled: true
   },
@@ -250,6 +268,7 @@ export const recipes: Recipe[] = [
     cookTimeMin: 120,
     difficulty: 'ADVANCED',
     category: 'WEEKEND',
+    contentType: 'MEAT',
     image: '/placeholder.svg',
     mamaId: 2,
     mamaName: 'Abuela Rosa',
@@ -266,6 +285,7 @@ export const recipes: Recipe[] = [
     servings: 8,
     description: 'Traditional Mexican soup with hominy and pork',
     voiceIntro: 'Big pot, big love—listen for the hominy pop.',
+    voiceTips: ['Toast the chiles until fragrant', 'Skim the foam for clear broth'],
     subsNote: 'Canned hominy cuts simmer time.',
     voiceEnabled: true
   },
@@ -276,6 +296,7 @@ export const recipes: Recipe[] = [
     cookTimeMin: 180,
     difficulty: 'ADVANCED',
     category: 'CELEBRATION',
+    contentType: 'MEAT',
     image: '/placeholder.svg',
     mamaId: 2,
     mamaName: 'Abuela Rosa',
@@ -292,6 +313,7 @@ export const recipes: Recipe[] = [
     servings: 8,
     description: 'Complex sauce with chiles and chocolate',
     voiceIntro: 'Many chiles, one heart.',
+    voiceTips: ['Patience with the chocolate', 'Taste and adjust sweetness gradually'],
     subsNote: 'Shortcut: start with 1 cup jarred mole paste, thin with stock.',
     voiceEnabled: true
   },
@@ -304,6 +326,7 @@ export const recipes: Recipe[] = [
     cookTimeMin: 15,
     difficulty: 'EASY',
     category: 'QUICK',
+    contentType: 'MEAT',
     image: '/placeholder.svg',
     mamaId: 3,
     mamaName: 'Mae Malai',
@@ -320,6 +343,7 @@ export const recipes: Recipe[] = [
     servings: 2,
     description: 'Spicy Thai basil chicken',
     voiceIntro: 'Hot wok, holy basil—don\'t blink.',
+    voiceTips: ['High heat is essential', 'Add basil at the very end'],
     subsNote: 'Use sweet basil + mint if Thai basil unavailable.',
     voiceEnabled: true
   },
@@ -330,6 +354,7 @@ export const recipes: Recipe[] = [
     cookTimeMin: 35,
     difficulty: 'MEDIUM',
     category: 'EVERYDAY',
+    contentType: 'MEAT',
     image: '/placeholder.svg',
     mamaId: 3,
     mamaName: 'Mae Malai',
@@ -347,6 +372,7 @@ export const recipes: Recipe[] = [
     description: 'Aromatic coconut curry with chicken',
     featured: true,
     voiceIntro: 'Green like the jungle after rain.',
+    voiceTips: ['Fry the paste until fragrant', 'Add coconut milk gradually'],
     subsNote: 'Jar curry paste is fine; add extra lime leaf for punch.',
     voiceEnabled: true
   },
@@ -357,6 +383,7 @@ export const recipes: Recipe[] = [
     cookTimeMin: 35,
     difficulty: 'MEDIUM',
     category: 'EVERYDAY',
+    contentType: 'FISH',
     image: '/placeholder.svg',
     mamaId: 3,
     mamaName: 'Mae Malai',
@@ -373,6 +400,7 @@ export const recipes: Recipe[] = [
     servings: 2,
     description: 'Classic Thai stir-fried noodles',
     voiceIntro: 'Sweet, sour, salty—balance is everything.',
+    voiceTips: ['Taste as you go', 'Don\'t oversoak the noodles'],
     subsNote: 'Lime + brown sugar works if tamarind missing.',
     voiceEnabled: true
   },
@@ -383,6 +411,7 @@ export const recipes: Recipe[] = [
     cookTimeMin: 120,
     difficulty: 'ADVANCED',
     category: 'WEEKEND',
+    contentType: 'MEAT',
     image: '/placeholder.svg',
     mamaId: 3,
     mamaName: 'Mae Malai',
@@ -399,6 +428,7 @@ export const recipes: Recipe[] = [
     servings: 4,
     description: 'Northern Thai curry noodle soup',
     voiceIntro: 'Northern warmth in a bowl.',
+    voiceTips: ['Crispy noodles add texture', 'Garnish right before serving'],
     subsNote: 'Crispy noodle topping optional but magic.',
     voiceEnabled: true
   },
@@ -409,6 +439,7 @@ export const recipes: Recipe[] = [
     cookTimeMin: 180,
     difficulty: 'ADVANCED',
     category: 'CELEBRATION',
+    contentType: 'MEAT',
     image: '/placeholder.svg',
     mamaId: 3,
     mamaName: 'Mae Malai',
@@ -425,6 +456,7 @@ export const recipes: Recipe[] = [
     servings: 6,
     description: 'Rich, aromatic curry with tender beef',
     voiceIntro: 'Spices from afar, comfort from home.',
+    voiceTips: ['Low heat for tender beef', 'Peanuts add richness at the end'],
     subsNote: 'Chicken thigh works too; cut cook to 90 min.',
     voiceEnabled: true
   }
@@ -445,6 +477,33 @@ export const getRecipeOfWeek = (): Recipe | undefined => {
 
 export const getRecipesByCategory = (category: string): Recipe[] => {
   if (category === 'All') return recipes;
+  
+  // Handle content-based categories (old system)
+  const contentTypeMap: { [key: string]: ContentType } = {
+    'Meat': 'MEAT',
+    'Fish': 'FISH', 
+    'Vegetarian': 'VEGETARIAN',
+    'Rice/Pasta': 'VEGETARIAN' // Most rice/pasta recipes are vegetarian
+  };
+  
+  if (contentTypeMap[category]) {
+    return recipes.filter(recipe => recipe.contentType === contentTypeMap[category]);
+  }
+  
+  // Handle time-based categories (new system)
+  const timeBasedCategories: Category[] = ['QUICK', 'EVERYDAY', 'WEEKEND', 'CELEBRATION'];
+  if (timeBasedCategories.includes(category as Category)) {
+    return recipes.filter(recipe => recipe.category === category);
+  }
+  
+  // Handle aliases
+  if (category === 'Quick') {
+    return recipes.filter(recipe => recipe.category === 'QUICK');
+  }
+  if (category === 'Weekend') {
+    return recipes.filter(recipe => recipe.category === 'WEEKEND');
+  }
+  
   return recipes.filter(recipe => recipe.category === category);
 };
 
