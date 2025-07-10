@@ -55,6 +55,19 @@
     --tile-pattern: repeating-conic-gradient(hsl(18 90% 55%) 0deg 90deg, hsl(40 85% 50%) 90deg 180deg);
     --silk-texture: radial-gradient(ellipse at center, hsl(140 30% 45%) 0%, hsl(60 40% 50%) 70%, hsl(50 90% 55%) 100%);
 
+    /* Cultural Background Patterns */
+    --pattern-basil: radial-gradient(circle at 10% 20%, rgba(46, 125, 50, 0.03) 0%, transparent 30%),
+                     radial-gradient(circle at 90% 80%, rgba(46, 125, 50, 0.02) 0%, transparent 25%);
+    
+    --pattern-papel: linear-gradient(45deg, transparent 40%, rgba(255, 87, 34, 0.02) 40%, rgba(255, 87, 34, 0.02) 60%, transparent 60%),
+                     linear-gradient(-45deg, transparent 40%, rgba(255, 193, 7, 0.015) 40%, rgba(255, 193, 7, 0.015) 60%, transparent 60%);
+    
+    --pattern-lotus: radial-gradient(ellipse at 30% 30%, rgba(255, 215, 0, 0.025) 0%, transparent 40%),
+                     radial-gradient(ellipse at 70% 70%, rgba(255, 215, 0, 0.015) 0%, transparent 35%);
+    
+    --pattern-checkered: linear-gradient(90deg, transparent 48%, rgba(139, 69, 19, 0.015) 48%, rgba(139, 69, 19, 0.015) 52%, transparent 52%),
+                         linear-gradient(0deg, transparent 48%, rgba(139, 69, 19, 0.015) 48%, rgba(139, 69, 19, 0.015) 52%, transparent 52%);
+
     --sidebar-background: 43 23% 96%;
     --sidebar-foreground: 14 26% 15%;
     --sidebar-primary: 11 75% 55%;
@@ -214,6 +227,63 @@
     animation: streak-glow 2s ease-in-out infinite;
   }
 
+  /* Cooking animations */
+  @keyframes cooking-pot {
+    0%, 100% { transform: rotate(0deg) scale(1); }
+    25% { transform: rotate(-2deg) scale(1.02); }
+    50% { transform: rotate(0deg) scale(1.05); }
+    75% { transform: rotate(2deg) scale(1.02); }
+  }
+
+  @keyframes steam-rise {
+    0% { 
+      transform: translateY(0) scale(1); 
+      opacity: 0.8; 
+    }
+    50% { 
+      transform: translateY(-20px) scale(1.1); 
+      opacity: 0.6; 
+    }
+    100% { 
+      transform: translateY(-40px) scale(1.2); 
+      opacity: 0; 
+    }
+  }
+
+  @keyframes spoon-stir {
+    0% { transform: rotate(0deg); }
+    25% { transform: rotate(15deg); }
+    50% { transform: rotate(0deg); }
+    75% { transform: rotate(-15deg); }
+    100% { transform: rotate(0deg); }
+  }
+
+  @keyframes cultural-notes {
+    0% { 
+      transform: translateY(0) rotate(0deg) scale(1); 
+      opacity: 0.7; 
+    }
+    50% { 
+      transform: translateY(-30px) rotate(180deg) scale(0.8); 
+      opacity: 0.5; 
+    }
+    100% { 
+      transform: translateY(-60px) rotate(360deg) scale(0.6); 
+      opacity: 0; 
+    }
+  }
+
+  @keyframes heart-float {
+    0% { 
+      transform: translateY(0) scale(1); 
+      opacity: 1; 
+    }
+    100% { 
+      transform: translateY(-50px) scale(1.2); 
+      opacity: 0; 
+    }
+  }
+
   /* Achievement celebrations */
   @keyframes confetti-fall {
     0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; }
@@ -227,6 +297,13 @@
     background: hsl(18 90% 55%);
     animation: confetti-fall 3s linear infinite;
   }
+
+  /* Animation classes */
+  .cooking-pot { animation: cooking-pot 2s ease-in-out infinite; }
+  .steam-rise { animation: steam-rise 3s ease-out infinite; }
+  .spoon-stir { animation: spoon-stir 1.5s ease-in-out infinite; }
+  .cultural-notes { animation: cultural-notes 4s ease-out infinite; }
+  .heart-float { animation: heart-float 2s ease-out forwards; }
 }
 
 @layer utilities {
@@ -281,4 +358,44 @@
   .card-stack-1 { transform: translateY(0px) scale(1) rotate(0deg); z-index: 3; }
   .card-stack-2 { transform: translateY(8px) scale(0.96) rotate(1deg); z-index: 2; }
   .card-stack-3 { transform: translateY(16px) scale(0.92) rotate(-1deg); z-index: 1; }
+
+  /* Cultural Background Patterns */
+  .bg-italian-pattern { 
+    background: var(--pattern-basil), var(--pattern-checkered);
+  }
+  .bg-mexican-pattern { 
+    background: var(--pattern-papel);
+  }
+  .bg-thai-pattern { 
+    background: var(--pattern-lotus);
+  }
+
+  /* Cultural Borders */
+  .border-italian {
+    border: 2px solid;
+    border-image: linear-gradient(45deg, 
+      hsl(var(--italian-accent)), 
+      rgba(139, 69, 19, 0.6),
+      hsl(var(--italian-accent))
+    ) 1;
+  }
+  
+  .border-mexican {
+    border: 3px solid;
+    border-image: repeating-linear-gradient(45deg,
+      hsl(var(--mexican-accent)) 0px,
+      hsl(var(--mexican-accent)) 10px,
+      rgba(255, 193, 7, 0.8) 10px,
+      rgba(255, 193, 7, 0.8) 20px
+    ) 1;
+  }
+  
+  .border-thai {
+    border: 2px solid;
+    border-image: linear-gradient(45deg,
+      hsl(var(--thai-accent)),
+      rgba(255, 215, 0, 0.6),
+      hsl(var(--thai-accent))
+    ) 1;
+  }
 }

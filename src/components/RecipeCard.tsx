@@ -7,14 +7,28 @@ interface RecipeCardProps {
   variant?: 'default' | 'polaroid' | 'hero';
   className?: string;
   onClick?: () => void;
+  cultural?: 'italian' | 'mexican' | 'thai';
 }
 
 const RecipeCard: React.FC<RecipeCardProps> = ({ 
   recipe, 
   variant = 'default', 
   className = '',
-  onClick 
+  onClick,
+  cultural 
 }) => {
+  // Determine cultural styling based on recipe's mama ID
+  const getCulturalStyling = () => {
+    if (cultural) return cultural;
+    
+    // Auto-detect from recipe if not explicitly set
+    if (recipe.mamaId === 1) return 'italian';
+    if (recipe.mamaId === 2) return 'mexican';
+    if (recipe.mamaId === 3) return 'thai';
+    return undefined;
+  };
+
+  const culturalTheme = getCulturalStyling();
   const getRotation = () => {
     if (variant !== 'polaroid') return '';
     const rotations = ['rotate-1', '-rotate-1', 'rotate-2', '-rotate-2', 'rotate-0'];
@@ -56,17 +70,28 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
   }
 
   if (variant === 'polaroid') {
+    const culturalPattern = culturalTheme ? `bg-${culturalTheme}-pattern` : '';
+    const culturalBorder = culturalTheme ? `border-${culturalTheme}` : '';
+    
     return (
       <div 
-        className={`bg-white rounded-lg shadow-warm border-4 border-white cursor-pointer transition-all duration-300 hover:shadow-xl hover:scale-105 ${getRotation()} ${className}`}
+        className={`bg-white rounded-lg shadow-warm border-4 border-white cursor-pointer transition-all duration-300 hover:shadow-xl hover:scale-105 ${getRotation()} ${culturalPattern} ${culturalBorder} ${className}`}
         onClick={onClick}
       >
-        <div className="aspect-square bg-muted rounded-t overflow-hidden">
+        <div className="aspect-square bg-muted rounded-t overflow-hidden relative">
           <img 
             src={recipe.image} 
             alt={recipe.title}
             className="w-full h-full object-cover"
           />
+          {/* Cultural watermark */}
+          {culturalTheme && (
+            <div className="absolute bottom-2 right-2 opacity-10 text-2xl">
+              {culturalTheme === 'italian' && '🍃'}
+              {culturalTheme === 'mexican' && '🎀'}
+              {culturalTheme === 'thai' && '🪷'}
+            </div>
+          )}
         </div>
         <div className="p-4">
           <div className="flex items-center justify-between mb-2">
@@ -85,17 +110,25 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
     );
   }
 
+  const culturalPattern = culturalTheme ? `bg-${culturalTheme}-pattern` : '';
+  
   return (
     <div 
-      className={`bg-white rounded-xl shadow-warm overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-xl hover:scale-105 ${className}`}
+      className={`bg-white rounded-xl shadow-warm overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-xl hover:scale-105 ${culturalPattern} ${className}`}
       onClick={onClick}
     >
-      <div className="aspect-video bg-muted">
+      <div className="aspect-video bg-muted relative">
         <img 
           src={recipe.image} 
           alt={recipe.title}
           className="w-full h-full object-cover"
         />
+        {/* Cultural texture overlay */}
+        {culturalTheme && (
+          <div className="absolute inset-0 opacity-5">
+            <div className={`w-full h-full bg-${culturalTheme}-pattern`}></div>
+          </div>
+        )}
       </div>
       <div className="p-4">
         <div className="flex items-center justify-between mb-2">

@@ -7,6 +7,8 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 import { getRecipeOfWeek, getFeaturedRecipes, getRecipesByCategory, Recipe } from '@/data/recipes';
 import RecipeCardStack from '@/components/RecipeCardStack';
 import LoadingSkeleton from '@/components/LoadingSkeleton';
+import CulturalEmptyState from '@/components/CulturalEmptyState';
+import CelebrationEffects from '@/components/CelebrationEffects';
 import PageTransition from '@/components/PageTransition';
 import { useToast } from '@/hooks/use-toast';
 
@@ -18,6 +20,9 @@ const Recipes = () => {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [stackRecipes, setStackRecipes] = useState<Recipe[]>([]);
   const [likedRecipes, setLikedRecipes] = useState<Set<string>>(new Set());
+  const [celebrationTrigger, setCelebrationTrigger] = useState(false);
+  const [celebrationType, setCelebrationType] = useState<'heart' | 'confetti' | 'cultural'>('heart');
+  const [culturalTheme, setCulturalTheme] = useState<'italian' | 'mexican' | 'thai' | undefined>(undefined);
 
   const categories = [
     { id: 'All', label: 'All', emoji: '✨' },
@@ -70,6 +75,15 @@ const Recipes = () => {
     newLiked.add(recipe.id);
     setLikedRecipes(newLiked);
     
+    // Determine cultural theme and trigger celebration
+    const cultural = recipe.mamaId === 1 ? 'italian' : recipe.mamaId === 2 ? 'mexican' : recipe.mamaId === 3 ? 'thai' : undefined;
+    setCulturalTheme(cultural);
+    setCelebrationType('heart');
+    setCelebrationTrigger(true);
+    
+    // Reset celebration trigger
+    setTimeout(() => setCelebrationTrigger(false), 100);
+    
     toast({
       title: "Added to favorites! ❤️",
       description: `${recipe.title} has been saved to your favorites.`,
@@ -95,7 +109,14 @@ const Recipes = () => {
         <div className="h-full flex flex-col">
           <LoadingSkeleton variant="hero" />
           <div className="flex-1 flex items-center justify-center">
-            <LoadingSkeleton variant="recipe" count={3} />
+            <LoadingSkeleton 
+              variant="cooking" 
+              cultural={selectedCategory === 'All' ? undefined : 
+                selectedCategory === 'Meat' ? 'italian' :
+                selectedCategory === 'Fish' ? 'thai' :
+                selectedCategory === 'Vegetarian' ? 'mexican' : undefined
+              }
+            />
           </div>
         </div>
       </PageTransition>
@@ -224,15 +245,10 @@ const Recipes = () => {
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-12">
-                  <span className="text-6xl mb-4 block">🔍</span>
-                  <h3 className="font-heading font-bold text-xl text-slate-800 mb-2">
-                    No recipes found
-                  </h3>
-                  <p className="text-slate-600">
-                    No recipes found matching your search. Try different keywords!
-                  </p>
-                </div>
+                <CulturalEmptyState 
+                  message="No recipes found matching your search. Try different keywords!"
+                  className="py-12"
+                />
               )}
             </div>
           ) : (
@@ -257,23 +273,30 @@ const Recipes = () => {
                   />
                 </div>
               ) : (
-                <div className="h-full flex items-center justify-center">
-                  <div className="text-center max-w-sm">
-                    <span className="text-6xl mb-4 block">🍽️</span>
-                    <h3 className="font-heading font-bold text-xl text-slate-800 mb-2">
-                      No recipes found
-                    </h3>
-                    <p className="text-slate-600 font-handwritten">
-                      {selectedCategory === 'All' 
-                        ? "No recipes available right now."
-                        : `No ${selectedCategory.toLowerCase()} recipes available yet.`}
-                    </p>
-                  </div>
-                </div>
+                <CulturalEmptyState 
+                  cultural={
+                    selectedCategory === 'Meat' ? 'italian' :
+                    selectedCategory === 'Fish' ? 'thai' :
+                    selectedCategory === 'Vegetarian' ? 'mexican' : undefined
+                  }
+                  message={
+                    selectedCategory === 'All' 
+                      ? "No recipes available right now."
+                      : `No ${selectedCategory.toLowerCase()} recipes available yet.`
+                  }
+                />
               )}
             </div>
           )}
         </div>
+
+        {/* Celebration Effects */}
+        <CelebrationEffects
+          type={celebrationType}
+          cultural={culturalTheme}
+          trigger={celebrationTrigger}
+          onComplete={() => setCelebrationTrigger(false)}
+        />
       </div>
     </PageTransition>
   );
