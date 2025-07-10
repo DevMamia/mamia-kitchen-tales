@@ -14,6 +14,12 @@ interface CookingTimerProps {
 }
 
 export const CookingTimer = ({ isExpanded, onToggle, suggestedTimer, onTimerComplete }: CookingTimerProps) => {
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
+
   const [time, setTime] = useState(suggestedTimer?.duration || 300);
   const [isRunning, setIsRunning] = useState(false);
   const [inputTime, setInputTime] = useState(() => {
@@ -35,11 +41,6 @@ export const CookingTimer = ({ isExpanded, onToggle, suggestedTimer, onTimerComp
     return () => clearInterval(interval);
   }, [isRunning, time]);
 
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-  };
 
   const handleStart = () => {
     if (time === 0) {
