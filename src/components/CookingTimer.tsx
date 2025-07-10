@@ -5,12 +5,22 @@ import { Button } from './ui/button';
 interface CookingTimerProps {
   isExpanded: boolean;
   onToggle: () => void;
+  suggestedTimer?: {
+    display: string;
+    duration: number;
+    description?: string;
+  };
+  onTimerComplete?: () => void;
 }
 
-export const CookingTimer = ({ isExpanded, onToggle }: CookingTimerProps) => {
-  const [time, setTime] = useState(300); // 5 minutes default
+export const CookingTimer = ({ isExpanded, onToggle, suggestedTimer, onTimerComplete }: CookingTimerProps) => {
+  const [time, setTime] = useState(suggestedTimer?.duration || 300);
   const [isRunning, setIsRunning] = useState(false);
-  const [inputTime, setInputTime] = useState('05:00');
+  const [inputTime, setInputTime] = useState(() => {
+    const duration = suggestedTimer?.duration || 300;
+    return formatTime(duration);
+  });
+  const [showSuggestion, setShowSuggestion] = useState(!!suggestedTimer);
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -20,7 +30,7 @@ export const CookingTimer = ({ isExpanded, onToggle }: CookingTimerProps) => {
       }, 1000);
     } else if (time === 0) {
       setIsRunning(false);
-      // Could add notification here
+      onTimerComplete?.();
     }
     return () => clearInterval(interval);
   }, [isRunning, time]);
@@ -38,6 +48,16 @@ export const CookingTimer = ({ isExpanded, onToggle }: CookingTimerProps) => {
       setTime(mins * 60 + secs);
     }
     setIsRunning(!isRunning);
+    setShowSuggestion(false);
+  };
+
+  const handleStartSuggested = () => {
+    if (suggestedTimer) {
+      setTime(suggestedTimer.duration);
+      setInputTime(formatTime(suggestedTimer.duration));
+      setIsRunning(true);
+      setShowSuggestion(false);
+    }
   };
 
   const handleReset = () => {
@@ -70,6 +90,24 @@ export const CookingTimer = ({ isExpanded, onToggle }: CookingTimerProps) => {
           ×
         </Button>
       </div>
+
+      {/* Suggested Timer */}
+      {showSuggestion && suggestedTimer && (
+        <div className="mb-4 p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg border border-orange-200 dark:border-orange-800">
+          <p className="text-sm text-orange-700 dark:text-orange-300 mb-2">
+            Suggested for this step:
+          </p>
+          <p className="font-medium text-orange-800 dark:text-orange-200 mb-3">
+            {suggestedTimer.display} - {suggestedTimer.description}
+          </p>
+          <Button
+            onClick={handleStartSuggested}
+            className="w-full bg-orange-500 text-white hover:bg-orange-600"
+          >
+            Start {suggestedTimer.display} Timer
+          </Button>
+        </div>
+      )}
 
       <div className="text-center">
         <div className="text-3xl font-bold font-mono mb-4 text-foreground">

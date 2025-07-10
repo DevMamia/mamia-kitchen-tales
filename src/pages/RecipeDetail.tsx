@@ -71,10 +71,10 @@ const RecipeDetail = () => {
   };
 
   const renderInstructions = (instruction: string, index: number) => {
-    // Extract timer text from instructions
+    // Use structured timer data if available, otherwise fall back to regex
+    const stepTimer = recipe.stepTimers?.[index];
     const timerRegex = /(\d+\s*(?:minutes?|mins?|hours?|hrs?))/gi;
-    const timerMatch = instruction.match(timerRegex);
-    const cleanInstruction = instruction.replace(timerRegex, '').trim();
+    const timerMatch = !stepTimer ? instruction.match(timerRegex) : null;
     
     return (
       <div key={index} className="flex gap-4 mb-6">
@@ -82,16 +82,16 @@ const RecipeDetail = () => {
           <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-primary-foreground font-bold text-sm flex-shrink-0 mt-1">
             {index + 1}
           </div>
-          {timerMatch && (
+          {(stepTimer || timerMatch) && (
             <div className="absolute -right-2 top-10 text-xs text-muted-foreground bg-muted px-2 py-1 rounded-md whitespace-nowrap">
               <Timer size={12} className="inline mr-1" />
-              {timerMatch[0]}
+              {stepTimer?.display || timerMatch?.[0]}
             </div>
           )}
         </div>
         <div className="flex-1">
           <p className="text-foreground leading-relaxed">
-            {cleanInstruction}
+            {instruction}
           </p>
         </div>
       </div>

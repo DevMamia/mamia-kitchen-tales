@@ -16,6 +16,7 @@ const Cook = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [voiceStatus, setVoiceStatus] = useState<'speaking' | 'listening' | 'processing' | 'idle'>('idle');
   const [timerExpanded, setTimerExpanded] = useState(false);
+  const [timerCompleted, setTimerCompleted] = useState(false);
 
   const { speak, isPlaying, config } = useVoice();
 
@@ -158,6 +159,12 @@ const Cook = () => {
 
   // Page 2: Full Cooking Interface
   const currentInstruction = recipe.instructions[currentStep - 1];
+  const currentStepTimer = recipe.stepTimers?.[currentStep - 1];
+
+  const handleTimerComplete = () => {
+    setTimerCompleted(true);
+    // Could add notification sound here
+  };
 
   return (
     <div className="min-h-[calc(100vh-8rem)] bg-gradient-to-b from-orange-50/20 to-background">
@@ -198,11 +205,23 @@ const Cook = () => {
             {currentInstruction}
           </h2>
           
-          {/* Highlighted timers and tips would be processed here */}
-          {currentInstruction.includes('5 minutes') && (
+          {/* Timer suggestion for current step */}
+          {currentStepTimer && (
             <div className="bg-orange-100 dark:bg-orange-900/30 rounded-lg p-3 mb-4">
               <p className="text-orange-700 dark:text-orange-300 font-medium text-lg">
-                ⏰ Timer: 5 minutes
+                ⏰ This step takes {currentStepTimer.display}
+              </p>
+              <p className="text-orange-600 dark:text-orange-400 text-sm mt-1">
+                {currentStepTimer.description}
+              </p>
+            </div>
+          )}
+
+          {/* Timer completion notification */}
+          {timerCompleted && (
+            <div className="bg-green-100 dark:bg-green-900/30 rounded-lg p-3 mb-4">
+              <p className="text-green-700 dark:text-green-300 font-medium text-lg">
+                ✅ Timer finished! Ready for the next step?
               </p>
             </div>
           )}
@@ -251,7 +270,10 @@ const Cook = () => {
           </Button>
 
           <Button
-            onClick={() => setCurrentStep(Math.min(totalSteps, currentStep + 1))}
+            onClick={() => {
+              setCurrentStep(Math.min(totalSteps, currentStep + 1));
+              setTimerCompleted(false);
+            }}
             disabled={currentStep === totalSteps}
             variant="outline"
             className="text-lg py-6 px-8 min-h-[56px]"
@@ -280,6 +302,8 @@ const Cook = () => {
       <CookingTimer 
         isExpanded={timerExpanded}
         onToggle={() => setTimerExpanded(!timerExpanded)}
+        suggestedTimer={currentStepTimer}
+        onTimerComplete={handleTimerComplete}
       />
     </div>
   );

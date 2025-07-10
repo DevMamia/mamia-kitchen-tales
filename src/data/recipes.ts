@@ -4,6 +4,13 @@ export type Difficulty = 'EASY' | 'MEDIUM' | 'ADVANCED';
 export type Category = 'QUICK' | 'EVERYDAY' | 'WEEKEND' | 'CELEBRATION';
 export type ContentType = 'MEAT' | 'FISH' | 'VEGETARIAN' | 'VEGAN';
 
+export interface StepTimer {
+  display: string;
+  duration: number; // in seconds
+  autoStart?: boolean;
+  description?: string;
+}
+
 export interface Recipe {
   id: string;
   title: string;
@@ -36,6 +43,8 @@ export interface Recipe {
   equipment?: string[];
   storageInstructions?: string;
   culturalContext?: string;
+  // Timer integration
+  stepTimers?: (StepTimer | null)[];
 }
 
 export const recipes: Recipe[] = [
@@ -124,7 +133,21 @@ export const recipes: Recipe[] = [
       'The key to cacciatore is patience - let each ingredient build flavor slowly, like a good story'
     ],
     subsNote: 'No San Marzano tomatoes? Use the best canned tomatoes you can find. For mushrooms, try porcini if available. Bone-in thighs work wonderfully too.',
-    voiceEnabled: true
+    voiceEnabled: true,
+    stepTimers: [
+      null, // Season chicken - no timer
+      null, // Heat oil - no timer
+      { display: '~6 min', duration: 360, autoStart: true, description: 'Golden brown chicken' }, // Brown chicken
+      { display: '~5 min', duration: 300, autoStart: true, description: 'Soft onions' }, // Cook onions
+      { display: '~8 min', duration: 480, autoStart: true, description: 'Tender peppers' }, // Cook peppers & mushrooms
+      { display: '~1 min', duration: 60, autoStart: true, description: 'Fragrant garlic' }, // Cook garlic
+      { display: '~3 min', duration: 180, autoStart: true, description: 'Alcohol evaporates' }, // Simmer wine
+      null, // Add tomatoes and herbs - no timer
+      null, // Return chicken - no timer
+      { display: '~20 min', duration: 1200, autoStart: true, description: 'Fork-tender chicken' }, // Braise chicken
+      null, // Remove herbs - no timer
+      null, // Garnish and serve - no timer
+    ]
   },
   {
     id: 'carbonara-1',
