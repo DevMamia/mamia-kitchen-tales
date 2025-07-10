@@ -68,8 +68,14 @@ export default {
 					ring: 'hsl(var(--sidebar-ring))'
 				},
 				italian: 'hsl(var(--italian-accent))',
+				'italian-marble': '#8B4513',
+				'italian-marble-warm': '#A0522D',
 				mexican: 'hsl(var(--mexican-accent))',
-				thai: 'hsl(var(--thai-accent))'
+				'mexican-tile': '#D2691E',
+				'mexican-tile-warm': '#FF8C00',
+				thai: 'hsl(var(--thai-accent))',
+				'thai-silk': '#228B22',
+				'thai-silk-warm': '#32CD32'
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
