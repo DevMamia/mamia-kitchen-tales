@@ -26,6 +26,7 @@ const App = () => (
           <Route path="/mama/:mamaId" element={<Layout><MamaCookbook /></Layout>} />
           <Route path="/recipes" element={<Layout pageTitle="Discover Recipes" pageSubtitle="Find the perfect dish for any occasion"><Recipes /></Layout>} />
           <Route path="/recipe/:recipeId" element={<Layout><RecipeDetail /></Layout>} />
+          <Route path="/cook" element={<Layout pageTitle="Cook" pageSubtitle="Choose a recipe to start cooking"><Cook /></Layout>} />
           <Route path="/cook/:recipeId" element={<Layout><Cook /></Layout>} />
           <Route path="/kitchen" element={<Layout pageTitle="My Kitchen" pageSubtitle="Your personal cooking space"><Kitchen /></Layout>} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

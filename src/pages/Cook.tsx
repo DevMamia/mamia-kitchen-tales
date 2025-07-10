@@ -1,11 +1,12 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Volume2, ChevronLeft, ChevronRight, Upload, X, Settings } from 'lucide-react';
+import { ArrowLeft, Volume2, ChevronLeft, ChevronRight, Upload, X, Settings, ChefHat } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { VoiceStatusIndicator } from '@/components/VoiceStatusIndicator';
 import { CookingTimer } from '@/components/CookingTimer';
-import { getRecipeWithMama } from '@/data/recipes';
+import { getRecipeWithMama, recipes } from '@/data/recipes';
+import { getMamaById } from '@/data/mamas';
 import { useVoice } from '@/hooks/useVoice';
 
 const Cook = () => {
@@ -19,7 +20,54 @@ const Cook = () => {
   const { speak, isPlaying, config } = useVoice();
 
   // Find the recipe with mama info
-  const recipeData = getRecipeWithMama(recipeId || '');
+  const recipeData = recipeId ? getRecipeWithMama(recipeId) : null;
+  
+  // If no recipe ID provided, show recipe selection
+  if (!recipeId) {
+    return (
+      <div className="min-h-[calc(100vh-8rem)] p-6">
+        <div className="text-center mb-8">
+          <ChefHat size={64} className="mx-auto mb-4 text-orange-500" />
+          <h1 className="text-3xl font-heading font-bold text-foreground mb-2">
+            Choose a Recipe to Cook
+          </h1>
+          <p className="text-lg text-muted-foreground">
+            Select from your collection to start cooking
+          </p>
+        </div>
+
+        <div className="grid gap-4 max-w-2xl mx-auto">
+          {recipes.map((recipe) => {
+            const mama = getMamaById(recipe.mamaId);
+            return (
+              <div
+                key={recipe.id}
+                onClick={() => navigate(`/cook/${recipe.id}`)}
+                className="bg-card rounded-xl p-4 border border-border hover:border-orange-500 transition-colors cursor-pointer group"
+              >
+                <div className="flex items-center gap-4">
+                  <img
+                    src={recipe.image}
+                    alt={recipe.title}
+                    className="w-16 h-16 rounded-lg object-cover"
+                  />
+                  <div className="flex-1">
+                    <h3 className="font-heading font-bold text-foreground group-hover:text-orange-500 transition-colors">
+                      {recipe.title}
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                      with {mama?.name} {mama?.emoji} • {recipe.cookingTime}
+                    </p>
+                  </div>
+                  <ChevronRight className="text-muted-foreground group-hover:text-orange-500 transition-colors" />
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
   
   if (!recipeData) {
     return <div>Recipe not found</div>;
