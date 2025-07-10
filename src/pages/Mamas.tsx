@@ -1,44 +1,50 @@
 
 import React, { useState } from 'react';
 import { Carousel, CarouselContent, CarouselItem, CarouselApi } from '@/components/ui/carousel';
-import { Wine, Flower2, Leaf } from 'lucide-react';
+import { Wine, Flower2, Leaf, ChefHat } from 'lucide-react';
 
 const mamas = [
   {
     id: 1,
     name: "Nonna Lucia",
-    cuisine: "Italian",
+    cuisine: "Italian Cuisine",
     background: "#FF8C42",
     signatureDish: "Classic Carbonara",
-    quote: "From rolling pasta in nonna's eyes...",
-    greeting: "Buongiorno, caro!",
-    greetingTranslation: "Good morning, dear!",
+    description: "Born in a small village in Tuscany, Nonna Lucia learned to cook from her mother and grandmother. Her kitchen is filled with the aroma of fresh herbs and the sound of laughter.",
+    philosophy: "Cooking is love made visible. Every dish tells a story of family and tradition.",
+    greeting: "Ciao, bambino!",
+    greetingTranslation: "Hello, little one!",
+    action: "stirring risotto",
     watermark: Wine,
-    description: "With flour-dusted hands and stories of old Italy, Nonna Lucia brings generations of Roman tradition to every dish."
+    accent: "🍷"
   },
   {
     id: 2,
     name: "Abuela Rosa",
-    cuisine: "Mexican",
+    cuisine: "Mexican Cuisine", 
     background: "#FF6B6B",
     signatureDish: "Mole Negro",
-    quote: "Every ingredient tells a story of our ancestors...",
-    greeting: "¡Bienvenido, mijo!",
-    greetingTranslation: "Welcome, my child!",
+    description: "From Oaxaca's vibrant markets to your kitchen, Abuela Rosa brings three generations of authentic Mexican cooking with warmth and passion.",
+    philosophy: "La comida es el alma de la familia - food is the soul of the family.",
+    greeting: "¡Hola, mi nieto!",
+    greetingTranslation: "Hello, my grandchild!",
+    action: "grinding spices",
     watermark: Flower2,
-    description: "Wrapped in her colorful rebozo, Abuela Rosa carries the secrets of Oaxacan cuisine and the warmth of Mexican hospitality."
+    accent: "🌶️"
   },
   {
     id: 3,
-    name: "Mae Malai",
-    cuisine: "Thai",
-    background: "#7FB069",
+    name: "Siriporn",
+    cuisine: "Thai Cuisine",
+    background: "#7FB069", 
     signatureDish: "Green Curry",
-    quote: "Balance in cooking, balance in life - this is our way...",
-    greeting: "สวัสดีค่ะ",
-    greetingTranslation: "Hello, dear",
+    description: "Mae Siriporn's kitchen in Bangkok is a symphony of fresh herbs and aromatic spices. She believes cooking is meditation in motion.",
+    philosophy: "Balance in flavor, balance in life. Every ingredient has its purpose.",
+    greeting: "สวัสดีค่ะ ลูกรัก",
+    greetingTranslation: "Hello, my dear child",
+    action: "pounding curry paste",
     watermark: Leaf,
-    description: "In her traditional dress, Mae Malai embodies the gentle wisdom of Thai cuisine, where every spice has purpose and every meal brings harmony."
+    accent: "🌿"
   }
 ];
 
@@ -101,47 +107,70 @@ const Mamas = () => {
                       </div>
                     )}
 
-                    <div className="relative h-full p-6 flex flex-col text-white">
-                      {/* Character illustration placeholder */}
-                      <div className="flex justify-center mb-6">
-                        <div className="w-48 h-48 rounded-full bg-white/20 border-4 border-white/30 flex items-center justify-center">
-                          <div className="w-40 h-40 rounded-full bg-white/10 flex items-center justify-center">
-                            <span className="text-6xl">👵🏻</span>
+                    <div className="relative h-full p-6 flex text-white">
+                      {/* Left Content Area */}
+                      <div className="flex-1 flex flex-col justify-between pr-4">
+                        {/* Top Section */}
+                        <div>
+                          <p className="text-xs font-bold tracking-widest opacity-90 mb-2">{mama.cuisine.toUpperCase()}</p>
+                          <h3 className="font-heading font-bold text-4xl mb-3 leading-tight">{mama.name}</h3>
+                          
+                          {/* Description */}
+                          <p className="text-sm leading-relaxed opacity-95 mb-4">
+                            {mama.description}
+                          </p>
+
+                          {/* Cooking Action */}
+                          <div className="flex items-center gap-2 mb-4">
+                            <ChefHat size={16} className="opacity-80" />
+                            <p className="text-xs opacity-80 font-medium">{mama.action}</p>
+                          </div>
+                        </div>
+
+                        {/* Middle Section - Signature Dish */}
+                        <div className="bg-white/15 backdrop-blur-sm rounded-xl p-3 mb-4">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="text-lg">{mama.accent}</span>
+                            <p className="text-xs font-bold tracking-wider opacity-80">SIGNATURE DISH</p>
+                          </div>
+                          <p className="font-heading font-bold text-lg">{mama.signatureDish}</p>
+                        </div>
+
+                        {/* Philosophy Quote */}
+                        <div className="mb-4">
+                          <p className="font-handwritten text-sm italic opacity-90 leading-relaxed">
+                            "{mama.philosophy}"
+                          </p>
+                        </div>
+
+                        {/* Bottom Section */}
+                        <div>
+                          {/* CTA Button */}
+                          <button className="w-full bg-white text-gray-800 font-heading font-bold py-3 px-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 mb-3 flex items-center justify-center gap-2">
+                            <span>📖</span>
+                            <span>Open {mama.name.split(' ')[0]}'s Cookbook</span>
+                          </button>
+
+                          {/* Cultural greeting */}
+                          <div className="text-center">
+                            <p className="font-handwritten text-base mb-1">{mama.greeting}</p>
+                            <p className="text-xs opacity-70">"{mama.greetingTranslation}"</p>
                           </div>
                         </div>
                       </div>
 
-                      {/* Content */}
-                      <div className="text-center mb-6">
-                        <p className="text-sm font-medium opacity-90 mb-1">{mama.cuisine.toUpperCase()}</p>
-                        <h3 className="font-heading font-bold text-3xl mb-4">{mama.name}</h3>
-                        <p className="font-handwritten text-lg leading-relaxed opacity-95 mb-4">
-                          {mama.description}
-                        </p>
-                      </div>
-
-                      {/* Signature dish */}
-                      <div className="bg-white/20 rounded-2xl p-4 mb-6">
-                        <p className="text-xs font-medium opacity-80 mb-1">SIGNATURE DISH</p>
-                        <p className="font-heading font-bold text-xl">{mama.signatureDish}</p>
-                      </div>
-
-                      {/* Quote */}
-                      <div className="mb-6">
-                        <p className="font-handwritten text-base italic opacity-90">
-                          "{mama.quote}"
-                        </p>
-                      </div>
-
-                      {/* CTA Button */}
-                      <button className="bg-white text-gray-800 font-heading font-bold py-4 px-6 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-200 mb-4">
-                        📖 Open {mama.name.split(' ')[0]}'s Cookbook
-                      </button>
-
-                      {/* Cultural greeting */}
-                      <div className="text-center">
-                        <p className="font-handwritten text-lg mb-1">{mama.greeting}</p>
-                        <p className="text-xs opacity-75">"{mama.greetingTranslation}"</p>
+                      {/* Right Side - Character Illustration */}
+                      <div className="w-32 flex flex-col items-center justify-center">
+                        <div className="w-28 h-28 rounded-full bg-white/20 border-3 border-white/30 flex items-center justify-center mb-3">
+                          <div className="w-24 h-24 rounded-full bg-white/10 flex items-center justify-center">
+                            <span className="text-4xl">👵🏻</span>
+                          </div>
+                        </div>
+                        
+                        {/* Small cooking illustration */}
+                        <div className="bg-white/15 rounded-lg p-2">
+                          <ChefHat size={20} className="text-white/80" />
+                        </div>
                       </div>
                     </div>
                   </div>
