@@ -77,7 +77,16 @@ export const recipes: Recipe[] = [
     voiceIntro: 'Ciao bello! A quick kick of chilli to wake up your taste buds.',
     voiceTips: ['Splash pasta water so the sauce hugs the penne.', 'Arrabbiata means \'angry\'—let it blush!'],
     subsNote: 'No penne? Any short pasta works. No fresh chilli? Use 1/4 tsp flakes.',
-    voiceEnabled: true
+    voiceEnabled: true,
+    stepTimers: [
+      null, // Heat olive oil - no timer needed
+      { display: '2 min', duration: 120, description: 'Until garlic is fragrant, not brown' }, // Cook garlic and chillies
+      null, // Add tomatoes - no timer needed  
+      { display: '8 min', duration: 480, description: 'Let sauce develop while pasta cooks' }, // Simmer sauce
+      { display: '7 min', duration: 420, description: 'Cook pasta 1 minute less than package directions for al dente' }, // Cook pasta
+      null, // Toss pasta - no timer needed
+      null  // Garnish - no timer needed
+    ]
   },
   {
     id: 'chicken-cacciatore',
@@ -191,7 +200,16 @@ export const recipes: Recipe[] = [
       'The secret is pasta water - it transforms eggs and cheese into silk without scrambling'
     ],
     subsNote: 'No guanciale? Pancetta works but reduce cooking time. No Pecorino? Parmigiano-Reggiano is acceptable. The black pepper must be freshly ground - this is not optional!',
-    voiceEnabled: true
+    voiceEnabled: true,
+    stepTimers: [
+      null, // Bring water to boil - no timer needed
+      { display: '8-10 min', duration: 540, description: 'Golden and crispy guanciale' }, // Cook guanciale
+      null, // Mix eggs and cheese - no timer needed
+      { display: '9-11 min', duration: 600, description: 'Al dente pasta (check package directions minus 1 min)' }, // Cook pasta
+      null, // Remove from heat - no timer needed
+      null, // Add egg mixture - no timer needed
+      null  // Serve immediately - no timer needed
+    ]
   },
   {
     id: 'lasagna-nonna',
