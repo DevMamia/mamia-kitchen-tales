@@ -9,6 +9,7 @@ export interface Recipe {
   title: string;
   cookingTime: string;
   cookTimeMin: number;
+  prepTimeMin?: number;
   difficulty: Difficulty;
   category: Category;
   contentType: ContentType;
@@ -31,6 +32,10 @@ export interface Recipe {
   // Cooking context
   cookingTips?: string[];
   difficulty_explanation?: string;
+  // Production enhancement fields
+  equipment?: string[];
+  storageInstructions?: string;
+  culturalContext?: string;
 }
 
 export const recipes: Recipe[] = [
@@ -70,6 +75,7 @@ export const recipes: Recipe[] = [
     title: 'Chicken Cacciatore',
     cookingTime: '40 min',
     cookTimeMin: 40,
+    prepTimeMin: 15,
     difficulty: 'MEDIUM',
     category: 'EVERYDAY',
     contentType: 'MEAT',
@@ -77,27 +83,60 @@ export const recipes: Recipe[] = [
     mamaId: 1,
     mamaName: 'Nonna Lucia',
     mamaEmoji: '🍷',
-    ingredients: ['1 whole chicken cut up', 'Bell peppers', 'Mushrooms', 'Onions', 'Crushed tomatoes', 'White wine', 'Herbs'],
+    ingredients: [
+      '1 whole chicken (3-4 lbs/1.5-2kg), cut into 8 pieces, patted dry',
+      '1/4 cup (60ml) extra virgin olive oil',
+      '1 large yellow onion (8oz/225g), sliced into half-moons',
+      '2 bell peppers (1 red, 1 yellow), cut into 1-inch strips',
+      '8oz (225g) cremini mushrooms, quartered',
+      '4 cloves garlic, minced',
+      '1/2 cup (120ml) dry white wine (Pinot Grigio or Sauvignon Blanc)',
+      '1 can (28oz/800g) San Marzano crushed tomatoes',
+      '2 sprigs fresh rosemary',
+      '4 fresh sage leaves',
+      '2 bay leaves',
+      '1 tsp kosher salt, plus more to taste',
+      '1/2 tsp freshly ground black pepper',
+      '1/4 cup fresh Italian parsley, chopped for garnish'
+    ],
     instructions: [
-      'Brown chicken pieces in olive oil',
-      'Remove chicken and sauté vegetables',
-      'Add wine and tomatoes',
-      'Return chicken to pot',
-      'Simmer until chicken is tender',
-      'Season with herbs and serve'
+      'Season chicken pieces generously with salt and pepper, let stand 10 minutes at room temperature',
+      'Heat olive oil in a heavy-bottomed Dutch oven or braiser over medium-high heat until shimmering (about 350°F/175°C)',
+      'Brown chicken pieces skin-side down first, 4-5 minutes per side until golden. Work in batches if needed. Transfer to a plate.',
+      'Reduce heat to medium. Add onions to the same pan with the fond, cook 5-7 minutes until softened and beginning to caramelize',
+      'Add bell peppers and mushrooms, cook 5-6 minutes until peppers soften and mushrooms release their moisture',
+      'Add minced garlic, cook 30 seconds until fragrant (don\'t let it burn)',
+      'Pour in white wine, scraping up any browned bits. Let simmer 2-3 minutes until alcohol evaporates',
+      'Add crushed tomatoes, rosemary, sage, and bay leaves. Season with 1 tsp salt and 1/2 tsp pepper',
+      'Return chicken to pot, nestling pieces into the sauce. Bring to a gentle simmer',
+      'Cover and cook 25-30 minutes until chicken is fork-tender and internal temperature reaches 165°F (74°C)',
+      'Remove bay leaves and herb sprigs. Taste and adjust seasoning with salt and pepper',
+      'Garnish with fresh parsley and serve immediately with crusty bread or over creamy polenta'
     ],
     servings: 4,
-    description: 'Hunter-style chicken with vegetables in tomato sauce',
-    voiceIntro: 'We are hunting flavour today, my dear!',
-    voiceTips: ['Brown the chicken well for deeper flavor', 'Don\'t rush the vegetables - let them caramelize'],
-    subsNote: 'Swap chicken for mushrooms for a vegetarian version.',
+    description: 'Hunter-style chicken braised with bell peppers, mushrooms, and aromatic herbs in a rich tomato sauce',
+    equipment: ['Dutch oven or heavy braiser', 'Meat thermometer', 'Wooden spoon'],
+    storageInstructions: 'Refrigerate up to 3 days. Reheat gently on stovetop with a splash of broth.',
+    culturalContext: 'This rustic dish originated with Italian hunters who cooked whatever they caught with foraged mushrooms and vegetables.',
+    voiceIntro: 'Eccolo! Today we hunt for flavor like the old hunters in Tuscany. Every bubble tells a story.',
+    voiceTips: [
+      'Listen, caro - the chicken must sing when it hits the hot oil. If it doesn\'t sizzle, the pan isn\'t ready!',
+      'Don\'t move the chicken too soon - let it get that beautiful golden crust, like my papa\'s weathered hands',
+      'When you add the wine, tilt the pan away from you - we want the aroma, not singed eyebrows!',
+      'The vegetables should soften slowly, like hearts opening to love. Patience makes everything sweeter',
+      'If the sauce gets too thick, add a splash of chicken broth - thin like friendship, rich like family',
+      'Taste the sauce with a piece of bread - this is how we judge everything in my kitchen',
+      'The herbs should smell like a walk through the hillside after rain. Fresh is everything, tesoro!'
+    ],
+    subsNote: 'No San Marzano tomatoes? Use the best canned tomatoes you can find. For mushrooms, try porcini if available. Bone-in thighs work wonderfully too.',
     voiceEnabled: true
   },
   {
     id: 'carbonara-1',
     title: 'Pasta Carbonara',
-    cookingTime: '30 min',
-    cookTimeMin: 30,
+    cookingTime: '20 min',
+    cookTimeMin: 20,
+    prepTimeMin: 10,
     difficulty: 'MEDIUM',
     category: 'EVERYDAY',
     contentType: 'MEAT',
@@ -105,21 +144,40 @@ export const recipes: Recipe[] = [
     mamaId: 1,
     mamaName: 'Nonna Lucia',
     mamaEmoji: '🍷',
-    ingredients: ['400g spaghetti', '200g guanciale', '4 egg yolks', '100g Pecorino Romano', 'Black pepper', 'Salt'],
+    ingredients: [
+      '400g (14oz) spaghetti or tonnarelli pasta',
+      '200g (7oz) guanciale (cured pork jowl), diced into 1/4-inch cubes',
+      '4 large free-range egg yolks, room temperature',
+      '100g (3.5oz) Pecorino Romano DOP, finely grated plus extra for serving',
+      '2 tsp coarsely ground black pepper, plus more for garnish',
+      '1 tsp kosher salt for pasta water'
+    ],
     instructions: [
-      'Boil pasta in well-salted water until al dente',
-      'Cut guanciale into small cubes and fry until golden and crispy',
-      'In a bowl, whisk egg yolks with grated Pecorino Romano and black pepper',
-      'Drain pasta, reserving some pasta water',
-      'Remove guanciale pan from heat, add hot pasta and toss',
-      'Add egg mixture and toss quickly, adding pasta water to create creamy sauce'
+      'Bring a large pot of water to rolling boil. Add 1 tsp salt per liter of water - it should taste like mild seawater',
+      'Meanwhile, place diced guanciale in a large cold pan. Cook over medium-low heat 8-10 minutes, stirring occasionally, until golden and crispy',
+      'In a mixing bowl, whisk egg yolks with grated Pecorino Romano and black pepper until well combined. Set aside at room temperature',
+      'Cook spaghetti according to package directions minus 1 minute for al dente texture. Reserve 1 cup hot pasta cooking water before draining',
+      'Remove guanciale pan from heat. Immediately add drained hot pasta to the guanciale, tossing vigorously to coat with rendered fat',
+      'Working quickly off heat, add egg-cheese mixture while tossing continuously. Gradually add pasta water, 2-3 tablespoons at a time, until sauce becomes silky and coats each strand',
+      'Taste and adjust with more Pecorino, pepper, or pasta water as needed. Serve immediately with extra cheese and black pepper'
     ],
     servings: 4,
-    description: 'Authentic Roman carbonara with crispy guanciale and creamy egg sauce.',
+    description: 'Authentic Roman carbonara with crispy guanciale and silky egg-cheese sauce - no cream, just technique',
+    equipment: ['Large pasta pot', 'Heavy-bottomed pan', 'Fine grater', 'Mixing bowl'],
+    storageInstructions: 'Best enjoyed immediately. Leftovers don\'t reheat well due to egg-based sauce.',
+    culturalContext: 'Born in Roman trattorie, carbonara represents the soul of Italian cooking - few perfect ingredients treated with respect.',
     featured: true,
-    voiceIntro: 'Remember—no cream! Just eggs and love.',
-    voiceTips: ['Work quickly when adding eggs to prevent scrambling', 'Save some pasta water - it\'s the secret to perfect sauce'],
-    subsNote: 'Pancetta instead of guanciale is okay; Parm if no Pecorino.',
+    voiceIntro: 'Ascolta bene - no cream in my carbonara! Only eggs, cheese, guanciale, and amore. This is Roma on a plate.',
+    voiceTips: [
+      'Cold pan for guanciale - we want to render the fat slowly, like patience building character',
+      'The pasta water is liquid gold - save it before you drain! It binds the sauce like magic',
+      'Room temperature eggs won\'t scramble as easily - take them out 30 minutes before cooking',
+      'Toss, toss, toss! Motion prevents scrambling and creates the silk we want',
+      'If it gets too thick, more pasta water. Too thin? More cheese. Cooking is conversation, tesoro',
+      'The pan must be off the heat when you add eggs - we\'re making carbonara, not scrambled eggs!',
+      'Serve immediately in warmed bowls - carbonara waits for no one, not even the pope!'
+    ],
+    subsNote: 'No guanciale? Pancetta works but reduce cooking time. No Pecorino? Parmigiano-Reggiano is acceptable. The black pepper must be freshly ground - this is not optional!',
     voiceEnabled: true
   },
   {
@@ -185,6 +243,7 @@ export const recipes: Recipe[] = [
     title: 'Quesadillas de Queso y Poblano',
     cookingTime: '15 min',
     cookTimeMin: 15,
+    prepTimeMin: 10,
     difficulty: 'EASY',
     category: 'QUICK',
     contentType: 'VEGETARIAN',
@@ -192,18 +251,40 @@ export const recipes: Recipe[] = [
     mamaId: 2,
     mamaName: 'Abuela Rosa',
     mamaEmoji: '🌶️',
-    ingredients: ['Flour tortillas', 'Oaxaca cheese', 'Poblano peppers', 'Onions'],
+    ingredients: [
+      '4 large flour tortillas (8-10 inch diameter)',
+      '2 cups (8oz/225g) Oaxaca cheese, shredded (or Monterey Jack)',
+      '2 large poblano peppers, roasted and sliced',
+      '1 medium white onion, thinly sliced',
+      '2 tablespoons vegetable oil or lard',
+      '1/2 teaspoon kosher salt',
+      '1/4 cup Mexican crema or sour cream for serving',
+      '1 lime, cut into wedges',
+      'Fresh salsa verde or pico de gallo for serving'
+    ],
     instructions: [
-      'Roast poblano peppers',
-      'Slice peppers and onions',
-      'Fill tortillas with cheese and vegetables',
-      'Cook until golden and cheese melts'
+      'Roast poblano peppers directly over gas flame or under broiler until charred all over, about 8-10 minutes total',
+      'Place charred peppers in a plastic bag for 10 minutes to steam. Peel away charred skin, remove seeds, and slice into strips',
+      'Heat 1 tablespoon oil in a large skillet over medium heat. Sauté sliced onions with salt for 5-6 minutes until softened and lightly golden',
+      'Lay tortillas flat. On half of each tortilla, sprinkle cheese, then add poblano strips and sautéed onions',
+      'Fold tortillas in half, pressing gently to seal. Cook in the same skillet over medium heat, 2-3 minutes per side until golden and cheese melts',
+      'Cut each quesadilla into triangles and serve immediately with crema, lime wedges, and salsa'
     ],
     servings: 4,
-    description: 'Crispy cheese and poblano pepper quesadillas',
-    voiceIntro: 'Rapidito y delicioso—my cheesy hug!',
-    voiceTips: ['Don\'t overfill or they\'ll leak', 'Medium heat keeps the cheese creamy'],
-    subsNote: 'Bell pepper for poblano; mozzarella if no Oaxaca cheese.',
+    description: 'Crispy flour tortillas filled with melted Oaxaca cheese and smoky roasted poblano peppers',
+    equipment: ['Large skillet or comal', 'Gas burner or broiler for roasting', 'Pizza wheel or knife'],
+    storageInstructions: 'Best eaten immediately. Can be reheated in a dry skillet for 1-2 minutes per side.',
+    culturalContext: 'A beloved Mexican comfort food, quesadillas originated in central Mexico and showcase the magic of good cheese and chiles.',
+    voiceIntro: 'Ay, mijo! Quick and delicious - my cheesy abrazo that warms the heart. Fire-roasted poblanos make all the difference.',
+    voiceTips: [
+      'The peppers must sing when they hit the flame - listen for that crackling, it means the skin is charring perfectly',
+      'Don\'t rush the onions, let them caramelize slowly like sweet patience',
+      'Fold the tortilla like tucking in a baby - gentle but secure, we don\'t want the cheese escaping',
+      'Medium heat, mijo - too hot and the outside burns before the cheese melts',
+      'Fresh lime juice brightens everything - squeeze it right before eating, like sunshine on your tongue',
+      'The cheese should stretch when you pull apart the quesadilla - that\'s how you know it\'s perfect!'
+    ],
+    subsNote: 'No poblanos? Use Anaheim or bell peppers, but poblanos give the authentic smoky flavor. Oaxaca cheese is traditional, but Monterey Jack or mozzarella work fine.',
     voiceEnabled: true
   },
   {
@@ -352,6 +433,7 @@ export const recipes: Recipe[] = [
     title: 'Green Curry',
     cookingTime: '35 min',
     cookTimeMin: 35,
+    prepTimeMin: 20,
     difficulty: 'MEDIUM',
     category: 'EVERYDAY',
     contentType: 'MEAT',
@@ -359,21 +441,49 @@ export const recipes: Recipe[] = [
     mamaId: 3,
     mamaName: 'Mae Malai',
     mamaEmoji: '🌿',
-    ingredients: ['Green curry paste', 'Coconut milk', 'Chicken', 'Thai eggplant', 'Thai basil', 'Fish sauce'],
+    ingredients: [
+      '3-4 tablespoons Thai green curry paste (nam prik gaeng keow wan)',
+      '1 can (400ml/14oz) premium coconut milk, chilled overnight',
+      '1 lb (450g) boneless chicken thigh, cut into bite-sized pieces',
+      '6-8 small Thai eggplants (makheua phuang), quartered, or 1 large eggplant cubed',
+      '3-4 makrut lime leaves, torn into pieces',
+      '2-3 Thai bird\'s eye chilies, sliced (optional for extra heat)',
+      '2 tablespoons fish sauce (nam pla)',
+      '1 tablespoon palm sugar or brown sugar',
+      '1 red bell pepper, sliced into strips',
+      '1 cup fresh Thai basil leaves (horapa)',
+      '2 tablespoons vegetable oil',
+      'Steamed jasmine rice for serving'
+    ],
     instructions: [
-      'Fry curry paste in coconut cream',
-      'Add chicken and cook',
-      'Add remaining coconut milk',
-      'Simmer with eggplant',
-      'Season to taste',
-      'Garnish with basil'
+      'Open chilled coconut milk can without shaking. Scoop out 3-4 tablespoons of thick cream from the top',
+      'Heat oil in a wok or heavy pan over medium-high heat. Add coconut cream and fry for 2-3 minutes until oil separates',
+      'Add green curry paste to the pan. Fry for 3-4 minutes, stirring constantly, until very fragrant and darker in color',
+      'Add chicken pieces and stir to coat with curry paste. Cook for 5-6 minutes until chicken changes color',
+      'Gradually add remaining coconut milk, stirring to combine. Bring to a gentle simmer',
+      'Add eggplant pieces and torn lime leaves. Simmer for 8-10 minutes until eggplant is tender',
+      'Season with fish sauce and palm sugar. Add bell pepper strips and simmer 2-3 minutes',
+      'Taste and adjust seasoning - it should be rich, aromatic, with balanced sweet, salty, and spicy notes',
+      'Remove from heat and stir in fresh Thai basil leaves until wilted',
+      'Serve immediately over steamed jasmine rice with extra basil and sliced chilies on the side'
     ],
     servings: 4,
-    description: 'Aromatic coconut curry with chicken',
+    description: 'Aromatic Thai green curry with tender chicken and vegetables in rich coconut sauce',
+    equipment: ['Wok or heavy-bottomed pan', 'Rice cooker or pot for rice', 'Sharp knife'],
+    storageInstructions: 'Refrigerate up to 3 days. Reheat gently, adding coconut milk if needed. Flavors improve overnight.',
+    culturalContext: 'Green curry represents the heart of Thai cuisine - balancing sweet, salty, sour, and spicy in perfect harmony.',
     featured: true,
-    voiceIntro: 'Green like the jungle after rain.',
-    voiceTips: ['Fry the paste until fragrant', 'Add coconut milk gradually'],
-    subsNote: 'Jar curry paste is fine; add extra lime leaf for punch.',
+    voiceIntro: 'Ah, green curry - like the jungle after monsoon rain. Today we create balance, the soul of Thai cooking.',
+    voiceTips: [
+      'Listen to the curry paste when it fries - it should bubble and release its perfume like flowers blooming',
+      'The coconut cream must be thick on top - this is the secret to proper oil separation',
+      'Don\'t rush the paste - let it fry until it darkens and smells like heaven',
+      'Add coconut milk slowly, like trust building between friends - gradual and gentle',
+      'Thai eggplant should be tender but not mushy - they\'ll continue cooking in the hot curry',
+      'Balance is everything - taste and adjust like tuning a beautiful song',
+      'Basil goes in last moment - we want the fresh perfume, not cooked leaves'
+    ],
+    subsNote: 'No Thai eggplant? Use regular eggplant, salted and drained. Bottled curry paste works fine - Mae Pranom or Thai Kitchen brands are good. Sweet basil can substitute for Thai basil.',
     voiceEnabled: true
   },
   {
