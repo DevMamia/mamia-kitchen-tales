@@ -35,11 +35,11 @@ const mamas = [
   },
   {
     id: 3,
-    name: "Siriporn",
+    name: "Mae Malai",
     cuisine: "Thai Cuisine",
     background: "#7FB069", 
     signatureDish: "Green Curry",
-    description: "Mae Siriporn's kitchen in Bangkok is a symphony of fresh herbs and aromatic spices. She believes cooking is meditation in motion.",
+    description: "Mae Malai's kitchen in Bangkok is a symphony of fresh herbs and aromatic spices. She believes cooking is meditation in motion.",
     philosophy: "Balance in flavor, balance in life. Every ingredient has its purpose.",
     greeting: "สวัสดีค่ะ ลูกรัก",
     greetingTranslation: "Hello, my dear child",

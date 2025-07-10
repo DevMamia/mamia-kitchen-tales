@@ -114,7 +114,7 @@ export const recipes: Recipe[] = [
     description: 'Silky smooth custard with golden caramel sauce.',
   },
 
-  // Siriporn's Recipes
+  // Mae Malai's Recipes
   {
     id: 'curry-1',
     title: 'Green Curry',
@@ -123,7 +123,7 @@ export const recipes: Recipe[] = [
     category: 'Meat',
     image: '/placeholder.svg',
     mamaId: 3,
-    mamaName: 'Siriporn',
+    mamaName: 'Mae Malai',
     mamaEmoji: '🌿',
     ingredients: ['Green curry paste', 'Coconut milk', 'Chicken', 'Thai eggplant', 'Basil leaves', 'Fish sauce'],
     instructions: ['Fry curry paste', 'Add coconut milk', 'Cook chicken', 'Add vegetables and seasonings'],
@@ -139,7 +139,7 @@ export const recipes: Recipe[] = [
     category: 'Rice/Pasta',
     image: '/placeholder.svg',
     mamaId: 3,
-    mamaName: 'Siriporn',
+    mamaName: 'Mae Malai',
     mamaEmoji: '🌿',
     ingredients: ['Rice noodles', 'Shrimp', 'Eggs', 'Bean sprouts', 'Tamarind paste', 'Palm sugar', 'Peanuts'],
     instructions: ['Soak noodles', 'Stir-fry proteins', 'Add noodles and sauce', 'Garnish with peanuts'],
@@ -154,7 +154,7 @@ export const recipes: Recipe[] = [
     category: 'Dessert',
     image: '/placeholder.svg',
     mamaId: 3,
-    mamaName: 'Siriporn',
+    mamaName: 'Mae Malai',
     mamaEmoji: '🌿',
     ingredients: ['Glutinous rice', 'Coconut milk', 'Palm sugar', 'Salt', 'Ripe mangoes'],
     instructions: ['Steam rice', 'Make coconut sauce', 'Mix rice with sauce', 'Serve with fresh mango'],
