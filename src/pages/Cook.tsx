@@ -22,6 +22,13 @@ const Cook = () => {
   // Find the recipe with mama info
   const recipeData = recipeId ? getRecipeWithMama(recipeId) : null;
   
+  // Store current recipe in localStorage when entering cooking mode
+  useEffect(() => {
+    if (recipeId && recipeData) {
+      localStorage.setItem('lastCookingRecipe', recipeId);
+    }
+  }, [recipeId, recipeData]);
+  
   // If no recipe ID provided, show recipe selection
   if (!recipeId) {
     return (
