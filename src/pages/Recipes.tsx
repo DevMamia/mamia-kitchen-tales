@@ -31,21 +31,27 @@ const Recipes = () => {
   useEffect(() => {
     let recipesToShow: Recipe[] = [];
     
-    if (selectedCategory === 'All') {
-      recipesToShow = getFeaturedRecipes();
-    } else {
-      recipesToShow = getRecipesByCategory(selectedCategory);
-    }
-    
-    // Filter by search query if exists
     if (searchQuery) {
-      recipesToShow = recipesToShow.filter(recipe =>
+      // Independent search - search all recipes
+      const allRecipes = [...getFeaturedRecipes(), ...getRecipesByCategory('Meat'), ...getRecipesByCategory('Fish'), ...getRecipesByCategory('Rice/Pasta'), ...getRecipesByCategory('Dessert')];
+      const uniqueRecipes = allRecipes.filter((recipe, index, self) => 
+        index === self.findIndex(r => r.id === recipe.id)
+      );
+      
+      recipesToShow = uniqueRecipes.filter(recipe =>
         recipe.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         recipe.mamaName.toLowerCase().includes(searchQuery.toLowerCase()) ||
         recipe.ingredients.some(ingredient => 
           ingredient.toLowerCase().includes(searchQuery.toLowerCase())
         )
       );
+    } else {
+      // Category browsing with 3D stack
+      if (selectedCategory === 'All') {
+        recipesToShow = getFeaturedRecipes();
+      } else {
+        recipesToShow = getRecipesByCategory(selectedCategory);
+      }
     }
     
     setStackRecipes(recipesToShow);
@@ -93,31 +99,32 @@ const Recipes = () => {
       <div className="h-full flex flex-col">
         {/* Compact Recipe of the Week Hero */}
         {recipeOfWeek && !searchQuery && (
-          <div className="mb-6 relative overflow-hidden rounded-2xl bg-gradient-primary shadow-glow">
-            <div className="p-6 text-white relative">
-              <div className="absolute top-4 right-4 opacity-20">
-                <Star size={60} className="text-white" />
+          <div className="mb-6 relative overflow-hidden rounded-xl bg-slate-900 shadow-xl">
+            <div className="absolute inset-0 bg-gradient-to-r from-slate-900/90 to-slate-800/90"></div>
+            <div className="p-3 text-white relative">
+              <div className="absolute top-3 right-3 opacity-20">
+                <Star size={40} className="text-white" />
               </div>
               <div className="relative">
-                <div className="flex items-center gap-2 mb-2">
-                  <Crown size={20} className="text-yellow-300" />
-                  <span className="text-sm font-bold tracking-wider opacity-90">RECIPE OF THE WEEK</span>
+                <div className="flex items-center gap-2 mb-1">
+                  <Crown size={16} className="text-yellow-300" />
+                  <span className="text-xs font-bold tracking-wider opacity-90">RECIPE OF THE WEEK</span>
                 </div>
-                <h3 className="font-heading font-bold text-2xl mb-2">{recipeOfWeek.title}</h3>
-                <p className="text-sm opacity-90 mb-3">by {recipeOfWeek.mamaName}</p>
-                <div className="flex items-center gap-4 text-sm">
+                <h3 className="font-heading font-bold text-lg mb-1">{recipeOfWeek.title}</h3>
+                <p className="text-xs opacity-90 mb-2">by {recipeOfWeek.mamaName}</p>
+                <div className="flex items-center gap-3 text-xs">
                   <div className="flex items-center gap-1">
-                    <Clock size={16} />
+                    <Clock size={14} />
                     <span>{recipeOfWeek.cookingTime}</span>
                   </div>
                   <div className="flex items-center gap-1">
-                    <Heart size={16} />
+                    <Heart size={14} />
                     <span>{recipeOfWeek.difficulty}</span>
                   </div>
                 </div>
                 <button 
                   onClick={() => handleRecipeClick(recipeOfWeek)}
-                  className="mt-4 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-lg font-heading font-medium hover:bg-white/30 transition-all duration-200"
+                  className="mt-3 bg-white/20 backdrop-blur-sm px-3 py-1.5 rounded-lg text-xs font-heading font-medium hover:bg-white/30 transition-all duration-200"
                 >
                   Cook This Week's Special
                 </button>
@@ -137,70 +144,114 @@ const Recipes = () => {
           />
         </div>
 
-        {/* Category Chips */}
-        <div className="flex gap-2 overflow-x-auto pb-2 mb-6">
-          {categories.map((category) => (
-            <Badge
-              key={category}
-              variant={selectedCategory === category ? "default" : "outline"}
-              className={`cursor-pointer whitespace-nowrap transition-all duration-200 hover-scale ${
-                selectedCategory === category
-                  ? 'bg-gradient-primary text-white shadow-glow'
-                  : 'hover:bg-primary/10'
-              }`}
-              onClick={() => setSelectedCategory(category)}
-            >
-              {category}
-            </Badge>
-          ))}
-        </div>
+        {/* Category Chips - Only show when not searching */}
+        {!searchQuery && (
+          <div className="flex gap-2 overflow-x-auto pb-2 mb-6">
+            {categories.map((category) => (
+              <Badge
+                key={category}
+                variant={selectedCategory === category ? "default" : "outline"}
+                className={`cursor-pointer whitespace-nowrap transition-all duration-200 hover-scale ${
+                  selectedCategory === category
+                    ? 'bg-slate-800 text-white shadow-lg'
+                    : 'hover:bg-slate-100'
+                }`}
+                onClick={() => setSelectedCategory(category)}
+              >
+                {category}
+              </Badge>
+            ))}
+          </div>
+        )}
 
-        {/* Main Content - 3D Card Stack */}
+        {/* Main Content */}
         <div className="flex-1">
-          {searchQuery && (
-            <div className="mb-4">
-              <p className="text-muted-foreground">
-                {stackRecipes.length} result{stackRecipes.length !== 1 ? 's' : ''} for "{searchQuery}"
-              </p>
-            </div>
-          )}
-
-          {stackRecipes.length > 0 ? (
+          {searchQuery ? (
+            /* Search Results Mode */
             <div>
-              <h3 className="font-heading font-bold text-xl text-foreground mb-4 flex items-center gap-2">
-                <span className="text-xl">
-                  {selectedCategory === 'All' ? '✨' :
-                   selectedCategory === 'Meat' ? '🥩' : 
-                   selectedCategory === 'Fish' ? '🐟' : 
-                   selectedCategory === 'Rice/Pasta' ? '🍝' : '🍰'}
-                </span>
-                {selectedCategory === 'All' ? 'Featured' : selectedCategory} Recipes
-                <span className="text-sm text-muted-foreground font-normal">
-                  ({stackRecipes.length})
-                </span>
-              </h3>
-              <RecipeCardStack
-                recipes={stackRecipes}
-                onLike={handleLikeRecipe}
-                onDislike={handleDislikeRecipe}
-                onTap={handleRecipeClick}
-              />
-            </div>
-          ) : (
-            <div className="h-full flex items-center justify-center">
-              <div className="text-center max-w-sm">
-                <span className="text-6xl mb-4 block">🍽️</span>
-                <h3 className="font-heading font-bold text-xl text-foreground mb-2">
-                  No recipes found
+              <div className="mb-4">
+                <h3 className="font-heading font-bold text-xl text-slate-800 mb-2">
+                  Search Results
                 </h3>
-                <p className="text-muted-foreground font-handwritten">
-                  {searchQuery 
-                    ? "No recipes found matching your search. Try different keywords!"
-                    : selectedCategory === 'All' 
-                      ? "No recipes available right now."
-                      : `No ${selectedCategory.toLowerCase()} recipes available yet.`}
+                <p className="text-slate-600">
+                  {stackRecipes.length} result{stackRecipes.length !== 1 ? 's' : ''} for "{searchQuery}"
                 </p>
               </div>
+              
+              {stackRecipes.length > 0 ? (
+                <div className="grid gap-4">
+                  {stackRecipes.map((recipe) => (
+                    <div 
+                      key={recipe.id}
+                      onClick={() => handleRecipeClick(recipe)}
+                      className="bg-white rounded-xl p-4 shadow-md hover:shadow-lg cursor-pointer transition-all duration-200 border border-slate-100"
+                    >
+                      <h4 className="font-heading font-bold text-lg text-slate-800 mb-1">{recipe.title}</h4>
+                      <p className="text-slate-600 text-sm mb-2">by {recipe.mamaName}</p>
+                      <div className="flex items-center gap-4 text-sm text-slate-500">
+                        <div className="flex items-center gap-1">
+                          <Clock size={14} />
+                          <span>{recipe.cookingTime}</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Heart size={14} />
+                          <span>{recipe.difficulty}</span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <span className="text-6xl mb-4 block">🔍</span>
+                  <h3 className="font-heading font-bold text-xl text-slate-800 mb-2">
+                    No recipes found
+                  </h3>
+                  <p className="text-slate-600">
+                    No recipes found matching your search. Try different keywords!
+                  </p>
+                </div>
+              )}
+            </div>
+          ) : (
+            /* Category Browsing Mode - 3D Card Stack */
+            <div>
+              {stackRecipes.length > 0 ? (
+                <div>
+                  <h3 className="font-heading font-bold text-xl text-slate-800 mb-4 flex items-center gap-2">
+                    <span className="text-xl">
+                      {selectedCategory === 'All' ? '✨' :
+                       selectedCategory === 'Meat' ? '🥩' : 
+                       selectedCategory === 'Fish' ? '🐟' : 
+                       selectedCategory === 'Rice/Pasta' ? '🍝' : '🍰'}
+                    </span>
+                    {selectedCategory === 'All' ? 'Featured' : selectedCategory} Recipes
+                    <span className="text-sm text-slate-500 font-normal">
+                      ({stackRecipes.length})
+                    </span>
+                  </h3>
+                  <RecipeCardStack
+                    recipes={stackRecipes}
+                    onLike={handleLikeRecipe}
+                    onDislike={handleDislikeRecipe}
+                    onTap={handleRecipeClick}
+                  />
+                </div>
+              ) : (
+                <div className="h-full flex items-center justify-center">
+                  <div className="text-center max-w-sm">
+                    <span className="text-6xl mb-4 block">🍽️</span>
+                    <h3 className="font-heading font-bold text-xl text-slate-800 mb-2">
+                      No recipes found
+                    </h3>
+                    <p className="text-slate-600 font-handwritten">
+                      {selectedCategory === 'All' 
+                        ? "No recipes available right now."
+                        : `No ${selectedCategory.toLowerCase()} recipes available yet.`}
+                    </p>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>
