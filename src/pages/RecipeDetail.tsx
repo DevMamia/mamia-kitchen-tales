@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Clock, Users, ChefHat, Plus, Minus, ShoppingCart, Timer } from 'lucide-react';
+import { ArrowLeft, Clock, Users, ChefHat, Plus, Minus, ShoppingCart, Timer, Sparkles, Heart } from 'lucide-react';
 import { recipes } from '@/data/recipes';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const RecipeDetail = () => {
   const { recipeId } = useParams();
@@ -95,10 +96,10 @@ const RecipeDetail = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Hero Section */}
-      <div className="relative h-64 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-black/60"></div>
+    <div className="min-h-screen bg-gradient-subtle">
+      {/* Enhanced Hero Section */}
+      <div className="relative h-80 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/10 to-black/70"></div>
         <img 
           src={recipe.image} 
           alt={recipe.title}
@@ -106,180 +107,234 @@ const RecipeDetail = () => {
         />
         
         {/* Header Controls */}
-        <div className="absolute top-4 left-4 right-4 flex items-center justify-between">
+        <div className="absolute top-6 left-6 right-6 flex items-center justify-between">
           <button 
             onClick={() => navigate(-1)}
-            className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/30 transition-colors"
+            className="w-12 h-12 bg-white/15 backdrop-blur-md rounded-full flex items-center justify-center text-white hover:bg-white/25 transition-all duration-200 shadow-elegant"
           >
-            <ArrowLeft size={20} />
+            <ArrowLeft size={22} />
+          </button>
+          <button className="w-12 h-12 bg-white/15 backdrop-blur-md rounded-full flex items-center justify-center text-white hover:bg-white/25 transition-all duration-200 shadow-elegant">
+            <Heart size={20} />
           </button>
         </div>
 
-        {/* Recipe Info Overlay */}
-        <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
-          <div className="flex items-center gap-2 mb-2">
-            <span className="text-2xl">{recipe.mamaEmoji}</span>
-            <span className="text-sm opacity-90">by {recipe.mamaName}</span>
-          </div>
-          <h1 className="font-heading font-bold text-3xl mb-4">{recipe.title}</h1>
-          
-          {/* Stats */}
-          <div className="flex gap-3">
-            <div className="bg-white/20 backdrop-blur-sm rounded-lg px-3 py-2 flex items-center gap-1">
-              <Clock size={16} />
-              <span className="text-sm font-medium">{recipe.cookingTime}</span>
-            </div>
-            <div className="bg-white/20 backdrop-blur-sm rounded-lg px-3 py-2 flex items-center gap-1">
-              <Users size={16} />
-              <span className="text-sm font-medium">{recipe.servings} servings</span>
-            </div>
-            <div className="bg-white/20 backdrop-blur-sm rounded-lg px-3 py-2 flex items-center gap-1">
-              <ChefHat size={16} />
-              <span className="text-sm font-medium">{recipe.difficulty}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Description */}
-      <div className="p-6 bg-white">
-        <p className="text-muted-foreground leading-relaxed font-handwritten text-lg">
-          {recipe.description}
-        </p>
-      </div>
-
-      {/* Sticky Tab Navigation */}
-      <div className={`sticky top-0 z-10 bg-white border-b transition-all duration-200 ${
-        isSticky ? 'shadow-md' : ''
-      }`}>
-        <div className="p-4">
-          <div className="bg-muted rounded-lg p-1 flex">
-            <button
-              onClick={() => setActiveTab('ingredients')}
-              className={`flex-1 py-2 px-4 rounded-md font-heading font-bold text-sm transition-all duration-200 ${
-                activeTab === 'ingredients'
-                  ? 'bg-white text-foreground shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              Ingredients
-            </button>
-            <button
-              onClick={() => setActiveTab('instructions')}
-              className={`flex-1 py-2 px-4 rounded-md font-heading font-bold text-sm transition-all duration-200 ${
-                activeTab === 'instructions'
-                  ? 'bg-white text-foreground shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              Instructions
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Content */}
-      <div className="px-6 py-4 pb-24">
-        {activeTab === 'ingredients' && (
-          <div className="space-y-6">
-            {/* Serving Adjuster */}
-            <div className="bg-white rounded-xl p-4 shadow-warm">
-              <div className="flex items-center justify-between">
-                <span className="font-heading font-bold text-foreground">Servings</span>
-                <div className="flex items-center gap-3">
-                  <button
-                    onClick={() => setServings(Math.max(1, servings - 1))}
-                    className="w-8 h-8 bg-muted rounded-full flex items-center justify-center hover:bg-muted/80 transition-colors"
-                  >
-                    <Minus size={16} />
-                  </button>
-                  <span className="font-heading font-bold text-xl w-8 text-center">{servings}</span>
-                  <button
-                    onClick={() => setServings(servings + 1)}
-                    className="w-8 h-8 bg-muted rounded-full flex items-center justify-center hover:bg-muted/80 transition-colors"
-                  >
-                    <Plus size={16} />
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* Ingredients List */}
-            <div className="space-y-3">
-              {adjustedIngredients.map((ingredient, index) => (
-                <div key={index} className="flex items-center gap-3 p-3 bg-white rounded-lg shadow-sm">
-                  <button
-                    onClick={() => toggleIngredient(index)}
-                    className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all duration-200 ${
-                      checkedIngredients.has(index)
-                        ? 'bg-primary border-primary text-primary-foreground'
-                        : 'border-muted-foreground/30 hover:border-primary'
-                    }`}
-                  >
-                    {checkedIngredients.has(index) && (
-                      <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-                        <polyline points="20,6 9,17 4,12"></polyline>
-                      </svg>
-                    )}
-                  </button>
-                  <span className={`flex-1 transition-all duration-200 ${
-                    checkedIngredients.has(index) 
-                      ? 'text-muted-foreground line-through' 
-                      : 'text-foreground'
-                  }`}>
-                    {ingredient}
-                  </span>
-                </div>
-              ))}
-            </div>
-
-            {/* Add to Shopping List */}
-            <button className="w-full bg-white border-2 border-primary text-primary font-heading font-bold py-3 rounded-xl hover:bg-primary hover:text-primary-foreground transition-all duration-200 flex items-center justify-center gap-2">
-              <ShoppingCart size={20} />
-              Add to Shopping List
-            </button>
-          </div>
-        )}
-
-        {activeTab === 'instructions' && (
-          <div className="space-y-6">
-            {/* Instructions */}
-            <div className="space-y-6">
-              {recipe.instructions.map((instruction, index) => 
-                renderInstructions(instruction, index)
+        {/* Enhanced Recipe Info Overlay */}
+        <div className="absolute bottom-0 left-0 right-0 p-8 text-white">
+          <div className="flex items-center gap-3 mb-3">
+            <span className="text-3xl">{recipe.mamaEmoji}</span>
+            <div>
+              <span className="text-sm font-medium opacity-90 block">by {recipe.mamaName}</span>
+              {recipe.difficulty_explanation && (
+                <span className="text-xs opacity-75">{recipe.difficulty}</span>
               )}
             </div>
-
-            {/* Mama's Tips */}
-            {recipe.voiceTips && recipe.voiceTips.length > 0 && (
-              <div className="bg-gradient-to-br from-amber-50 to-orange-50 border-l-4 border-primary rounded-lg p-4 mt-8">
-                <h3 className="font-handwritten text-lg text-primary font-bold mb-2">
-                  {recipe.mamaName}'s Tips
-                </h3>
-                <ul className="space-y-2 font-handwritten text-foreground">
-                  {recipe.voiceTips.map((tip, index) => (
-                    <li key={index}>• {tip}</li>
-                  ))}
-                </ul>
-                <p className="text-right mt-3 font-handwritten text-primary/70 italic">
-                  — With love, {recipe.mamaName}
-                </p>
-              </div>
-            )}
           </div>
-        )}
+          <h1 className="font-heading font-bold text-4xl md:text-5xl mb-6 leading-tight">{recipe.title}</h1>
+          
+          {/* Enhanced Stats */}
+          <div className="flex gap-4 flex-wrap">
+            <div className="bg-white/15 backdrop-blur-md rounded-2xl px-4 py-3 flex items-center gap-2 shadow-glow">
+              <Clock size={18} className="text-primary-glow" />
+              <span className="text-sm font-semibold">{recipe.cookingTime}</span>
+            </div>
+            <div className="bg-white/15 backdrop-blur-md rounded-2xl px-4 py-3 flex items-center gap-2 shadow-glow">
+              <Users size={18} className="text-primary-glow" />
+              <span className="text-sm font-semibold">{recipe.servings} servings</span>
+            </div>
+            <div className="bg-white/15 backdrop-blur-md rounded-2xl px-4 py-3 flex items-center gap-2 shadow-glow">
+              <ChefHat size={18} className="text-primary-glow" />
+              <span className="text-sm font-semibold">{recipe.difficulty}</span>
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* Fixed Bottom Button */}
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t">
+      {/* Enhanced Description Card */}
+      <div className="mx-6 -mt-8 relative z-10">
+        <div className="bg-white rounded-3xl p-8 shadow-elegant">
+          <p className="text-muted-foreground leading-relaxed text-lg font-medium mb-4">
+            {recipe.description}
+          </p>
+          {recipe.difficulty_explanation && (
+            <div className="flex items-start gap-3 p-4 bg-gradient-subtle rounded-2xl">
+              <Sparkles size={20} className="text-primary mt-1 flex-shrink-0" />
+              <div>
+                <p className="text-sm font-semibold text-foreground mb-1">Why {recipe.difficulty}?</p>
+                <p className="text-sm text-muted-foreground">{recipe.difficulty_explanation}</p>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Enhanced Tabs Section */}
+      <div className="px-6 pt-8">
+        <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'ingredients' | 'instructions')}>
+          <div className={`sticky top-0 z-20 bg-gradient-subtle py-4 transition-all duration-300 ${
+            isSticky ? 'shadow-md backdrop-blur-md bg-white/95' : ''
+          }`}>
+            <TabsList className="w-full h-14 p-2 bg-white rounded-2xl shadow-elegant">
+              <TabsTrigger 
+                value="ingredients" 
+                className="flex-1 h-10 rounded-xl font-heading font-bold text-base data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-glow transition-all duration-200"
+              >
+                Ingredients
+              </TabsTrigger>
+              <TabsTrigger 
+                value="instructions" 
+                className="flex-1 h-10 rounded-xl font-heading font-bold text-base data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-glow transition-all duration-200"
+              >
+                Instructions
+              </TabsTrigger>
+            </TabsList>
+          </div>
+
+          <div className="pt-6 pb-32">
+            <TabsContent value="ingredients" className="space-y-8 mt-0">
+              {/* Enhanced Serving Adjuster */}
+              <div className="bg-white rounded-3xl p-6 shadow-elegant">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="font-heading font-bold text-lg text-foreground">Adjust Servings</h3>
+                    <p className="text-sm text-muted-foreground">Recipe serves {recipe.servings} by default</p>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <button
+                      onClick={() => setServings(Math.max(1, servings - 1))}
+                      className="w-12 h-12 bg-gradient-subtle rounded-full flex items-center justify-center hover:bg-primary hover:text-primary-foreground transition-all duration-200 shadow-elegant"
+                    >
+                      <Minus size={18} />
+                    </button>
+                    <span className="font-heading font-bold text-2xl w-12 text-center text-primary">{servings}</span>
+                    <button
+                      onClick={() => setServings(servings + 1)}
+                      className="w-12 h-12 bg-gradient-subtle rounded-full flex items-center justify-center hover:bg-primary hover:text-primary-foreground transition-all duration-200 shadow-elegant"
+                    >
+                      <Plus size={18} />
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Enhanced Ingredients List */}
+              <div className="bg-white rounded-3xl p-6 shadow-elegant">
+                <h3 className="font-heading font-bold text-xl text-foreground mb-6">Ingredients</h3>
+                <div className="space-y-4">
+                  {adjustedIngredients.map((ingredient, index) => (
+                    <div key={index} className="flex items-center gap-4 p-4 bg-gradient-subtle rounded-2xl hover:shadow-sm transition-all duration-200">
+                      <button
+                        onClick={() => toggleIngredient(index)}
+                        className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all duration-200 ${
+                          checkedIngredients.has(index)
+                            ? 'bg-primary border-primary text-primary-foreground shadow-glow'
+                            : 'border-muted-foreground/30 hover:border-primary hover:shadow-sm'
+                        }`}
+                      >
+                        {checkedIngredients.has(index) && (
+                          <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                            <polyline points="20,6 9,17 4,12"></polyline>
+                          </svg>
+                        )}
+                      </button>
+                      <span className={`flex-1 font-medium transition-all duration-200 ${
+                        checkedIngredients.has(index) 
+                          ? 'text-muted-foreground line-through' 
+                          : 'text-foreground'
+                      }`}>
+                        {ingredient}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Enhanced Shopping List Button */}
+              <button className="w-full bg-white border-2 border-primary text-primary font-heading font-bold py-4 rounded-2xl hover:bg-primary hover:text-primary-foreground transition-all duration-200 flex items-center justify-center gap-3 shadow-elegant hover:shadow-glow">
+                <ShoppingCart size={22} />
+                Add to Shopping List
+              </button>
+            </TabsContent>
+
+            <TabsContent value="instructions" className="space-y-8 mt-0">
+              {/* Enhanced Instructions */}
+              <div className="bg-white rounded-3xl p-6 shadow-elegant">
+                <h3 className="font-heading font-bold text-xl text-foreground mb-6">Cooking Steps</h3>
+                <div className="space-y-8">
+                  {recipe.instructions.map((instruction, index) => (
+                    <div key={index} className="flex gap-6">
+                      <div className="w-12 h-12 bg-gradient-primary rounded-full flex items-center justify-center text-primary-foreground font-bold text-lg flex-shrink-0 shadow-glow">
+                        {index + 1}
+                      </div>
+                      <div className="flex-1 pt-2">
+                        <p className="text-foreground leading-relaxed font-medium text-lg">
+                          {instruction.split(/(\d+\s*(?:minutes?|mins?|hours?|hrs?))/gi).map((part, i) => 
+                            /\d+\s*(?:minutes?|mins?|hours?|hrs?)/gi.test(part) ? (
+                              <span key={i} className="inline-flex items-center gap-2 bg-primary/10 text-primary px-3 py-1.5 rounded-lg font-semibold mx-1">
+                                <Timer size={16} />
+                                {part}
+                              </span>
+                            ) : part
+                          )}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Enhanced Mama's Tips */}
+              {recipe.voiceTips && recipe.voiceTips.length > 0 && (
+                <div className="bg-gradient-to-br from-amber-50 to-orange-50 border-l-4 border-primary rounded-3xl p-8 shadow-elegant">
+                  <div className="flex items-center gap-3 mb-4">
+                    <span className="text-3xl">{recipe.mamaEmoji}</span>
+                    <h3 className="font-heading text-xl text-primary font-bold">
+                      {recipe.mamaName}'s Secret Tips
+                    </h3>
+                  </div>
+                  <div className="space-y-3">
+                    {recipe.voiceTips.map((tip, index) => (
+                      <div key={index} className="flex items-start gap-3">
+                        <Sparkles size={16} className="text-primary mt-1 flex-shrink-0" />
+                        <p className="text-foreground font-medium leading-relaxed">{tip}</p>
+                      </div>
+                    ))}
+                  </div>
+                  <p className="text-right mt-6 font-handwritten text-primary/70 italic text-lg">
+                    — With love, {recipe.mamaName}
+                  </p>
+                </div>
+              )}
+
+              {/* Cooking Tips */}
+              {recipe.cookingTips && recipe.cookingTips.length > 0 && (
+                <div className="bg-white rounded-3xl p-6 shadow-elegant">
+                  <h3 className="font-heading font-bold text-lg text-foreground mb-4">Pro Tips</h3>
+                  <div className="space-y-3">
+                    {recipe.cookingTips.map((tip, index) => (
+                      <div key={index} className="flex items-start gap-3 p-3 bg-gradient-subtle rounded-2xl">
+                        <ChefHat size={16} className="text-primary mt-1 flex-shrink-0" />
+                        <p className="text-sm text-muted-foreground">{tip}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </TabsContent>
+          </div>
+        </Tabs>
+      </div>
+
+      {/* Enhanced Fixed Bottom Button */}
+      <div className="fixed bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-white via-white to-transparent">
         <button
           onClick={handleStartCooking}
-          className="w-full bg-primary text-primary-foreground font-heading font-bold py-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center gap-3 gentle-pulse"
+          className="w-full bg-gradient-primary text-primary-foreground font-heading font-bold py-5 rounded-2xl shadow-glow hover:shadow-xl transition-all duration-200 flex items-center justify-center gap-4 gentle-pulse"
         >
-          <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
-            <span className="text-lg">{recipe.mamaEmoji}</span>
+          <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
+            <span className="text-xl">{recipe.mamaEmoji}</span>
           </div>
-          <span>Start Cooking with {recipe.mamaName.split(' ')[0]}</span>
+          <span className="text-lg">Start Cooking with {recipe.mamaName.split(' ')[0]}</span>
         </button>
       </div>
     </div>
