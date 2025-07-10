@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Clock, Users, ChefHat, Plus, Minus, ShoppingCart, Timer } from 'lucide-react';
 import { recipes } from '@/data/recipes';
+import { getMamaById } from '@/data/mamas';
 
 const RecipeDetail = () => {
   const { recipeId } = useParams();
@@ -12,6 +13,7 @@ const RecipeDetail = () => {
   const [isSticky, setIsSticky] = useState(false);
 
   const recipe = recipes.find(r => r.id === recipeId);
+  const mama = recipe ? getMamaById(recipe.mamaId) : null;
 
   useEffect(() => {
     if (recipe) {
@@ -148,6 +150,23 @@ const RecipeDetail = () => {
         </p>
       </div>
 
+      {/* Start Cooking Button */}
+      <div className="px-6 pb-6 bg-white">
+        <button
+          onClick={handleStartCooking}
+          className={`w-full ${mama?.country === 'Italy' ? 'bg-gradient-to-r from-italian-marble to-italian-marble-warm' : 
+                     mama?.country === 'Mexico' ? 'bg-gradient-to-r from-mexican-tile to-mexican-tile-warm' :
+                     'bg-gradient-to-r from-thai-silk to-thai-silk-warm'} 
+                   text-white font-heading font-bold py-4 px-6 rounded-xl shadow-warm hover:shadow-elegant transition-all duration-300 
+                   flex items-center justify-center gap-3`}
+        >
+          <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
+            <span className="text-xl">{recipe.mamaEmoji}</span>
+          </div>
+          <span className="text-lg">Let's cook together with {recipe.mamaName.split(' ')[0]}!</span>
+        </button>
+      </div>
+
       {/* Sticky Tab Navigation */}
       <div className={`sticky top-0 z-10 bg-white border-b transition-all duration-200 ${
         isSticky ? 'shadow-md' : ''
@@ -179,7 +198,7 @@ const RecipeDetail = () => {
       </div>
 
       {/* Content */}
-      <div className="px-6 py-4 pb-24">
+      <div className="px-6 py-4">
         {activeTab === 'ingredients' && (
           <div className="space-y-6">
             {/* Serving Adjuster */}
@@ -270,18 +289,6 @@ const RecipeDetail = () => {
         )}
       </div>
 
-      {/* Fixed Bottom Button */}
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t">
-        <button
-          onClick={handleStartCooking}
-          className="w-full bg-primary text-primary-foreground font-heading font-bold py-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center gap-3 gentle-pulse"
-        >
-          <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
-            <span className="text-lg">{recipe.mamaEmoji}</span>
-          </div>
-          <span>Start Cooking with {recipe.mamaName.split(' ')[0]}</span>
-        </button>
-      </div>
     </div>
   );
 };
