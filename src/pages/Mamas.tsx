@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Carousel, CarouselContent, CarouselItem, CarouselApi } from '@/components/ui/carousel';
 import { Wine, Flower2, Leaf, ChefHat } from 'lucide-react';
 
@@ -49,6 +50,7 @@ const mamas = [
 ];
 
 const Mamas = () => {
+  const navigate = useNavigate();
   const [api, setApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
 
@@ -146,7 +148,10 @@ const Mamas = () => {
                         {/* Bottom Section */}
                         <div>
                           {/* CTA Button */}
-                          <button className="w-full bg-white text-gray-800 font-heading font-bold py-3 px-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 mb-3 flex items-center justify-center gap-2">
+                          <button 
+                            onClick={() => navigate(`/mama/${mama.id}`)}
+                            className="w-full bg-white text-gray-800 font-heading font-bold py-3 px-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 mb-3 flex items-center justify-center gap-2"
+                          >
                             <span>📖</span>
                             <span>Open {mama.name.split(' ')[0]}'s Cookbook</span>
                           </button>
