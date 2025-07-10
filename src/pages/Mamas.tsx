@@ -65,8 +65,7 @@ const Mamas = () => {
   }, [api]);
 
   return (
-    <div className="h-full flex flex-col">
-
+    <div className="h-full flex flex-col pb-4">
       <div className="flex-1 relative">
         <Carousel
           setApi={setApi}
@@ -76,7 +75,7 @@ const Mamas = () => {
             loop: true,
           }}
         >
-          <CarouselContent className="h-[60vh] min-h-[500px]">
+          <CarouselContent className="h-[50vh] max-h-[400px] min-h-[350px]">
             {mamas.map((mama) => {
               const WatermarkIcon = mama.watermark;
               return (
@@ -178,7 +177,7 @@ const Mamas = () => {
         </Carousel>
 
         {/* Progress dots */}
-        <div className="flex justify-center gap-2 mt-6">
+        <div className="flex justify-center gap-2 mt-4">
           {mamas.map((_, index) => (
             <button
               key={index}
