@@ -71,25 +71,27 @@ const RecipeDetail = () => {
   };
 
   const renderInstructions = (instruction: string, index: number) => {
-    // Highlight timer text in instructions
+    // Extract timer text from instructions
     const timerRegex = /(\d+\s*(?:minutes?|mins?|hours?|hrs?))/gi;
-    const parts = instruction.split(timerRegex);
+    const timerMatch = instruction.match(timerRegex);
+    const cleanInstruction = instruction.replace(timerRegex, '').trim();
     
     return (
       <div key={index} className="flex gap-4 mb-6">
-        <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-primary-foreground font-bold text-sm flex-shrink-0 mt-1">
-          {index + 1}
+        <div className="relative">
+          <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-primary-foreground font-bold text-sm flex-shrink-0 mt-1">
+            {index + 1}
+          </div>
+          {timerMatch && (
+            <div className="absolute -right-2 top-10 text-xs text-muted-foreground bg-muted px-2 py-1 rounded-md whitespace-nowrap">
+              <Timer size={12} className="inline mr-1" />
+              {timerMatch[0]}
+            </div>
+          )}
         </div>
         <div className="flex-1">
           <p className="text-foreground leading-relaxed">
-            {parts.map((part, i) => 
-              timerRegex.test(part) ? (
-                <span key={i} className="inline-flex items-center gap-1 bg-primary/10 text-primary px-2 py-1 rounded-md font-medium">
-                  <Timer size={14} />
-                  {part}
-                </span>
-              ) : part
-            )}
+            {cleanInstruction}
           </p>
         </div>
       </div>

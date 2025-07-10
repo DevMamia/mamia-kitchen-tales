@@ -100,17 +100,17 @@ export const recipes: Recipe[] = [
       '1/4 cup fresh Italian parsley, chopped for garnish'
     ],
     instructions: [
-      'Season chicken pieces generously with salt and pepper, let stand 10 minutes at room temperature',
-      'Heat olive oil in a heavy-bottomed Dutch oven or braiser over medium-high heat until shimmering (about 350°F/175°C)',
-      'Brown chicken pieces skin-side down first, 4-5 minutes per side until golden. Work in batches if needed. Transfer to a plate.',
-      'Reduce heat to medium. Add onions to the same pan with the fond, cook 5-7 minutes until softened and beginning to caramelize',
-      'Add bell peppers and mushrooms, cook 5-6 minutes until peppers soften and mushrooms release their moisture',
-      'Add minced garlic, cook 30 seconds until fragrant (don\'t let it burn)',
-      'Pour in white wine, scraping up any browned bits. Let simmer 2-3 minutes until alcohol evaporates',
-      'Add crushed tomatoes, rosemary, sage, and bay leaves. Season with 1 tsp salt and 1/2 tsp pepper',
+      'Season chicken pieces generously with salt and pepper, let stand at room temperature',
+      'Heat olive oil in a heavy-bottomed Dutch oven over medium-high heat until shimmering',
+      'Brown chicken pieces skin-side down first until golden. Work in batches if needed. Transfer to a plate.',
+      'Reduce heat to medium. Add onions to the same pan, cook until softened and beginning to caramelize',
+      'Add bell peppers and mushrooms, cook until peppers soften and mushrooms release their moisture',
+      'Add minced garlic, cook until fragrant',
+      'Pour in white wine, scraping up any browned bits. Let simmer until alcohol evaporates',
+      'Add crushed tomatoes, rosemary, sage, and bay leaves. Season with salt and pepper',
       'Return chicken to pot, nestling pieces into the sauce. Bring to a gentle simmer',
-      'Cover and cook 25-30 minutes until chicken is fork-tender and internal temperature reaches 165°F (74°C)',
-      'Remove bay leaves and herb sprigs. Taste and adjust seasoning with salt and pepper',
+      'Cover and cook until chicken is fork-tender and internal temperature reaches 165°F',
+      'Remove bay leaves and herb sprigs. Taste and adjust seasoning',
       'Garnish with fresh parsley and serve immediately with crusty bread or over creamy polenta'
     ],
     servings: 4,
@@ -120,13 +120,8 @@ export const recipes: Recipe[] = [
     culturalContext: 'This rustic dish originated with Italian hunters who cooked whatever they caught with foraged mushrooms and vegetables.',
     voiceIntro: 'Eccolo! Today we hunt for flavor like the old hunters in Tuscany. Every bubble tells a story.',
     voiceTips: [
-      'Listen, caro - the chicken must sing when it hits the hot oil. If it doesn\'t sizzle, the pan isn\'t ready!',
-      'Don\'t move the chicken too soon - let it get that beautiful golden crust, like my papa\'s weathered hands',
-      'When you add the wine, tilt the pan away from you - we want the aroma, not singed eyebrows!',
-      'The vegetables should soften slowly, like hearts opening to love. Patience makes everything sweeter',
-      'If the sauce gets too thick, add a splash of chicken broth - thin like friendship, rich like family',
-      'Taste the sauce with a piece of bread - this is how we judge everything in my kitchen',
-      'The herbs should smell like a walk through the hillside after rain. Fresh is everything, tesoro!'
+      'Hunters used to cook whatever they caught with foraged mushrooms and vegetables from the forest',
+      'The key to cacciatore is patience - let each ingredient build flavor slowly, like a good story'
     ],
     subsNote: 'No San Marzano tomatoes? Use the best canned tomatoes you can find. For mushrooms, try porcini if available. Bone-in thighs work wonderfully too.',
     voiceEnabled: true
@@ -153,12 +148,12 @@ export const recipes: Recipe[] = [
       '1 tsp kosher salt for pasta water'
     ],
     instructions: [
-      'Bring a large pot of water to rolling boil. Add 1 tsp salt per liter of water - it should taste like mild seawater',
-      'Meanwhile, place diced guanciale in a large cold pan. Cook over medium-low heat 8-10 minutes, stirring occasionally, until golden and crispy',
-      'In a mixing bowl, whisk egg yolks with grated Pecorino Romano and black pepper until well combined. Set aside at room temperature',
-      'Cook spaghetti according to package directions minus 1 minute for al dente texture. Reserve 1 cup hot pasta cooking water before draining',
-      'Remove guanciale pan from heat. Immediately add drained hot pasta to the guanciale, tossing vigorously to coat with rendered fat',
-      'Working quickly off heat, add egg-cheese mixture while tossing continuously. Gradually add pasta water, 2-3 tablespoons at a time, until sauce becomes silky and coats each strand',
+      'Bring a large pot of water to rolling boil. Add salt - it should taste like mild seawater',
+      'Meanwhile, place diced guanciale in a large cold pan. Cook over medium-low heat, stirring occasionally, until golden and crispy',
+      'In a mixing bowl, whisk egg yolks with grated Pecorino Romano and black pepper until well combined',
+      'Cook spaghetti according to package directions minus 1 minute for al dente texture. Reserve hot pasta cooking water before draining',
+      'Remove guanciale pan from heat. Add drained hot pasta to the guanciale, tossing vigorously to coat with rendered fat',
+      'Working quickly off heat, add egg-cheese mixture while tossing continuously. Gradually add pasta water until sauce becomes silky',
       'Taste and adjust with more Pecorino, pepper, or pasta water as needed. Serve immediately with extra cheese and black pepper'
     ],
     servings: 4,
@@ -169,13 +164,8 @@ export const recipes: Recipe[] = [
     featured: true,
     voiceIntro: 'Ascolta bene - no cream in my carbonara! Only eggs, cheese, guanciale, and amore. This is Roma on a plate.',
     voiceTips: [
-      'Cold pan for guanciale - we want to render the fat slowly, like patience building character',
-      'The pasta water is liquid gold - save it before you drain! It binds the sauce like magic',
-      'Room temperature eggs won\'t scramble as easily - take them out 30 minutes before cooking',
-      'Toss, toss, toss! Motion prevents scrambling and creates the silk we want',
-      'If it gets too thick, more pasta water. Too thin? More cheese. Cooking is conversation, tesoro',
-      'The pan must be off the heat when you add eggs - we\'re making carbonara, not scrambled eggs!',
-      'Serve immediately in warmed bowls - carbonara waits for no one, not even the pope!'
+      'True Roman carbonara never has cream - it was invented by charcoal workers using simple ingredients',
+      'The secret is pasta water - it transforms eggs and cheese into silk without scrambling'
     ],
     subsNote: 'No guanciale? Pancetta works but reduce cooking time. No Pecorino? Parmigiano-Reggiano is acceptable. The black pepper must be freshly ground - this is not optional!',
     voiceEnabled: true
