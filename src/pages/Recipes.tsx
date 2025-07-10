@@ -159,6 +159,7 @@ const Recipes = () => {
               opts={{
                 align: "start",
                 dragFree: true,
+                loop: true,
               }}
               className="w-full"
             >
