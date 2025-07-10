@@ -8,6 +8,7 @@ import { Layout } from "./components/Layout";
 import Mamas from "./pages/Mamas";
 import MamaCookbook from "./pages/MamaCookbook";
 import Recipes from "./pages/Recipes";
+import RecipeDetail from "./pages/RecipeDetail";
 import Cook from "./pages/Cook";
 import Kitchen from "./pages/Kitchen";
 import NotFound from "./pages/NotFound";
@@ -25,6 +26,7 @@ const App = () => (
             <Route path="/" element={<Mamas />} />
             <Route path="/mama/:mamaId" element={<MamaCookbook />} />
             <Route path="/recipes" element={<Recipes />} />
+            <Route path="/recipe/:recipeId" element={<RecipeDetail />} />
             <Route path="/cook" element={<Cook />} />
             <Route path="/kitchen" element={<Kitchen />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

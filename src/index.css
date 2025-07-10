@@ -79,6 +79,21 @@
     display: none;
   }
 
+  /* Recipe detail animations */
+  .recipe-fade-in {
+    animation: fade-in 0.4s ease-out;
+  }
+
+  /* Gentle pulse for CTA button */
+  @keyframes gentle-pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+  }
+
+  .gentle-pulse {
+    animation: gentle-pulse 2s ease-in-out infinite;
+  }
+
   .font-handwritten {
     font-family: 'Kalam', cursive;
   }
