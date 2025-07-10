@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Search, Heart, Clock, Star, Crown } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import { getRecipeOfWeek, getFeaturedRecipes, getRecipesByCategory, Recipe } from '@/data/recipes';
 import RecipeCardStack from '@/components/RecipeCardStack';
 import LoadingSkeleton from '@/components/LoadingSkeleton';
@@ -18,7 +19,14 @@ const Recipes = () => {
   const [stackRecipes, setStackRecipes] = useState<Recipe[]>([]);
   const [likedRecipes, setLikedRecipes] = useState<Set<string>>(new Set());
 
-  const categories = ['All', 'Meat', 'Fish', 'Vegetarian', 'Quick', 'Weekend'];
+  const categories = [
+    { id: 'All', label: 'All', emoji: '✨' },
+    { id: 'Meat', label: 'Meat', emoji: '🥩' },
+    { id: 'Fish', label: 'Fish', emoji: '🐟' },
+    { id: 'Vegetarian', label: 'Vegetarian', emoji: '🥬' },
+    { id: 'Quick', label: 'Quick', emoji: '⚡' },
+    { id: 'Weekend', label: 'Weekend', emoji: '🏠' },
+  ];
 
   useEffect(() => {
     // Simulate loading time
@@ -144,23 +152,36 @@ const Recipes = () => {
           />
         </div>
 
-        {/* Category Chips - Only show when not searching */}
+        {/* Category Carousel - Only show when not searching */}
         {!searchQuery && (
-          <div className="flex gap-2 overflow-x-auto pb-2 mb-6">
-            {categories.map((category) => (
-              <Badge
-                key={category}
-                variant={selectedCategory === category ? "default" : "outline"}
-                className={`cursor-pointer whitespace-nowrap transition-all duration-200 hover-scale ${
-                  selectedCategory === category
-                    ? 'bg-slate-800 text-white shadow-lg'
-                    : 'hover:bg-slate-100'
-                }`}
-                onClick={() => setSelectedCategory(category)}
-              >
-                {category}
-              </Badge>
-            ))}
+          <div className="mb-6 relative">
+            <Carousel
+              opts={{
+                align: "start",
+                dragFree: true,
+              }}
+              className="w-full"
+            >
+              <CarouselContent className="-ml-2 md:-ml-4">
+                {categories.map((category) => (
+                  <CarouselItem key={category.id} className="pl-2 md:pl-4 basis-auto">
+                    <div
+                      className={`cursor-pointer p-4 rounded-2xl transition-all duration-300 hover-scale min-w-[120px] text-center ${
+                        selectedCategory === category.id
+                          ? 'bg-primary text-primary-foreground shadow-lg scale-105'
+                          : 'bg-card hover:bg-muted border border-border'
+                      }`}
+                      onClick={() => setSelectedCategory(category.id)}
+                    >
+                      <div className="text-2xl mb-2">{category.emoji}</div>
+                      <div className="font-medium text-sm">{category.label}</div>
+                    </div>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              <CarouselPrevious className="hidden md:flex" />
+              <CarouselNext className="hidden md:flex" />
+            </Carousel>
           </div>
         )}
 
@@ -218,18 +239,15 @@ const Recipes = () => {
             <div>
               {stackRecipes.length > 0 ? (
                 <div>
-                  <h3 className="font-heading font-bold text-xl text-slate-800 mb-4 flex items-center gap-2">
-                    <span className="text-xl">
-                      {selectedCategory === 'All' ? '✨' :
-                       selectedCategory === 'Meat' ? '🥩' : 
-                       selectedCategory === 'Fish' ? '🐟' : 
-                       selectedCategory === 'Rice/Pasta' ? '🍝' : '🍰'}
-                    </span>
-                    {selectedCategory === 'All' ? 'Featured' : selectedCategory} Recipes
-                    <span className="text-sm text-slate-500 font-normal">
-                      ({stackRecipes.length})
-                    </span>
-                  </h3>
+                   <h3 className="font-heading font-bold text-xl text-slate-800 mb-4 flex items-center gap-2">
+                     <span className="text-xl">
+                       {categories.find(cat => cat.id === selectedCategory)?.emoji || '✨'}
+                     </span>
+                     {selectedCategory === 'All' ? 'Featured' : selectedCategory} Recipes
+                     <span className="text-sm text-slate-500 font-normal">
+                       ({stackRecipes.length})
+                     </span>
+                   </h3>
                   <RecipeCardStack
                     recipes={stackRecipes}
                     onLike={handleLikeRecipe}
