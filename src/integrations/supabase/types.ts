@@ -14,7 +14,104 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          display_name: string | null
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      shopping_list_items: {
+        Row: {
+          category: string | null
+          checked: boolean
+          created_at: string
+          id: string
+          ingredient_name: string
+          quantity: string | null
+          recipe_id: string | null
+          recipe_name: string | null
+          shopping_list_id: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string | null
+          checked?: boolean
+          created_at?: string
+          id?: string
+          ingredient_name: string
+          quantity?: string | null
+          recipe_id?: string | null
+          recipe_name?: string | null
+          shopping_list_id: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string | null
+          checked?: boolean
+          created_at?: string
+          id?: string
+          ingredient_name?: string
+          quantity?: string | null
+          recipe_id?: string | null
+          recipe_name?: string | null
+          shopping_list_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shopping_list_items_shopping_list_id_fkey"
+            columns: ["shopping_list_id"]
+            isOneToOne: false
+            referencedRelation: "shopping_lists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shopping_lists: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

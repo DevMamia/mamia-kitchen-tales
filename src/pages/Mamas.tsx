@@ -2,8 +2,10 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Carousel, CarouselContent, CarouselItem, CarouselApi } from '@/components/ui/carousel';
-import { Wine, Flower2, Leaf, ChefHat } from 'lucide-react';
+import { Wine, Flower2, Leaf, ChefHat, User, LogIn } from 'lucide-react';
 import { mamas } from '@/data/mamas';
+import { useAuth } from '@/contexts/AuthContext';
+import { Button } from '@/components/ui/button';
 
 // Using mamas from centralized data
 const mamasDisplay = mamas.map(mama => ({
@@ -26,6 +28,7 @@ const mamasDisplay = mamas.map(mama => ({
 
 const Mamas = () => {
   const navigate = useNavigate();
+  const { user, signOut } = useAuth();
   const [api, setApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
 

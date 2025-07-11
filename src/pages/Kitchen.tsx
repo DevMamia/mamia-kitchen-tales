@@ -1,10 +1,51 @@
 
 import React from 'react';
-import { BookmarkCheck, Clock, Star, Plus } from 'lucide-react';
+import { BookmarkCheck, Clock, Star, Plus, LogIn } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import ShoppingListCard from '@/components/ShoppingListCard';
 
 const Kitchen = () => {
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
+
+  if (!user) {
+    return (
+      <div className="text-center py-12">
+        <div className="bg-muted/30 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+          <LogIn className="h-8 w-8 text-muted-foreground" />
+        </div>
+        <h3 className="text-lg font-heading font-semibold text-warm-brown mb-2">
+          Sign in to access your kitchen
+        </h3>
+        <p className="text-muted-foreground mb-4">
+          Save recipes, create shopping lists, and track your cooking journey
+        </p>
+        <Button onClick={() => navigate('/auth')}>
+          Sign In
+        </Button>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
+      {/* User Info & Logout */}
+      <div className="flex justify-between items-center">
+        <div>
+          <h2 className="text-xl font-heading font-bold text-warm-brown">
+            Welcome back!
+          </h2>
+          <p className="text-muted-foreground text-sm">{user.email}</p>
+        </div>
+        <Button variant="outline" size="sm" onClick={signOut}>
+          Sign Out
+        </Button>
+      </div>
+
+      {/* Shopping List Card - First Priority */}
+      <ShoppingListCard />
 
       <div className="grid gap-4">
         <div className="bg-card rounded-2xl p-6 shadow-paper border border-border">

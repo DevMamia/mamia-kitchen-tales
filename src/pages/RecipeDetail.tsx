@@ -3,6 +3,10 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Clock, Users, ChefHat, Plus, Minus, ShoppingCart, Timer } from 'lucide-react';
 import { recipes } from '@/data/recipes';
 import { getMamaById } from '@/data/mamas';
+import { Button } from '@/components/ui/button';
+import { useAuth } from '@/contexts/AuthContext';
+import { useShoppingList } from '@/contexts/ShoppingListContext';
+import ShoppingListModal from '@/components/ShoppingListModal';
 
 const RecipeDetail = () => {
   const { recipeId } = useParams();
@@ -11,6 +15,9 @@ const RecipeDetail = () => {
   const [servings, setServings] = useState(4);
   const [checkedIngredients, setCheckedIngredients] = useState<Set<number>>(new Set());
   const [isSticky, setIsSticky] = useState(false);
+  const [showShoppingModal, setShowShoppingModal] = useState(false);
+  const { user } = useAuth();
+  const { addIngredientsToShoppingList } = useShoppingList();
 
   const recipe = recipes.find(r => r.id === recipeId);
   const mama = recipe ? getMamaById(recipe.mamaId) : null;
@@ -81,6 +88,31 @@ const RecipeDetail = () => {
 
   const handleStartCooking = () => {
     navigate(`/cook/${recipe.id}`);
+  };
+
+  const getUncheckedIngredients = () => {
+    return adjustedIngredients.filter((ingredient, index) => {
+      const isSectionHeader = ingredient.trim().endsWith(':');
+      return !isSectionHeader && !checkedIngredients.has(index);
+    });
+  };
+
+  const handleAddToShoppingList = async () => {
+    if (!user) {
+      navigate('/auth');
+      return;
+    }
+
+    const uncheckedIngredients = getUncheckedIngredients();
+    if (uncheckedIngredients.length === 0) return;
+
+    await addIngredientsToShoppingList({
+      ingredients: uncheckedIngredients,
+      recipe_id: recipeId || '',
+      recipe_name: recipe?.title || 'Unknown Recipe'
+    });
+
+    setShowShoppingModal(true);
   };
 
   const renderInstructions = (instruction: string, index: number) => {
@@ -301,10 +333,20 @@ const RecipeDetail = () => {
             </div>
 
             {/* Add to Shopping List */}
-            <button className="w-full bg-white border-2 border-primary text-primary font-heading font-bold py-3 rounded-xl hover:bg-primary hover:text-primary-foreground transition-all duration-200 flex items-center justify-center gap-2">
+            <Button 
+              onClick={handleAddToShoppingList}
+              disabled={getUncheckedIngredients().length === 0}
+              className="w-full font-heading font-bold py-3 h-12 rounded-xl transition-all duration-200 flex items-center justify-center gap-2"
+              variant={getUncheckedIngredients().length > 0 ? "default" : "outline"}
+            >
               <ShoppingCart size={20} />
-              Add to Shopping List
-            </button>
+              {!user 
+                ? 'Sign In to Add to Shopping List'
+                : getUncheckedIngredients().length === 0 
+                  ? 'All Ingredients Checked'
+                  : `Add ${getUncheckedIngredients().length} Items to Shopping List`
+              }
+            </Button>
           </div>
         )}
 
@@ -338,6 +380,13 @@ const RecipeDetail = () => {
         )}
       </div>
 
+      {/* Shopping List Modal */}
+      <ShoppingListModal
+        isOpen={showShoppingModal}
+        onClose={() => setShowShoppingModal(false)}
+        addedCount={getUncheckedIngredients().length}
+        recipeName={recipe?.title || 'Unknown Recipe'}
+      />
     </div>
   );
 };
