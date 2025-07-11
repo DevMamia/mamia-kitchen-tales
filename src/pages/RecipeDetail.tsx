@@ -7,6 +7,8 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { useShoppingList } from '@/contexts/ShoppingListContext';
 import ShoppingListModal from '@/components/ShoppingListModal';
+import { QuantityCalculationService } from '@/services/quantityCalculationService';
+import { IngredientAnimation } from '@/components/CelebrationEffects';
 
 const RecipeDetail = () => {
   const { recipeId } = useParams();
@@ -16,6 +18,12 @@ const RecipeDetail = () => {
   const [checkedIngredients, setCheckedIngredients] = useState<Set<number>>(new Set());
   const [isSticky, setIsSticky] = useState(false);
   const [showShoppingModal, setShowShoppingModal] = useState(false);
+  const [ingredientAnimations, setIngredientAnimations] = useState<Array<{
+    ingredient: string;
+    category: string;
+    position: { x: number; y: number };
+    id: string;
+  }>>([]);
   const { user } = useAuth();
   const { addIngredientsToShoppingList } = useShoppingList();
 
@@ -61,12 +69,27 @@ const RecipeDetail = () => {
       return ingredient; // Don't adjust section headers
     }
     
-    // Simple ingredient adjustment - in real app this would be more sophisticated
-    const ratio = servings / recipe.servings;
-    return ingredient.replace(/\d+/g, (match) => {
-      const num = parseInt(match);
-      return Math.round(num * ratio).toString();
-    });
+    // Enhanced quantity calculation using QuantityCalculationService
+    try {
+      const parsed = QuantityCalculationService.parseQuantity(ingredient);
+      const scaled = QuantityCalculationService.scaleQuantity(parsed, servings / recipe.servings);
+      const formatted = QuantityCalculationService.formatQuantity(scaled);
+      
+      // Replace the quantity part while preserving the ingredient name
+      const quantityPattern = /^([^a-zA-Z]*)/;
+      const match = ingredient.match(quantityPattern);
+      if (match && match[1].trim()) {
+        return ingredient.replace(match[1], formatted + ' ');
+      }
+      return formatted + ' ' + ingredient.replace(/^[^a-zA-Z]*/, '');
+    } catch (error) {
+      // Fallback to simple calculation if parsing fails
+      const ratio = servings / recipe.servings;
+      return ingredient.replace(/\d+/g, (match) => {
+        const num = parseInt(match);
+        return Math.round(num * ratio).toString();
+      });
+    }
   });
 
   const toggleIngredient = (index: number) => {
@@ -94,10 +117,20 @@ const RecipeDetail = () => {
     return adjustedIngredients.filter((ingredient, index) => {
       const isSectionHeader = ingredient.trim().endsWith(':');
       return !isSectionHeader && !checkedIngredients.has(index);
-    }).map(ingredient => ({
-      name: ingredient,
-      quantity: undefined // We'll extract quantity parsing later if needed
-    }));
+    }).map(ingredient => {
+      try {
+        const parsed = QuantityCalculationService.parseQuantity(ingredient);
+        return {
+          name: ingredient.replace(/^[^a-zA-Z]*/, '').trim(),
+          quantity: QuantityCalculationService.formatQuantity(parsed)
+        };
+      } catch (error) {
+        return {
+          name: ingredient,
+          quantity: undefined
+        };
+      }
+    });
   };
 
   const handleAddToShoppingList = async () => {
@@ -108,6 +141,19 @@ const RecipeDetail = () => {
 
     const uncheckedIngredients = getUncheckedIngredients();
     if (uncheckedIngredients.length === 0) return;
+
+    // Create ingredient animations
+    const animations = uncheckedIngredients.slice(0, 8).map((ingredient, index) => ({
+      ingredient: ingredient.name,
+      category: 'pantry', // Default category, would be determined by categorization service
+      position: { 
+        x: Math.random() * 200 - 100,
+        y: Math.random() * 200 - 100
+      },
+      id: `anim-${Date.now()}-${index}`
+    }));
+    
+    setIngredientAnimations(animations);
 
     await addIngredientsToShoppingList({
       ingredients: uncheckedIngredients,
@@ -383,12 +429,28 @@ const RecipeDetail = () => {
         )}
       </div>
 
+      {/* Ingredient Animations */}
+      {ingredientAnimations.map((animation) => (
+        <IngredientAnimation
+          key={animation.id}
+          ingredient={animation.ingredient}
+          category={animation.category}
+          startPosition={animation.position}
+          onComplete={() => {
+            setIngredientAnimations(prev => 
+              prev.filter(a => a.id !== animation.id)
+            );
+          }}
+        />
+      ))}
+
       {/* Shopping List Modal */}
       <ShoppingListModal
         isOpen={showShoppingModal}
         onClose={() => setShowShoppingModal(false)}
         addedCount={getUncheckedIngredients().length}
         recipeName={recipe?.title || 'Unknown Recipe'}
+        ingredientPositions={ingredientAnimations.map(a => a.position)}
       />
     </div>
   );

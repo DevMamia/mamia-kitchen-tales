@@ -8,7 +8,7 @@ import { getRecipeOfWeek, getFeaturedRecipes, getRecipesByCategory, Recipe } fro
 import RecipeCardStack from '@/components/RecipeCardStack';
 import LoadingSkeleton from '@/components/LoadingSkeleton';
 import CulturalEmptyState from '@/components/CulturalEmptyState';
-import CelebrationEffects from '@/components/CelebrationEffects';
+import { CelebrationEffects } from '@/components/CelebrationEffects';
 import PageTransition from '@/components/PageTransition';
 import { useToast } from '@/hooks/use-toast';
 
