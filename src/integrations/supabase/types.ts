@@ -14,6 +14,68 @@ export type Database = {
   }
   public: {
     Tables: {
+      food_categories: {
+        Row: {
+          created_at: string
+          icon: string | null
+          id: string
+          name: string
+          sort_order: number | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          icon?: string | null
+          id?: string
+          name: string
+          sort_order?: number | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          icon?: string | null
+          id?: string
+          name?: string
+          sort_order?: number | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      ingredient_aliases: {
+        Row: {
+          alias_name: string
+          canonical_name: string
+          category_id: string | null
+          created_at: string
+          id: string
+        }
+        Insert: {
+          alias_name: string
+          canonical_name: string
+          category_id?: string | null
+          created_at?: string
+          id?: string
+        }
+        Update: {
+          alias_name?: string
+          canonical_name?: string
+          category_id?: string | null
+          created_at?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ingredient_aliases_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "food_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -41,9 +103,42 @@ export type Database = {
         }
         Relationships: []
       }
+      shopping_list_collaborators: {
+        Row: {
+          created_at: string
+          id: string
+          permission_level: string
+          shopping_list_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          permission_level?: string
+          shopping_list_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          permission_level?: string
+          shopping_list_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shopping_list_collaborators_shopping_list_id_fkey"
+            columns: ["shopping_list_id"]
+            isOneToOne: false
+            referencedRelation: "shopping_lists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       shopping_list_items: {
         Row: {
           category: string | null
+          category_id: string | null
           checked: boolean
           created_at: string
           id: string
@@ -56,6 +151,7 @@ export type Database = {
         }
         Insert: {
           category?: string | null
+          category_id?: string | null
           checked?: boolean
           created_at?: string
           id?: string
@@ -68,6 +164,7 @@ export type Database = {
         }
         Update: {
           category?: string | null
+          category_id?: string | null
           checked?: boolean
           created_at?: string
           id?: string
@@ -80,6 +177,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "shopping_list_items_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "food_categories"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "shopping_list_items_shopping_list_id_fkey"
             columns: ["shopping_list_id"]
             isOneToOne: false
@@ -87,6 +191,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      shopping_list_templates: {
+        Row: {
+          created_at: string
+          id: string
+          items: Json
+          name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          items: Json
+          name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          items?: Json
+          name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       shopping_lists: {
         Row: {

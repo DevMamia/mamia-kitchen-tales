@@ -94,7 +94,10 @@ const RecipeDetail = () => {
     return adjustedIngredients.filter((ingredient, index) => {
       const isSectionHeader = ingredient.trim().endsWith(':');
       return !isSectionHeader && !checkedIngredients.has(index);
-    });
+    }).map(ingredient => ({
+      name: ingredient,
+      quantity: undefined // We'll extract quantity parsing later if needed
+    }));
   };
 
   const handleAddToShoppingList = async () => {
@@ -108,8 +111,8 @@ const RecipeDetail = () => {
 
     await addIngredientsToShoppingList({
       ingredients: uncheckedIngredients,
-      recipe_id: recipeId || '',
-      recipe_name: recipe?.title || 'Unknown Recipe'
+      recipeId: recipeId || '',
+      recipeName: recipe?.title || 'Unknown Recipe'
     });
 
     setShowShoppingModal(true);

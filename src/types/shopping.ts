@@ -14,13 +14,19 @@ export interface ShoppingListItem {
   recipe_id?: string;
   recipe_name?: string;
   category: string;
+  category_id?: string;
   checked: boolean;
   created_at: string;
   updated_at: string;
 }
 
+export interface Ingredient {
+  name: string;
+  quantity?: string;
+}
+
 export interface AddToShoppingListRequest {
-  ingredients: string[];
-  recipe_id: string;
-  recipe_name: string;
+  ingredients: Ingredient[];
+  recipeId: string;
+  recipeName: string;
 }
