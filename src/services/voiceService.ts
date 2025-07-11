@@ -1,5 +1,6 @@
 // Voice Service for ElevenLabs Integration
 import { getMamaById } from '@/data/mamas';
+import { supabase } from '@/integrations/supabase/client';
 
 export interface VoiceConfig {
   mode: 'full' | 'essential' | 'text';
@@ -15,24 +16,24 @@ export interface MamaVoice {
   accent: string;
 }
 
-// Voice mappings for different Mamas
+// Voice mappings for different Mamas - voice IDs will be fetched from Supabase secrets
 export const MAMA_VOICES: Record<string, MamaVoice> = {
   'nonna_lucia': {
     id: 'nonna_lucia',
     name: 'Nonna Lucia',
-    voiceId: import.meta.env.VITE_NONNA_VOICE_ID || 'EXAVITQu4vr4xnSDxMaL',
+    voiceId: 'nonna-voice', // Will be replaced with actual ID from secrets
     accent: 'Italian'
   },
   'abuela_rosa': {
     id: 'abuela_rosa', 
     name: 'Abuela Rosa',
-    voiceId: import.meta.env.VITE_ABUELA_VOICE_ID || 'XB0fDUnXU5powFXDhCwa',
+    voiceId: 'abuela-voice', // Will be replaced with actual ID from secrets
     accent: 'Mexican'
   },
   'mae_malai': {
     id: 'mae_malai',
     name: 'Mae Malai', 
-    voiceId: import.meta.env.VITE_MAE_VOICE_ID || 'pNInz6obpgDQGcFmaJgB',
+    voiceId: 'mae-voice', // Will be replaced with actual ID from secrets
     accent: 'Thai'
   }
 };
@@ -70,6 +71,7 @@ export class VoiceService {
   private currentAudio: HTMLAudioElement | null = null;
   private audioQueue: Array<{ text: string; voiceId: string }> = [];
   private isPlaying = false;
+  private voiceIds: Record<string, string> = {};
   private config: VoiceConfig = {
     mode: 'essential',
     volume: 0.8,
@@ -77,7 +79,26 @@ export class VoiceService {
     enabled: true
   };
 
-  private constructor() {}
+  private constructor() {
+    this.initializeVoiceIds();
+  }
+
+  private async initializeVoiceIds() {
+    try {
+      // Get voice IDs from Supabase Edge Function secrets via a helper function
+      const { data, error } = await supabase.functions.invoke('get-voice-ids');
+      if (data && !error) {
+        this.voiceIds = {
+          nonna_lucia: data.ELEVENLABS_NONNA_VOICE_ID,
+          abuela_rosa: data.ELEVENLABS_ABUELA_VOICE_ID,
+          mae_malai: data.ELEVENLABS_MAE_VOICE_ID
+        };
+        console.log('Voice IDs initialized successfully');
+      }
+    } catch (error) {
+      console.warn('Could not fetch voice IDs, using defaults:', error);
+    }
+  }
 
   public static getInstance(): VoiceService {
     if (!VoiceService.instance) {
@@ -113,9 +134,10 @@ export class VoiceService {
 
     // In full mode, add to queue for TTS generation
     if (this.config.mode === 'full') {
-      const voice = MAMA_VOICES[voiceKey];
-      if (voice) {
-        this.addToQueue(text, voice.voiceId);
+      // Get the actual voice ID for this mama
+      const actualVoiceId = this.voiceIds[voiceKey] || MAMA_VOICES[voiceKey]?.voiceId;
+      if (actualVoiceId) {
+        this.addToQueue(text, actualVoiceId);
       }
     }
   }
@@ -201,22 +223,72 @@ export class VoiceService {
   }
 
   private async generateAndPlaySpeech(text: string, voiceId: string): Promise<void> {
-    // Placeholder for ElevenLabs API integration
-    // In production, this would:
-    // 1. Call ElevenLabs API with text and voiceId
-    // 2. Get audio blob back
-    // 3. Create audio element and play
-    
-    console.log(`Generating speech for: "${text}" with voice: ${voiceId}`);
-    
-    // Stop any currently playing audio
-    this.stopCurrentAudio();
-    
-    // Simulate API call and audio playback
-    await new Promise(resolve => {
-      const duration = Math.max(text.length * 80, 1000); // Estimate duration
-      setTimeout(resolve, duration);
-    });
+    try {
+      console.log(`[VoiceService] Generating speech for: "${text}" with voice: ${voiceId}`);
+      
+      // Stop any currently playing audio
+      this.stopCurrentAudio();
+
+      // Call our Supabase Edge Function for text-to-speech
+      const { data, error } = await supabase.functions.invoke('text-to-speech', {
+        body: {
+          text,
+          voiceId,
+          model: 'eleven_multilingual_v2',
+          stability: 0.5,
+          similarity_boost: 0.75
+        }
+      });
+
+      if (error) {
+        throw new Error(`Voice service error: ${error.message}`);
+      }
+
+      if (!data?.audioData) {
+        throw new Error('No audio data received from voice service');
+      }
+
+      // Create and play audio from base64 data
+      const audioBlob = new Blob([
+        Uint8Array.from(atob(data.audioData), c => c.charCodeAt(0))
+      ], { type: 'audio/mpeg' });
+      
+      const audioUrl = URL.createObjectURL(audioBlob);
+      const audio = new Audio(audioUrl);
+      
+      // Apply volume setting
+      audio.volume = this.config.volume;
+      
+      // Set current audio reference
+      this.currentAudio = audio;
+      this.isPlaying = true;
+
+      // Play audio and handle completion
+      await new Promise<void>((resolve, reject) => {
+        audio.onended = () => {
+          this.isPlaying = false;
+          this.currentAudio = null;
+          URL.revokeObjectURL(audioUrl);
+          resolve();
+        };
+        
+        audio.onerror = () => {
+          this.isPlaying = false;
+          this.currentAudio = null;
+          URL.revokeObjectURL(audioUrl);
+          reject(new Error('Audio playback failed'));
+        };
+        
+        audio.play().catch(reject);
+      });
+      
+      console.log(`[VoiceService] Finished playing: "${text}"`);
+    } catch (error) {
+      this.isPlaying = false;
+      this.currentAudio = null;
+      console.error('[VoiceService] Error generating speech:', error);
+      throw error;
+    }
   }
 
   public stopCurrentAudio(): void {
