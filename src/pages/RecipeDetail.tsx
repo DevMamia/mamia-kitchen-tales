@@ -48,6 +48,12 @@ const RecipeDetail = () => {
   }
 
   const adjustedIngredients = recipe.ingredients.map(ingredient => {
+    // Check if this is a section header (ends with colon)
+    const isSectionHeader = ingredient.trim().endsWith(':');
+    if (isSectionHeader) {
+      return ingredient; // Don't adjust section headers
+    }
+    
     // Simple ingredient adjustment - in real app this would be more sophisticated
     const ratio = servings / recipe.servings;
     return ingredient.replace(/\d+/g, (match) => {
@@ -57,6 +63,13 @@ const RecipeDetail = () => {
   });
 
   const toggleIngredient = (index: number) => {
+    // Check if this is a section header (ends with colon)
+    const ingredient = adjustedIngredients[index];
+    const isSectionHeader = ingredient.trim().endsWith(':');
+    if (isSectionHeader) {
+      return; // Don't toggle section headers
+    }
+    
     const newChecked = new Set(checkedIngredients);
     if (newChecked.has(index)) {
       newChecked.delete(index);
@@ -243,31 +256,48 @@ const RecipeDetail = () => {
 
             {/* Ingredients List */}
             <div className="space-y-3">
-              {adjustedIngredients.map((ingredient, index) => (
-                <div key={index} className="flex items-center gap-3 p-3 bg-white rounded-lg shadow-sm">
-                  <button
-                    onClick={() => toggleIngredient(index)}
-                    className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all duration-200 ${
-                      checkedIngredients.has(index)
-                        ? 'bg-primary border-primary text-primary-foreground'
-                        : 'border-muted-foreground/30 hover:border-primary'
-                    }`}
-                  >
-                    {checkedIngredients.has(index) && (
-                      <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-                        <polyline points="20,6 9,17 4,12"></polyline>
-                      </svg>
-                    )}
-                  </button>
-                  <span className={`flex-1 transition-all duration-200 ${
-                    checkedIngredients.has(index) 
-                      ? 'text-muted-foreground line-through' 
-                      : 'text-foreground'
-                  }`}>
-                    {ingredient}
-                  </span>
-                </div>
-              ))}
+              {adjustedIngredients.map((ingredient, index) => {
+                const isSectionHeader = ingredient.trim().endsWith(':');
+                
+                if (isSectionHeader) {
+                  return (
+                    <div key={index} className="mt-6 mb-3">
+                      <div className="inline-flex items-center gap-2 bg-gradient-to-r from-primary/10 to-primary/5 border border-primary/20 rounded-lg px-4 py-2">
+                        <div className="w-2 h-2 bg-primary rounded-full"></div>
+                        <span className="font-heading font-bold text-primary text-sm uppercase tracking-wider">
+                          {ingredient}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                }
+                
+                return (
+                  <div key={index} className="flex items-center gap-3 p-3 bg-white rounded-lg shadow-sm">
+                    <button
+                      onClick={() => toggleIngredient(index)}
+                      className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all duration-200 ${
+                        checkedIngredients.has(index)
+                          ? 'bg-primary border-primary text-primary-foreground'
+                          : 'border-muted-foreground/30 hover:border-primary'
+                      }`}
+                    >
+                      {checkedIngredients.has(index) && (
+                        <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                          <polyline points="20,6 9,17 4,12"></polyline>
+                        </svg>
+                      )}
+                    </button>
+                    <span className={`flex-1 transition-all duration-200 ${
+                      checkedIngredients.has(index) 
+                        ? 'text-muted-foreground line-through' 
+                        : 'text-foreground'
+                    }`}>
+                      {ingredient}
+                    </span>
+                  </div>
+                );
+              })}
             </div>
 
             {/* Add to Shopping List */}
