@@ -34,6 +34,9 @@ export interface Recipe {
   voiceIntro?: string;
   voiceTips?: string[];
   voiceEnabled?: boolean;
+  // Enhanced tip structure
+  displayTips?: string[]; // 1-2 key tips shown at top of instructions
+  stepVoiceTips?: { [stepNumber: number]: string }; // Step-specific voice guidance
   // Additional fields
   subsNote?: string;
   // Cooking context
@@ -74,8 +77,21 @@ export const recipes: Recipe[] = [
     servings: 4,
     description: 'Spicy tomato pasta with garlic and chillies',
     recipeOfWeek: true,
-    voiceIntro: 'Ciao bello! A quick kick of chilli to wake up your taste buds.',
-    voiceTips: ['Splash pasta water so the sauce hugs the penne.', 'Arrabbiata means \'angry\'—let it blush!'],
+    voiceIntro: "Ciao! Today we make my beautiful Penne all'Arrabbiata. Very simple but you must do with passion!",
+    displayTips: [
+      "Use real San Marzano tomatoes if you can find them, they make all the difference",
+      "Don't let the garlic burn - it becomes bitter!"
+    ],
+    stepVoiceTips: {
+      1: "Make sure your garlic doesn't burn - burned garlic is bitter, no good!",
+      3: "Don't put too much salt in the pasta water - the pasta will absorb it",
+      4: "Listen for the sizzle when you add the chili - that's when you know it's ready!"
+    },
+    voiceTips: [
+      "Make sure your garlic doesn't burn - burned garlic is bitter, no good!",
+      "Use real San Marzano tomatoes if you can find them, they make all the difference",
+      "Don't put too much salt in the pasta water - the pasta will absorb it"
+    ],
     subsNote: 'No penne? Any short pasta works. No fresh chilli? Use 1/4 tsp flakes.',
     voiceEnabled: true,
     stepTimers: [
@@ -101,119 +117,91 @@ export const recipes: Recipe[] = [
     mamaId: 1,
     mamaName: 'Nonna Lucia',
     mamaEmoji: '🍷',
-    ingredients: [
-      '1 whole chicken (3-4 lbs/1.5-2kg), cut into 8 pieces, patted dry',
-      '1/4 cup (60ml) extra virgin olive oil',
-      '1 large yellow onion (8oz/225g), sliced into half-moons',
-      '2 bell peppers (1 red, 1 yellow), cut into 1-inch strips',
-      '8oz (225g) cremini mushrooms, quartered',
-      '4 cloves garlic, minced',
-      '1/2 cup (120ml) dry white wine (Pinot Grigio or Sauvignon Blanc)',
-      '1 can (28oz/800g) San Marzano crushed tomatoes',
-      '2 sprigs fresh rosemary',
-      '4 fresh sage leaves',
-      '2 bay leaves',
-      '1 tsp kosher salt, plus more to taste',
-      '1/2 tsp freshly ground black pepper',
-      '1/4 cup fresh Italian parsley, chopped for garnish'
-    ],
+    ingredients: ['1 whole chicken cut into pieces', '1 onion', '2 bell peppers', '400g crushed tomatoes', '200ml white wine', 'Olive oil', 'Herbs'],
     instructions: [
-      'Season chicken pieces generously with salt and pepper, let stand at room temperature',
-      'Heat olive oil in a heavy-bottomed Dutch oven over medium-high heat until shimmering',
-      'Brown chicken pieces skin-side down first until golden. Work in batches if needed. Transfer to a plate.',
-      'Reduce heat to medium. Add onions to the same pan, cook until softened and beginning to caramelize',
-      'Add bell peppers and mushrooms, cook until peppers soften and mushrooms release their moisture',
-      'Add minced garlic, cook until fragrant',
-      'Pour in white wine, scraping up any browned bits. Let simmer until alcohol evaporates',
-      'Add crushed tomatoes, rosemary, sage, and bay leaves. Season with salt and pepper',
-      'Return chicken to pot, nestling pieces into the sauce. Bring to a gentle simmer',
-      'Cover and cook until chicken is fork-tender and internal temperature reaches 165°F',
-      'Remove bay leaves and herb sprigs. Taste and adjust seasoning',
-      'Garnish with fresh parsley and serve immediately with crusty bread or over creamy polenta'
+      'Season chicken pieces with salt and pepper',
+      'Heat oil in large skillet, brown chicken on all sides',
+      'Remove chicken, sauté onions and peppers until soft',
+      'Add wine to deglaze pan',
+      'Return chicken to pan with tomatoes and herbs',
+      'Simmer covered for 20 minutes until chicken is tender',
+      'Adjust seasoning and serve hot'
     ],
     servings: 4,
-    description: 'Hunter-style chicken braised with bell peppers, mushrooms, and aromatic herbs in a rich tomato sauce',
-    equipment: ['Dutch oven or heavy braiser', 'Meat thermometer', 'Wooden spoon'],
-    storageInstructions: 'Refrigerate up to 3 days. Reheat gently on stovetop with a splash of broth.',
-    culturalContext: 'This rustic dish originated with Italian hunters who cooked whatever they caught with foraged mushrooms and vegetables.',
-    voiceIntro: 'Eccolo! Today we hunt for flavor like the old hunters in Tuscany. Every bubble tells a story.',
-    voiceTips: [
-      'Hunters used to cook whatever they caught with foraged mushrooms and vegetables from the forest',
-      'The key to cacciatore is patience - let each ingredient build flavor slowly, like a good story'
+    description: 'Traditional Italian hunter\'s chicken with vegetables',
+    voiceIntro: "Ciao mia cara! Today we cook my beautiful Chicken Cacciatore. Is like cooking with love for your famiglia!",
+    displayTips: [
+      "Pat the chicken very dry before browning for crispy skin",
+      "Don't move the chicken too much when browning"
     ],
-    subsNote: 'No San Marzano tomatoes? Use the best canned tomatoes you can find. For mushrooms, try porcini if available. Bone-in thighs work wonderfully too.',
-    voiceEnabled: true,
-    stepTimers: [
-      null, // Season chicken - no timer
-      null, // Heat oil - no timer
-      { display: '~6 min', duration: 360, autoStart: true, description: 'Golden brown chicken' }, // Brown chicken
-      { display: '~5 min', duration: 300, autoStart: true, description: 'Soft onions' }, // Cook onions
-      { display: '~8 min', duration: 480, autoStart: true, description: 'Tender peppers' }, // Cook peppers & mushrooms
-      { display: '~1 min', duration: 60, autoStart: true, description: 'Fragrant garlic' }, // Cook garlic
-      { display: '~3 min', duration: 180, autoStart: true, description: 'Alcohol evaporates' }, // Simmer wine
-      null, // Add tomatoes and herbs - no timer
-      null, // Return chicken - no timer
-      { display: '~20 min', duration: 1200, autoStart: true, description: 'Fork-tender chicken' }, // Braise chicken
-      null, // Remove herbs - no timer
-      null, // Garnish and serve - no timer
-    ]
+    stepVoiceTips: {
+      2: "Pat the chicken very dry before browning - this gives you beautiful crispy skin",
+      3: "Don't move the chicken too much when browning - let it develop that golden color",
+      5: "Add a little wine if you have - makes everything more delicious!"
+    },
+    voiceTips: [
+      "Pat the chicken very dry before browning - this gives you beautiful crispy skin",
+      "Don't move the chicken too much when browning - let it develop that golden color",
+      "Add a little wine if you have - makes everything more delicious!"
+    ],
+    voiceEnabled: true
   },
   {
-    id: 'carbonara-1',
-    title: 'Pasta Carbonara',
-    cookingTime: '20 min',
-    cookTimeMin: 20,
-    prepTimeMin: 10,
+    id: 'classic-carbonara',
+    title: 'Classic Carbonara',
+    cookingTime: '15 min',
+    cookTimeMin: 15,
     difficulty: 'MEDIUM',
-    category: 'EVERYDAY',
+    category: 'QUICK',
     contentType: 'MEAT',
     image: '/placeholder.svg',
     mamaId: 1,
     mamaName: 'Nonna Lucia',
     mamaEmoji: '🍷',
     ingredients: [
-      '400g (14oz) spaghetti or tonnarelli pasta',
-      '200g (7oz) guanciale (cured pork jowl), diced into 1/4-inch cubes',
-      '4 large free-range egg yolks, room temperature',
-      '100g (3.5oz) Pecorino Romano DOP, finely grated plus extra for serving',
-      '2 tsp coarsely ground black pepper, plus more for garnish',
-      '1 tsp kosher salt for pasta water'
+      '400g spaghetti or tonnarelli',
+      '200g guanciale or pancetta, diced',
+      '4 large egg yolks',
+      '100g Pecorino Romano cheese, grated',
+      'Freshly ground black pepper',
+      'Salt for pasta water'
     ],
     instructions: [
-      'Bring a large pot of water to rolling boil. Add salt - it should taste like mild seawater',
-      'Meanwhile, place diced guanciale in a large cold pan. Cook over medium-low heat, stirring occasionally, until golden and crispy',
-      'In a mixing bowl, whisk egg yolks with grated Pecorino Romano and black pepper until well combined',
-      'Cook spaghetti according to package directions minus 1 minute for al dente texture. Reserve hot pasta cooking water before draining',
-      'Remove guanciale pan from heat. Add drained hot pasta to the guanciale, tossing vigorously to coat with rendered fat',
-      'Working quickly off heat, add egg-cheese mixture while tossing continuously. Gradually add pasta water until sauce becomes silky',
-      'Taste and adjust with more Pecorino, pepper, or pasta water as needed. Serve immediately with extra cheese and black pepper'
+      'Bring large pot of salted water to boil for pasta',
+      'Cook guanciale in large skillet over medium heat until crispy and golden',
+      'Meanwhile, whisk egg yolks with grated Pecorino and plenty of black pepper',
+      'Cook pasta until just shy of al dente, reserve 1 cup pasta cooking water',
+      'Add drained hot pasta to skillet with guanciale and fat',
+      'Remove from heat, quickly toss with egg mixture and pasta water',
+      'Serve immediately with extra Pecorino and black pepper'
     ],
     servings: 4,
-    description: 'Authentic Roman carbonara with crispy guanciale and silky egg-cheese sauce - no cream, just technique',
-    equipment: ['Large pasta pot', 'Heavy-bottomed pan', 'Fine grater', 'Mixing bowl'],
-    storageInstructions: 'Best enjoyed immediately. Leftovers don\'t reheat well due to egg-based sauce.',
-    culturalContext: 'Born in Roman trattorie, carbonara represents the soul of Italian cooking - few perfect ingredients treated with respect.',
-    featured: true,
-    voiceIntro: 'Ascolta bene - no cream in my carbonara! Only eggs, cheese, guanciale, and amore. This is Roma on a plate.',
-    voiceTips: [
-      'True Roman carbonara never has cream - it was invented by charcoal workers using simple ingredients',
-      'The secret is pasta water - it transforms eggs and cheese into silk without scrambling'
+    description: 'Rome\'s iconic pasta dish with eggs, cheese, and guanciale - no cream!',
+    voiceIntro: "Ah, Carbonara! The pride of Roma. Listen carefully - no cream, no peas, no nonsense. Just perfection!",
+    displayTips: [
+      "No cream! Real Carbonara never has cream",
+      "Take the pan off heat when mixing eggs - they must not scramble"
     ],
-    subsNote: 'No guanciale? Pancetta works but reduce cooking time. No Pecorino? Parmigiano-Reggiano is acceptable. The black pepper must be freshly ground - this is not optional!',
+    stepVoiceTips: {
+      3: "Save that pasta water - it's liquid gold for making the sauce creamy",
+      4: "Use only Pecorino Romano cheese, not Parmesan - this is the Roman way",
+      6: "Take the pan off the heat when mixing eggs - they must not scramble",
+      7: "No cream! Real Carbonara never has cream - this is very important!"
+    },
+    voiceTips: [
+      "No cream! Real Carbonara never has cream - this is very important!",
+      "Take the pan off the heat when mixing eggs - they must not scramble",
+      "Save that pasta water - it's liquid gold for making the sauce creamy",
+      "Use only Pecorino Romano cheese, not Parmesan - this is the Roman way"
+    ],
+    featured: true,
     voiceEnabled: true,
-    stepTimers: [
-      null, // Bring water to boil - no timer needed
-      { display: '8-10 min', duration: 540, description: 'Golden and crispy guanciale' }, // Cook guanciale
-      null, // Mix eggs and cheese - no timer needed
-      { display: '9-11 min', duration: 600, description: 'Al dente pasta (check package directions minus 1 min)' }, // Cook pasta
-      null, // Remove from heat - no timer needed
-      null, // Add egg mixture - no timer needed
-      null  // Serve immediately - no timer needed
-    ]
+    equipment: ['Large pot', 'Large skillet', 'Whisk', 'Cheese grater', 'Tongs'],
+    culturalContext: "Carbonara was born in Rome, possibly created by charcoal workers (carbonari) who needed a hearty meal. The dish represents the essence of Roman cooking - transforming simple ingredients into something magical."
   },
   {
-    id: 'lasagna-nonna',
-    title: 'Lasagna alla Nonna',
+    id: 'homemade-lasagna',
+    title: 'Nonna\'s Homemade Lasagna',
     cookingTime: '2 hours',
     cookTimeMin: 120,
     prepTimeMin: 45,
@@ -225,89 +213,68 @@ export const recipes: Recipe[] = [
     mamaName: 'Nonna Lucia',
     mamaEmoji: '🍷',
     ingredients: [
-      'FOR BOLOGNESE RAGÙ:',
-      '2 lbs (900g) mixed ground meat (beef chuck and pork shoulder, 70/30 ratio)',
-      '4oz (115g) pancetta, finely diced',
-      '1 large carrot, finely diced (brunoise)',
-      '1 large celery stalk, finely diced',
-      '1 large yellow onion, finely diced',
-      '3 cloves garlic, minced',
-      '1 cup (240ml) whole milk',
-      '1 cup (240ml) dry white wine',
-      '1 can (28oz) San Marzano tomatoes, crushed by hand',
-      '2 tablespoons tomato paste',
-      '2 bay leaves',
-      'FOR BÉCHAMEL:',
-      '1/2 cup (115g) unsalted butter',
-      '1/2 cup (60g) all-purpose flour',
-      '4 cups (950ml) whole milk, warmed',
-      '1/4 teaspoon freshly grated nutmeg',
-      'FOR ASSEMBLY:',
-      '1 lb (450g) fresh lasagna sheets or no-boil dried pasta',
-      '1 lb (450g) whole milk mozzarella, coarsely grated',
-      '1 cup (100g) Parmigiano-Reggiano DOP, finely grated',
-      '2 tablespoons extra virgin olive oil',
-      'Kosher salt and black pepper to taste'
+      'FOR THE RAGÙ:',
+      '500g ground beef and pork mix',
+      '1 large onion, finely chopped',
+      '2 carrots, finely diced',
+      '2 celery stalks, finely diced',
+      '800g San Marzano tomatoes, crushed',
+      '200ml red wine',
+      'FOR THE BÉCHAMEL:',
+      '80g butter',
+      '80g plain flour',
+      '800ml whole milk, warmed',
+      'Pinch of nutmeg',
+      'ASSEMBLY:',
+      '500g fresh lasagna sheets',
+      '300g Parmigiano-Reggiano, grated',
+      '250g fresh mozzarella, torn'
     ],
     instructions: [
-      'Begin ragù: Heat olive oil in heavy Dutch oven over medium heat. Add pancetta and cook until golden and crispy, about 6-8 minutes',
-      'Add diced vegetables (soffritto) to pancetta. Cook slowly until very soft and caramelized, about 15 minutes. This is the foundation of flavor',
-      'Add garlic, cook 1 minute until fragrant. Push vegetables to one side, increase heat to medium-high',
-      'Add ground meat in batches, breaking apart with wooden spoon. Cook until deeply browned, about 12-15 minutes total',
-      'Pour in white wine, scraping up any browned bits. Let alcohol cook off completely, about 5 minutes',
-      'Add tomato paste, cook 2 minutes until darkened. Add crushed tomatoes, milk, and bay leaves',
-      'Bring to gentle simmer, then reduce heat to lowest setting. Cover partially and simmer 3-4 hours, stirring occasionally. Ragù should be thick and rich',
-      'For béchamel: In heavy saucepan, melt butter over medium heat. Whisk in flour, cook 3 minutes to eliminate raw flour taste',
-      'Gradually whisk in warm milk, whisking constantly to prevent lumps. Cook until thick enough to coat spoon, about 10-12 minutes',
-      'Season béchamel with salt, pepper, and nutmeg. Cover with plastic wrap directly on surface to prevent skin forming',
-      'If using fresh pasta, blanch sheets in salted boiling water for 30 seconds. If using dried no-boil, soak in warm water 10 minutes',
-      'Preheat oven to 375°F (190°C). Butter a 9x13-inch baking dish generously',
-      'Assembly: Spread thin layer of béchamel in dish bottom. Layer pasta, then ragù, then béchamel, then cheeses. Repeat 3-4 times',
-      'Top layer should be béchamel and cheese only. Cover tightly with foil and bake 45 minutes',
-      'Remove foil, increase temperature to 425°F (220°C). Bake 15-20 minutes until golden and bubbling',
-      'Rest lasagna 20-30 minutes before cutting. This allows layers to set and makes clean slices possible'
+      'FOR THE RAGÙ:',
+      'Make ragù by browning meat, then vegetables, add wine and tomatoes, simmer 1.5 hours',
+      'FOR THE BÉCHAMEL:',
+      'Make béchamel by melting butter, whisking in flour, gradually adding warm milk',
+      'ASSEMBLY:',
+      'Cook lasagna sheets until just shy of al dente, drain carefully',
+      'Layer: béchamel, pasta, ragù, cheeses - repeat 4 times',
+      'Cover with foil, bake at 180°C for 45 minutes',
+      'Remove foil, bake 15 minutes more until golden',
+      'Rest for 15 minutes before cutting - this is important!'
     ],
     servings: 8,
-    description: 'Sunday masterpiece - layers of slow-cooked ragù, silky béchamel, and melted cheese between tender pasta sheets',
-    equipment: ['Dutch oven or heavy pot', 'Heavy saucepan for béchamel', '9x13-inch baking dish', 'Wire whisk'],
-    storageInstructions: 'Refrigerate up to 4 days or freeze up to 3 months. Reheat covered at 350°F until heated through.',
-    culturalContext: 'Born in Emilia-Romagna, lasagna represents the pinnacle of Italian comfort food - a dish worth spending all Sunday creating.',
-    voiceIntro: 'Ascolta bene - clear your Sunday, call your famiglia. Today we build layers of love, one by one, like our ancestors did.',
-    voiceTips: [
-      'The soffritto is everything - let those vegetables melt into pure sweetness, this is where the magic begins',
-      'Never rush the ragù - it needs time to develop its soul, like a good marriage',
-      'The milk in ragù makes it tender - this is the Bolognese secret my nonna whispered to me',
-      'Béchamel must be smooth as silk - whisk with passion, no lumps allowed in my kitchen',
-      'Each layer tells a story - pasta, ragù, béchamel, cheese - like chapters in a beautiful book',
-      'The resting time is not optional - patience gives us perfect slices, not a collapsed mess',
-      'Fresh pasta is traditional, but good dried pasta shows respect for the sauce too'
+    description: 'Traditional Emilian lasagna with rich ragù Bolognese and creamy béchamel',
+    voiceIntro: "Bene, mia cara! Today we make lasagna from my nonna's recipe. This takes time but is worth every minute!",
+    displayTips: [
+      "Make your ragù the day before - it gets better with time",
+      "Let the lasagna rest after baking for easier cutting"
     ],
-    subsNote: 'Fresh pasta sheets are traditional, but quality no-boil works fine. For ragù, ground lamb can substitute 25% of the meat. Make ragù day before - it tastes even better.',
+    stepVoiceTips: {
+      1: "Use San Marzano tomatoes in your ragù - they're sweeter, more delicate",
+      2: "Don't make your béchamel too thick - it should coat the spoon like cream",
+      4: "Save some pasta water when cooking sheets - helps if they stick together",
+      6: "Cover with foil if the top browns too quickly - we want golden, not burnt",
+      7: "Let the lasagna rest after baking - I know it's hard but it cuts better this way"
+    },
+    voiceTips: [
+      "Make your ragù the day before - it gets better with time, like good wine!",
+      "Don't make your béchamel too thick - it should coat the spoon like cream",
+      "Let the lasagna rest after baking - I know it's hard but it cuts better this way",
+      "Save some pasta water when cooking sheets - helps if they stick together",
+      "Cover with foil if the top browns too quickly - we want golden, not burnt",
+      "Use San Marzano tomatoes in your ragù - they're sweeter, more delicate"
+    ],
     voiceEnabled: true,
-    stepTimers: [
-      { display: '6-8 min', duration: 420, description: 'Golden crispy pancetta' }, // Cook pancetta
-      { display: '~15 min', duration: 900, description: 'Soft caramelized vegetables' }, // Cook soffritto
-      null, // Add garlic - no timer
-      { display: '12-15 min', duration: 810, description: 'Deeply browned meat' }, // Brown meat
-      { display: '~5 min', duration: 300, description: 'Alcohol evaporated' }, // Cook wine
-      null, // Add tomato paste - no timer
-      { display: '3-4 hours', duration: 12600, description: 'Rich, thick ragù' }, // Simmer ragù
-      { display: '~3 min', duration: 180, description: 'Cook flour roux' }, // Make béchamel roux
-      { display: '10-12 min', duration: 660, description: 'Thick coating consistency' }, // Finish béchamel
-      null, // Season béchamel - no timer
-      null, // Prepare pasta - no timer
-      null, // Butter dish - no timer
-      null, // Assembly - no timer
-      { display: '45 min', duration: 2700, description: 'Covered baking' }, // Bake covered
-      { display: '15-20 min', duration: 1050, description: 'Golden bubbling top' }, // Bake uncovered
-      { display: '20-30 min', duration: 1500, description: 'Layers set for clean cutting' } // Rest
-    ]
+    equipment: ['Large heavy-bottomed pot', 'Large saucepan', 'Whisk', '33x23cm baking dish', 'Large pot for pasta', 'Fine grater'],
+    storageInstructions: "Leftover lasagna keeps in refrigerator for 3-4 days. Reheat individual portions in microwave or covered in 160°C oven. Can be frozen for up to 3 months - thaw completely before reheating.",
+    culturalContext: "This recipe represents the traditional Emilian style from Bologna, where layers of handmade pasta are dressed with ragù Bolognese and béchamel. Each family has their own secret touches passed down through generations."
   },
   {
     id: 'osso-buco',
-    title: 'Osso Buco con Gremolata',
-    cookingTime: '3 hours',
-    cookTimeMin: 180,
+    title: 'Osso Buco alla Milanese',
+    cookingTime: '2.5 hours',
+    cookTimeMin: 150,
+    prepTimeMin: 30,
     difficulty: 'ADVANCED',
     category: 'CELEBRATION',
     contentType: 'MEAT',
@@ -315,30 +282,66 @@ export const recipes: Recipe[] = [
     mamaId: 1,
     mamaName: 'Nonna Lucia',
     mamaEmoji: '🍷',
-    ingredients: ['Veal shanks', 'Carrots', 'Celery', 'Onions', 'White wine', 'Beef stock', 'Gremolata ingredients'],
-    instructions: [
-      'Brown veal shanks',
-      'Sauté vegetables',
-      'Add wine and stock',
-      'Braise slowly for 2-3 hours',
-      'Make gremolata',
-      'Serve with gremolata'
+    ingredients: [
+      '4 large veal shanks (2 inches thick), tied with kitchen string',
+      '1 cup all-purpose flour for dredging',
+      '3 tablespoons olive oil',
+      '3 tablespoons butter',
+      '1 large onion, diced',
+      '2 carrots, diced',
+      '2 celery stalks, diced',
+      '1 cup dry white wine',
+      '400g San Marzano tomatoes, crushed',
+      '500ml beef stock',
+      'FOR GREMOLATA:',
+      'Zest of 2 lemons',
+      '3 garlic cloves, minced',
+      '1/2 cup fresh parsley, chopped'
     ],
-    servings: 6,
-    description: 'Braised veal shanks with aromatic vegetables',
-    voiceIntro: 'A feast fit for famiglia reunions.',
-    voiceTips: ['Low and slow is the secret', 'The marrow makes the dish special'],
-    subsNote: 'Beef shank works if you can\'t find veal.',
-    voiceEnabled: true
+    instructions: [
+      'Season veal shanks and dredge in flour, shaking off excess',
+      'Heat oil and butter in heavy Dutch oven, brown shanks on all sides',
+      'Remove shanks, sauté vegetables until softened',
+      'Add wine to deglaze, scraping up browned bits',
+      'Return shanks to pot, add tomatoes and enough stock to partially cover',
+      'Cover and braise in 160°C oven for 2 hours until fork-tender',
+      'Make gremolata by mixing lemon zest, garlic, and parsley',
+      'Serve shanks with braising liquid, topped with fresh gremolata'
+    ],
+    servings: 4,
+    description: 'Milanese braised veal shanks with aromatic vegetables and bright gremolata',
+    voiceIntro: "Ah, Osso Buco! This is Sunday dinner, special occasion food. We cook with patience and amore!",
+    displayTips: [
+      "Ask your butcher to cut the shanks 2 inches thick",
+      "Don't rush the browning - take your time for beautiful color"
+    ],
+    stepVoiceTips: {
+      1: "Tie the shanks with kitchen string so they don't fall apart during cooking",
+      2: "Don't rush the browning - each side needs 4-5 minutes for beautiful color",
+      4: "If you can't find veal, beef shanks work too, just cook a little longer",
+      6: "The marrow is the treasure - use a small spoon to get every bit!",
+      7: "Make gremolata fresh - don't prepare it too early or the lemon loses its punch"
+    },
+    voiceTips: [
+      "Ask your butcher to cut the shanks 2 inches thick - this is molto importante!",
+      "Tie the shanks with kitchen string so they don't fall apart during cooking",
+      "Don't rush the browning - each side needs 4-5 minutes for beautiful color",
+      "The marrow is the treasure - use a small spoon to get every bit!",
+      "If you can't find veal, beef shanks work too, just cook a little longer",
+      "Make gremolata fresh - don't prepare it too early or the lemon loses its punch"
+    ],
+    voiceEnabled: true,
+    equipment: ['Heavy Dutch oven or braising pot', 'Kitchen string', 'Sharp knife', 'Large plate for dredging', 'Wooden spoon'],
+    storageInstructions: "Osso buco actually improves after a day in the refrigerator. Store covered for up to 3 days. Reheat gently on stovetop, adding a splash of stock if needed. The marrow will set when cold but melts beautifully when reheated.",
+    culturalContext: "This dish originated in Milan in the 19th century. The name means 'bone with a hole,' referring to the marrow-filled bone. Traditionally served with risotto alla milanese, the saffron rice perfectly complements the rich, wine-braised veal."
   },
 
   // Abuela Rosa's Recipes
   {
-    id: 'quesadillas-poblano',
-    title: 'Quesadillas de Queso y Poblano',
-    cookingTime: '15 min',
-    cookTimeMin: 15,
-    prepTimeMin: 10,
+    id: 'quesadillas',
+    title: 'Cheese Quesadillas',
+    cookingTime: '10 min',
+    cookTimeMin: 10,
     difficulty: 'EASY',
     category: 'QUICK',
     contentType: 'VEGETARIAN',
@@ -346,47 +349,38 @@ export const recipes: Recipe[] = [
     mamaId: 2,
     mamaName: 'Abuela Rosa',
     mamaEmoji: '🌶️',
-    ingredients: [
-      '4 large flour tortillas (8-10 inch diameter)',
-      '2 cups (8oz/225g) Oaxaca cheese, shredded (or Monterey Jack)',
-      '2 large poblano peppers, roasted and sliced',
-      '1 medium white onion, thinly sliced',
-      '2 tablespoons vegetable oil or lard',
-      '1/2 teaspoon kosher salt',
-      '1/4 cup Mexican crema or sour cream for serving',
-      '1 lime, cut into wedges',
-      'Fresh salsa verde or pico de gallo for serving'
-    ],
+    ingredients: ['4 flour tortillas', '200g cheese (Oaxaca or Monterey Jack)', 'Oil for cooking'],
     instructions: [
-      'Roast poblano peppers directly over gas flame or under broiler until charred all over, about 8-10 minutes total',
-      'Place charred peppers in a plastic bag for 10 minutes to steam. Peel away charred skin, remove seeds, and slice into strips',
-      'Heat 1 tablespoon oil in a large skillet over medium heat. Sauté sliced onions with salt for 5-6 minutes until softened and lightly golden',
-      'Lay tortillas flat. On half of each tortilla, sprinkle cheese, then add poblano strips and sautéed onions',
-      'Fold tortillas in half, pressing gently to seal. Cook in the same skillet over medium heat, 2-3 minutes per side until golden and cheese melts',
-      'Cut each quesadilla into triangles and serve immediately with crema, lime wedges, and salsa'
+      'Grate cheese if using block cheese',
+      'Place cheese on half of each tortilla, fold over',
+      'Heat pan over medium heat, cook quesadilla until golden',
+      'Flip and cook other side until cheese melts',
+      'Cut into triangles and serve immediately'
     ],
-    servings: 4,
-    description: 'Crispy flour tortillas filled with melted Oaxaca cheese and smoky roasted poblano peppers',
-    equipment: ['Large skillet or comal', 'Gas burner or broiler for roasting', 'Pizza wheel or knife'],
-    storageInstructions: 'Best eaten immediately. Can be reheated in a dry skillet for 1-2 minutes per side.',
-    culturalContext: 'A beloved Mexican comfort food, quesadillas originated in central Mexico and showcase the magic of good cheese and chiles.',
-    voiceIntro: 'Ay, mijo! Quick and delicious - my cheesy abrazo that warms the heart. Fire-roasted poblanos make all the difference.',
+    servings: 2,
+    description: 'Simple and delicious melted cheese in warm tortillas',
+    voiceIntro: "¡Órale! Let's make some delicious quesadillas, mi amor. Simple but so, so good when done right!",
+    displayTips: [
+      "Don't overfill - the filling will spill out",
+      "Let the tortilla get golden brown before flipping"
+    ],
+    stepVoiceTips: {
+      2: "Don't put too much filling or it will spill everywhere - less is more!",
+      3: "Let the tortilla get golden brown before flipping - patience, mija!",
+      4: "Always serve immediately while the cheese is still melty and perfect"
+    },
     voiceTips: [
-      'The peppers must sing when they hit the flame - listen for that crackling, it means the skin is charring perfectly',
-      'Don\'t rush the onions, let them caramelize slowly like sweet patience',
-      'Fold the tortilla like tucking in a baby - gentle but secure, we don\'t want the cheese escaping',
-      'Medium heat, mijo - too hot and the outside burns before the cheese melts',
-      'Fresh lime juice brightens everything - squeeze it right before eating, like sunshine on your tongue',
-      'The cheese should stretch when you pull apart the quesadilla - that\'s how you know it\'s perfect!'
+      "Don't put too much filling or it will spill everywhere - less is more!",
+      "Let the tortilla get golden brown before flipping - patience, mija!",
+      "Always serve immediately while the cheese is still melty and perfect"
     ],
-    subsNote: 'No poblanos? Use Anaheim or bell peppers, but poblanos give the authentic smoky flavor. Oaxaca cheese is traditional, but Monterey Jack or mozzarella work fine.',
     voiceEnabled: true
   },
   {
     id: 'chicken-tinga',
-    title: 'Chicken Tinga Tacos',
-    cookingTime: '35 min',
-    cookTimeMin: 35,
+    title: 'Chicken Tinga',
+    cookingTime: '45 min',
+    cookTimeMin: 45,
     prepTimeMin: 15,
     difficulty: 'MEDIUM',
     category: 'EVERYDAY',
@@ -396,72 +390,49 @@ export const recipes: Recipe[] = [
     mamaName: 'Abuela Rosa',
     mamaEmoji: '🌶️',
     ingredients: [
-      '2 lbs (900g) bone-in chicken thighs, skin removed',
-      '1 large white onion, divided (half for poaching, half sliced)',
-      '3 cloves garlic, divided',
-      '1 bay leaf',
-      '1 teaspoon kosher salt, plus more to taste',
-      'FOR CHIPOTLE SAUCE:',
-      '3-4 chipotle chiles in adobo sauce, plus 2 tablespoons adobo sauce',
-      '4 large Roma tomatoes (about 2 lbs), cored',
-      '1/4 white onion (from above)',
-      '2 cloves garlic (from above)',
-      '1 teaspoon dried Mexican oregano',
-      '1/2 teaspoon ground cumin',
-      '1/4 teaspoon black pepper',
-      'FOR SERVING:',
-      '18-24 small corn tortillas, warmed',
-      '1 large white onion, finely diced',
-      '1 cup fresh cilantro, chopped',
-      'Mexican crema or sour cream',
-      'Lime wedges',
-      'Queso fresco, crumbled',
-      'Salsa verde (optional)'
+      '1kg chicken breasts or thighs',
+      '1 large white onion, halved',
+      '4 garlic cloves',
+      '2 bay leaves',
+      'FOR THE SAUCE:',
+      '3 chipotle chiles in adobo, plus 2 tbsp adobo sauce',
+      '400g crushed tomatoes',
+      '1 white onion, sliced',
+      '2 garlic cloves, minced',
+      'Salt and pepper to taste'
     ],
     instructions: [
-      'Place chicken thighs in large pot with half the onion, 1 garlic clove, bay leaf, and salt. Cover with water by 2 inches',
-      'Bring to boil, then reduce heat to gentle simmer. Cook 25-30 minutes until chicken is very tender and easily shredded',
-      'Remove chicken and let cool. Reserve 1 cup of the flavorful poaching liquid. Shred chicken into bite-sized pieces, discarding bones',
-      'Meanwhile, char tomatoes directly over gas flame or under broiler until blackened and blistered all over',
-      'Place charred tomatoes, chipotles, adobo sauce, remaining onion quarter, and 2 garlic cloves in blender',
-      'Add oregano, cumin, black pepper, and 1/2 cup reserved poaching liquid. Blend until smooth',
-      'Heat 2 tablespoons oil in large skillet over medium-high heat. Add blended sauce (it will splatter - be careful!)',
-      'Cook sauce, stirring frequently, for 10-12 minutes until thickened and darkened in color',
-      'Add shredded chicken to sauce, tossing to coat completely. Add more poaching liquid if needed for proper consistency',
-      'Simmer 5 minutes to meld flavors. Taste and adjust salt. The tinga should be moist but not soupy',
-      'Warm tortillas on comal or dry skillet until pliable and slightly charred',
-      'Serve tinga in warm tortillas with diced onion, cilantro, crema, lime wedges, and queso fresco'
+      'Poach chicken with onion, garlic, and bay leaves until tender',
+      'Reserve cooking liquid, shred chicken when cool enough to handle',
+      'Blend chipotles, adobo sauce, and tomatoes until smooth',
+      'Sauté sliced onion and garlic until soft and golden',
+      'Add chipotle sauce, simmer until reduced and thickened',
+      'Add shredded chicken, mix well and simmer 10 minutes',
+      'Season with salt and pepper, serve in tacos or tostadas'
     ],
     servings: 6,
-    description: 'Smoky Pueblan classic - tender shredded chicken bathed in rich chipotle-tomato sauce, perfect for tacos',
-    equipment: ['Large pot for poaching', 'Blender', 'Large skillet', 'Comal or heavy skillet'],
-    storageInstructions: 'Refrigerate up to 4 days or freeze up to 3 months. Reheat gently, adding poaching liquid if dry.',
-    culturalContext: 'Born in Puebla, tinga showcases the Mexican mastery of chiles - transforming humble chicken into smoky perfection.',
-    voiceIntro: 'Ay, mijo! Today we make tinga like my abuela in Puebla - fire-kissed tomatoes and smoky chipotles dancing together.',
-    voiceTips: [
-      'The chicken must be so tender it falls apart at your touch - this is the foundation of good tinga',
-      'Char those tomatoes until they\'re blackened like coal - this gives the sauce its deep, complex flavor',
-      'Listen when the sauce hits the hot pan - it should sizzle and pop like tiny fireworks',
-      'Save that poaching liquid, it\'s liquid gold - full of chicken flavor to thin your sauce',
-      'The sauce should coat the chicken like a beautiful rebozo - not too wet, not too dry',
-      'Warm those tortillas until they puff like little pillows - cold tortillas are sad tortillas',
-      'Don\'t forget the lime, mijo - it brightens everything like sunshine after rain'
+    description: 'Smoky shredded chicken in chipotle tomato sauce - perfect for tacos',
+    voiceIntro: "¡Ay, qué rico! Chicken Tinga is one of my favorites. Perfect for tacos, tostadas, anything you want!",
+    displayTips: [
+      "Don't shred the chicken too fine - you want texture",
+      "This tastes even better the next day!"
     ],
-    subsNote: 'Rotisserie chicken works in a pinch - use 3 cups shredded meat and chicken broth instead of poaching liquid. Chipotle chiles in adobo are essential - find them in the international aisle.',
+    stepVoiceTips: {
+      2: "Save some cooking liquid - if it gets too dry, add a little back in",
+      4: "Don't shred the chicken too fine - you want some texture, not chicken fluff!",
+      5: "Let the chipotle sauce reduce well - this concentrates all those beautiful smoky flavors",
+      6: "This tastes even better the next day - make extra for leftovers!"
+    },
+    voiceTips: [
+      "Don't shred the chicken too fine - you want some texture, not chicken fluff!",
+      "Let the chipotle sauce reduce well - this concentrates all those beautiful smoky flavors",
+      "Save some cooking liquid - if it gets too dry, add a little back in",
+      "This tastes even better the next day - make extra for leftovers!"
+    ],
     voiceEnabled: true,
-    stepTimers: [
-      null, // Place chicken in pot - no timer
-      { display: '25-30 min', duration: 1650, description: 'Tender easily shredded chicken' }, // Poach chicken
-      null, // Remove and shred - no timer
-      { display: '~8 min', duration: 480, description: 'Blackened and blistered all over' }, // Char tomatoes
-      null, // Blend sauce ingredients - no timer
-      null, // Heat oil - no timer
-      { display: '10-12 min', duration: 660, description: 'Thickened and darkened sauce' }, // Cook sauce
-      null, // Add chicken - no timer
-      { display: '5 min', duration: 300, description: 'Flavors melded' }, // Simmer together
-      null, // Warm tortillas - no timer
-      null // Serve - no timer
-    ]
+    equipment: ['Large pot', 'Blender', 'Large skillet', 'Two forks for shredding', 'Strainer'],
+    storageInstructions: "Chicken tinga keeps in refrigerator for up to 5 days and actually improves in flavor. Can be frozen for up to 3 months. Reheat gently, adding a splash of the reserved cooking liquid if needed.",
+    culturalContext: "Tinga originates from Puebla, Mexico. The word 'tinga' comes from the Nahuatl word meaning 'to mix' or 'to stir.' This dish showcases the Mexican love affair with chipotle chiles - jalapeños that have been smoked and dried, giving incredible depth of flavor."
   },
   {
     id: 'enchiladas-verdes',
@@ -470,83 +441,6 @@ export const recipes: Recipe[] = [
     cookTimeMin: 40,
     prepTimeMin: 20,
     difficulty: 'MEDIUM',
-    category: 'EVERYDAY',
-    contentType: 'MEAT',
-    image: '/placeholder.svg',
-    mamaId: 2,
-    mamaName: 'Abuela Rosa',
-    mamaEmoji: '🌶️',
-    ingredients: [
-      'FOR SALSA VERDE:',
-      '2 lbs (900g) fresh tomatillos, husks removed',
-      '2-3 serrano chiles (adjust for heat preference)',
-      '1/2 large white onion, quartered',
-      '4 cloves garlic, unpeeled',
-      '1/2 cup fresh cilantro stems and leaves',
-      '1 teaspoon kosher salt, plus more to taste',
-      'FOR ENCHILADAS:',
-      '12 corn tortillas (6-inch, preferably day-old)',
-      '3 cups cooked chicken, shredded (rotisserie works)',
-      '1 cup vegetable oil for frying tortillas',
-      '2 cups (8oz) Monterey Jack cheese, shredded',
-      '1 cup (4oz) queso fresco, crumbled',
-      '1/2 cup Mexican crema or sour cream',
-      '1/4 cup white onion, finely diced',
-      '1/4 cup fresh cilantro, chopped',
-      'Lime wedges for serving'
-    ],
-    instructions: [
-      'Preheat broiler. Place tomatillos, serranos, onion quarters, and unpeeled garlic on sheet pan',
-      'Broil 5-8 minutes until tomatillos are charred and softened, turning vegetables once halfway through',
-      'Remove charred skin from garlic. Place all roasted vegetables in blender with cilantro and salt',
-      'Blend until smooth but still slightly chunky. Taste and adjust salt - should be bright and tangy',
-      'Pour salsa into large saucepan, bring to simmer over medium heat. Cook 10 minutes to concentrate flavors',
-      'Meanwhile, heat oil in small skillet over medium heat. Quickly fry each tortilla 30 seconds per side until pliable',
-      'Drain tortillas on paper towels. This step is crucial - it prevents tortillas from dissolving in sauce',
-      'Preheat oven to 350°F (175°C). Pour thin layer of salsa verde in bottom of 9x13-inch baking dish',
-      'Working one at a time, dip each fried tortilla in warm salsa, fill with chicken and small amount of Monterey Jack',
-      'Roll tightly and place seam-side down in baking dish. Repeat with remaining tortillas',
-      'Pour remaining salsa over enchiladas, sprinkle with remaining Monterey Jack cheese',
-      'Bake 20-25 minutes until cheese melts and sauce is bubbling around edges',
-      'Remove from oven, immediately sprinkle with queso fresco, drizzle with crema, and garnish with diced onion and cilantro'
-    ],
-    servings: 6,
-    description: 'Traditional Mexican comfort - corn tortillas filled with tender chicken, bathed in bright tomatillo salsa and melted cheese',
-    equipment: ['Sheet pan for roasting', 'Blender', 'Large saucepan', 'Small skillet for frying', '9x13-inch baking dish'],
-    storageInstructions: 'Best eaten immediately. Leftovers keep 2 days refrigerated - reheat covered in 350°F oven.',
-    culturalContext: 'Enchiladas verdes represent the soul of Mexican home cooking - simple ingredients transformed into comfort through tradition.',
-    voiceIntro: 'Mira, mi amor! Today we make enchiladas like the old country - tomatillos kissed by fire, corn tortillas blessed with oil.',
-    voiceTips: [
-      'The tomatillos must char until they blister - this gives the salsa its deep, smoky flavor',
-      'Never skip frying the tortillas - this ancient technique keeps them from falling apart',
-      'Day-old tortillas are perfect - too fresh and they\'ll tear, too old and they\'ll crumble',
-      'The salsa should taste bright and alive - add more salt if it tastes flat',
-      'Roll them tight like precious bundles - loose enchiladas fall apart in the oven',
-      'Fresh crema at the end is like dewdrops on morning flowers - it cools and completes',
-      'Serve immediately while the cheese still bubbles - enchiladas wait for no one'
-    ],
-    subsNote: 'No fresh tomatillos? Use 2 cans (28oz each) whole tomatillos, drained. For quicker prep, use rotisserie chicken. Serrano heat varies - start with 1 chile and add more to taste.',
-    voiceEnabled: true,
-    stepTimers: [
-      null, // Preheat broiler - no timer
-      { display: '5-8 min', duration: 390, description: 'Charred and softened vegetables' }, // Broil vegetables
-      null, // Blend salsa - no timer
-      { display: '10 min', duration: 600, description: 'Concentrated flavors' }, // Simmer salsa
-      { display: '~8 min', duration: 480, description: 'Pliable fried tortillas' }, // Fry tortillas
-      null, // Prep baking dish - no timer
-      null, // Fill and roll enchiladas - no timer
-      null, // Top with sauce and cheese - no timer
-      { display: '20-25 min', duration: 1350, description: 'Melted cheese and bubbling sauce' }, // Bake
-      null // Garnish and serve - no timer
-    ]
-  },
-  {
-    id: 'pozole-rojo',
-    title: 'Pozole Rojo',
-    cookingTime: '2 hours',
-    cookTimeMin: 120,
-    prepTimeMin: 30,
-    difficulty: 'ADVANCED',
     category: 'WEEKEND',
     contentType: 'MEAT',
     image: '/placeholder.svg',
@@ -554,87 +448,61 @@ export const recipes: Recipe[] = [
     mamaName: 'Abuela Rosa',
     mamaEmoji: '🌶️',
     ingredients: [
-      'FOR THE BROTH:',
-      '3 lbs (1.4kg) pork shoulder, cut into 2-inch chunks',
-      '1 lb (450g) pork ribs (for extra flavor)',
-      '1 large white onion, quartered',
-      '6 cloves garlic, smashed',
-      '2 bay leaves',
-      '1 tablespoon kosher salt, plus more to taste',
-      'FOR THE CHILE SAUCE:',
-      '6 guajillo chiles, stemmed and seeded',
-      '4 ancho chiles, stemmed and seeded',
-      '2 chipotle chiles (optional, for smokiness)',
-      '3 Roma tomatoes',
-      '1/2 white onion',
-      '4 cloves garlic',
-      '1 teaspoon dried Mexican oregano',
-      '1/2 teaspoon ground cumin',
-      '1/4 teaspoon black pepper',
+      'FOR THE SALSA VERDE:',
+      '1kg fresh tomatillos, husked',
+      '2-3 serrano chiles',
+      '1 white onion, quartered',
+      '4 garlic cloves',
+      '1/2 cup fresh cilantro',
       'FOR ASSEMBLY:',
-      '2 cans (30oz each) white hominy, drained and rinsed',
-      'FOR GARNISHES:',
-      'Shredded iceberg lettuce',
-      'Sliced radishes',
-      'Diced white onion',
-      'Fresh cilantro, chopped',
-      'Dried oregano for sprinkling',
-      'Lime wedges',
-      'Chile piquín or cayenne pepper',
-      'Crispy pork chicharrón, crushed',
-      'Tostadas or warm corn tortillas'
+      '12 corn tortillas',
+      '500g cooked chicken, shredded',
+      '200g Mexican crema or sour cream',
+      '300g queso fresco or Monterey Jack, crumbled',
+      '1/4 white onion, thinly sliced'
     ],
     instructions: [
-      'Place pork shoulder and ribs in large stockpot with quartered onion, smashed garlic, bay leaves, and salt',
-      'Cover with water by 3 inches, bring to boil. Reduce heat and simmer gently 1.5-2 hours until pork is fork-tender',
-      'Remove meat and strain broth, discarding solids. Let meat cool, then shred into bite-sized pieces. Reserve 6-8 cups broth',
-      'Meanwhile, heat dry skillet over medium heat. Toast guajillo and ancho chiles until fragrant and pliable, about 2 minutes per side',
-      'Place toasted chiles in bowl, cover with hot water. Soak 20 minutes until softened',
-      'Char tomatoes, onion half, and garlic cloves directly over gas flame or under broiler until blackened',
-      'Drain chiles and place in blender with charred vegetables, oregano, cumin, and pepper',
-      'Add 1 cup of the reserved pork broth and blend until completely smooth. Strain through fine-mesh sieve',
-      'In the same stockpot, heat strained chile sauce over medium heat. Cook 15-20 minutes, stirring frequently, until thickened',
-      'Add reserved pork broth and shredded meat. Bring to simmer and cook 30 minutes for flavors to meld',
-      'Add hominy and simmer 15 more minutes. Taste and adjust salt - pozole should be rich and well-seasoned',
-      'Serve hot in large bowls with garnishes arranged on platters for everyone to customize their bowl'
+      'Char tomatillos, chiles, onion, and garlic under broiler until blackened',
+      'Blend charred vegetables with cilantro and salt until smooth',
+      'Simmer salsa verde for 15 minutes until slightly thickened',
+      'Warm tortillas in dry pan or microwave until pliable',
+      'Fill tortillas with chicken, roll tightly, place seam-side down',
+      'Pour salsa verde over enchiladas, add dollops of crema',
+      'Sprinkle with cheese and onion slices',
+      'Bake at 180°C for 15 minutes until heated through and bubbly'
     ],
-    servings: 8,
-    description: 'Sacred Mexican celebration soup - tender pork and plump hominy in rich red chile broth, crowned with fresh garnishes',
-    equipment: ['Large stockpot (8+ quarts)', 'Dry skillet for toasting', 'Blender', 'Fine-mesh strainer'],
-    storageInstructions: 'Refrigerate up to 4 days or freeze up to 3 months. Store garnishes separately. Pozole tastes better the next day.',
-    culturalContext: 'Ancient Aztec ceremonial dish, pozole connects us to pre-Hispanic Mexico - each kernel of hominy represents abundance and gratitude.',
-    voiceIntro: 'Ay, mijo! Today we make pozole like the ancients - sacred corn, noble pork, and chiles that sing. This is Mexico in a bowl.',
+    servings: 4,
+    description: 'Corn tortillas filled with chicken and smothered in bright green tomatillo salsa',
+    voiceIntro: "¡Mira! Enchiladas Verdes are pure comfort food. The green sauce is everything - bright, fresh, with just the right kick!",
+    displayTips: [
+      "Don't skip charring the tomatillos - this adds depth to your salsa",
+      "Warm your tortillas well so they don't crack when rolling"
+    ],
+    stepVoiceTips: {
+      1: "Don't skip charring the tomatillos - this adds so much depth to your salsa verde",
+      4: "Warm your tortillas well so they don't crack when rolling - nobody wants broken enchiladas!",
+      5: "Don't roll them too tight - the filling needs room to expand when heated",
+      6: "Use Mexican crema if you can find it - it's richer than sour cream",
+      7: "Fresh cheese like queso fresco is traditional, but Monterey Jack melts beautifully too"
+    },
     voiceTips: [
-      'Listen for the hominy to pop and bloom - this tells you it\'s perfectly heated through',
-      'Toast those chiles until they smell like heaven - but don\'t burn them or they\'ll taste bitter',
-      'The broth should be rich enough to coat a spoon - this comes from the bones and long simmering',
-      'Char those vegetables until they\'re blackened - this gives the sauce its deep, complex flavor',
-      'Strain that chile sauce smooth as silk - no one wants chunks in their pozole',
-      'Everyone builds their own bowl - this is part of the ceremony, the sharing, the love',
-      'Save some broth for leftovers - pozole is even better the next day when flavors marry'
+      "Don't skip charring the tomatillos - this adds so much depth to your salsa verde",
+      "Warm your tortillas well so they don't crack when rolling - nobody wants broken enchiladas!",
+      "Don't roll them too tight - the filling needs room to expand when heated",
+      "Use Mexican crema if you can find it - it's richer than sour cream",
+      "Fresh cheese like queso fresco is traditional, but Monterey Jack melts beautifully too"
     ],
-    subsNote: 'For quicker version, use rotisserie chicken and chicken broth - simmer 30 minutes total. Dried hominy is traditional but canned saves hours. Freeze leftover chile sauce for future batches.',
     voiceEnabled: true,
-    stepTimers: [
-      null, // Place meat in pot - no timer
-      { display: '1.5-2 hours', duration: 6300, description: 'Fork-tender pork' }, // Simmer meat
-      null, // Remove and shred meat - no timer
-      { display: '~4 min', duration: 240, description: 'Fragrant and pliable chiles' }, // Toast chiles
-      { display: '20 min', duration: 1200, description: 'Softened chiles' }, // Soak chiles
-      { display: '~8 min', duration: 480, description: 'Blackened vegetables' }, // Char vegetables
-      null, // Blend chile sauce - no timer
-      { display: '15-20 min', duration: 1050, description: 'Thickened chile sauce' }, // Cook sauce
-      { display: '30 min', duration: 1800, description: 'Flavors melded' }, // Simmer with broth
-      { display: '15 min', duration: 900, description: 'Heated hominy' }, // Add hominy
-      null // Serve with garnishes - no timer
-    ]
+    equipment: ['Baking sheet', 'Blender', 'Large saucepan', '23x33cm baking dish', 'Tongs'],
+    storageInstructions: "Assembled enchiladas can be covered and refrigerated for up to 2 days before baking. Leftover baked enchiladas keep for 3-4 days. Reheat covered in oven to prevent drying out.",
+    culturalContext: "Enchiladas verdes showcase the versatility of tomatillos, Mexico's ancient green tomato. The technique of charring vegetables before blending is fundamental to Mexican cooking, adding layers of smoky complexity that can't be achieved any other way."
   },
   {
-    id: 'mole-poblano',
-    title: 'Mole Poblano',
+    id: 'pozole-rojo',
+    title: 'Pozole Rojo',
     cookingTime: '3 hours',
     cookTimeMin: 180,
-    prepTimeMin: 45,
+    prepTimeMin: 30,
     difficulty: 'ADVANCED',
     category: 'CELEBRATION',
     contentType: 'MEAT',
@@ -643,96 +511,137 @@ export const recipes: Recipe[] = [
     mamaName: 'Abuela Rosa',
     mamaEmoji: '🌶️',
     ingredients: [
-      'FOR THE CHILES:',
-      '6 mulato chiles, stemmed and seeded',
+      '2kg pork shoulder, cut in large chunks',
+      '500g pork ribs',
+      '1 white onion, quartered',
+      '6 garlic cloves',
+      '2 bay leaves',
+      'FOR THE CHILE SAUCE:',
+      '6 guajillo chiles, stemmed and seeded',
       '4 ancho chiles, stemmed and seeded',
-      '4 pasilla chiles, stemmed and seeded',
       '2 chipotle chiles, stemmed and seeded',
-      'FOR AROMATICS:',
       '3 Roma tomatoes',
-      '1/4 white onion',
-      '6 cloves garlic, unpeeled',
-      '1 corn tortilla, torn into pieces',
-      '2 slices day-old bread, crusts removed',
-      'FOR NUTS AND SEEDS:',
-      '1/4 cup almonds, blanched',
-      '1/4 cup raisins',
-      '2 tablespoons sesame seeds',
-      '2 tablespoons pumpkin seeds (pepitas)',
-      'FOR SPICES:',
-      '1/4 teaspoon anise seeds',
-      '1/4 teaspoon black peppercorns',
-      '3 whole cloves',
-      '1/2 cinnamon stick (Mexican canela)',
-      '1/2 teaspoon dried Mexican oregano',
-      'FOR THE MOLE:',
-      '2 tablets (3oz each) Mexican chocolate, chopped',
-      '2 tablespoons lard or vegetable oil',
-      '2 teaspoons kosher salt, plus more to taste',
-      '1 tablespoon brown sugar (adjust to taste)',
-      '4-6 cups warm chicken broth',
-      'FOR SERVING:',
-      '1 whole chicken (4 lbs), cut into pieces, or 8 chicken thighs',
-      'Warm corn tortillas',
-      'Mexican rice',
-      'Sesame seeds for garnish'
+      'GARNISHES:',
+      '800g prepared hominy, drained',
+      'Thinly sliced cabbage',
+      'Diced onion',
+      'Lime wedges',
+      'Dried oregano',
+      'Red pepper flakes'
     ],
     instructions: [
-      'Toast chiles in dry skillet over medium heat until fragrant and pliable, about 2 minutes per side. Don\'t burn!',
-      'Place toasted chiles in large bowl, cover with hot water. Soak 30 minutes until completely softened',
-      'Meanwhile, char tomatoes, onion, and unpeeled garlic over gas flame or under broiler until blackened all over',
-      'In same dry skillet, toast tortilla pieces and bread until golden. Set aside to cool',
-      'Toast almonds, sesame seeds, and pumpkin seeds until fragrant. Toast spices separately until aromatic',
-      'Drain chiles, reserving soaking liquid. Working in batches, blend chiles with 1-2 cups soaking liquid until smooth',
-      'Strain chile mixture through fine-mesh sieve, pressing solids. This is your chile base',
-      'Peel charred garlic. Blend tomatoes, onion, garlic, toasted bread, tortilla, nuts, seeds, raisins, and spices with 1 cup broth',
-      'Strain this mixture as well. You now have two bases that will become mole',
-      'Heat lard in large heavy pot over medium heat. Fry chile base 20 minutes, stirring constantly to prevent burning',
-      'Add the aromatics mixture and fry 15 more minutes, stirring frequently. Mixture should be thick and dark',
-      'Add chopped chocolate, salt, and sugar. Stir until chocolate melts completely',
-      'Gradually add warm broth, whisking constantly, until mole reaches coating consistency - like heavy cream',
-      'Simmer 30-45 minutes, stirring occasionally. Taste and adjust salt, sugar, and chocolate',
-      'Meanwhile, season chicken and poach in salted water until cooked through, about 25 minutes',
-      'Add cooked chicken to mole and simmer 10 minutes. Mole should coat chicken pieces beautifully',
-      'Serve immediately with warm tortillas, rice, and sesame seeds. Mole improves with age - make day ahead if possible'
+      'Simmer pork shoulder and ribs with onion, garlic, and bay leaves for 2 hours',
+      'Toast dried chiles in dry pan until puffed and fragrant',
+      'Soak toasted chiles in hot water for 20 minutes until softened',
+      'Blend soaked chiles with tomatoes and soaking liquid until smooth',
+      'Strain chile sauce to remove any remaining bits',
+      'Add chile sauce and hominy to pork broth, simmer 30 minutes',
+      'Shred pork when cool enough to handle, return to pot',
+      'Serve hot with garnishes on the side for everyone to customize'
     ],
     servings: 8,
-    description: 'Mexico\'s national treasure - complex symphony of chiles, chocolate, and spices requiring patience, love, and 30+ ingredients',
-    equipment: ['Large heavy pot or Dutch oven', 'Dry skillet for toasting', 'Blender', 'Fine-mesh strainer', 'Whisk'],
-    storageInstructions: 'Refrigerate up to 1 week or freeze up to 6 months. Mole actually improves after a day. Thin with broth when reheating.',
-    culturalContext: 'Born in Puebla convents, mole poblano represents the fusion of indigenous and Spanish ingredients - Mexico\'s culinary soul on a plate.',
-    voiceIntro: 'Ay, Dios mío! Today we make mole - the soul of Mexico, thirty ingredients singing together. Clear your day, call your familia, this is sacred work.',
-    voiceTips: [
-      'Every chile must sing when it hits the hot pan - listen for that gentle sizzle, not harsh burning',
-      'The soaking water is precious - it holds the chile\'s essence, use it in your blending',
-      'Char those vegetables until they\'re black as midnight - this gives mole its deep, mysterious flavor',
-      'Toast everything separately - each ingredient needs its own time to release perfume',
-      'When you fry the bases, stir constantly like stirring love into the pot - mole burns easily',
-      'The chocolate is the bridge between earth and heaven - it marries all the flavors',
-      'Patience, mi amor - mole cannot be rushed, only coaxed into perfection',
-      'Taste and adjust like tuning a mariachi band - every note must be in harmony'
+    description: 'Traditional Mexican soup with pork, hominy, and red chile broth - perfect for celebrations',
+    voiceIntro: "¡Ay, Pozole! This is celebration food, weekend food. Takes time but fills the heart and belly with happiness!",
+    displayTips: [
+      "Toast your chiles until they puff but don't burn them",
+      "Skim the foam from the pork broth for clear pozole"
     ],
-    subsNote: 'For beginners, start with quality mole paste (Doña María or Masienda) - add chocolate, nuts, and broth to customize. This recipe makes extra sauce - freeze portions for future meals.',
+    stepVoiceTips: {
+      2: "Toast your chiles until they puff but don't let them burn - bitter chiles ruin everything!",
+      3: "Skim the foam from the pork broth - this keeps your pozole clear and clean",
+      5: "Don't add the hominy too early - it can get mushy if overcooked",
+      6: "If you can't find dried chiles, use chipotle in adobo but reduce the quantity",
+      7: "Let people garnish their own bowls - everyone likes different amounts of everything",
+      8: "Save some chile broth separately - some people like their pozole extra spicy!"
+    },
+    voiceTips: [
+      "Toast your chiles until they puff but don't let them burn - bitter chiles ruin everything!",
+      "Skim the foam from the pork broth - this keeps your pozole clear and clean",
+      "Don't add the hominy too early - it can get mushy if overcooked",
+      "Let people garnish their own bowls - everyone likes different amounts of everything",
+      "If you can't find dried chiles, use chipotle in adobo but reduce the quantity",
+      "Save some chile broth separately - some people like their pozole extra spicy!"
+    ],
     voiceEnabled: true,
-    stepTimers: [
-      { display: '~8 min', duration: 480, description: 'Fragrant pliable chiles' }, // Toast chiles
-      { display: '30 min', duration: 1800, description: 'Completely softened chiles' }, // Soak chiles
-      { display: '~10 min', duration: 600, description: 'Blackened vegetables' }, // Char vegetables
-      { display: '~5 min', duration: 300, description: 'Golden toasted bread' }, // Toast bread/tortilla
-      { display: '~6 min', duration: 360, description: 'Fragrant nuts, seeds, and spices' }, // Toast nuts/seeds
-      null, // Blend chile base - no timer
-      null, // Strain chile base - no timer
-      null, // Blend aromatics mixture - no timer
-      null, // Strain aromatics - no timer
-      { display: '20 min', duration: 1200, description: 'Deep red bubbling chile base' }, // Fry chile base
-      { display: '15 min', duration: 900, description: 'Thick dark aromatic mixture' }, // Fry aromatics
-      null, // Add chocolate - no timer
-      null, // Add broth gradually - no timer
-      { display: '30-45 min', duration: 2250, description: 'Rich coating consistency' }, // Simmer mole
-      { display: '25 min', duration: 1500, description: 'Cooked through chicken' }, // Poach chicken
-      { display: '10 min', duration: 600, description: 'Chicken coated with mole' }, // Finish with chicken
-      null // Serve - no timer
-    ]
+    equipment: ['Very large pot', 'Blender', 'Fine-mesh strainer', 'Ladle', 'Small bowls for garnishes', 'Comal or heavy skillet'],
+    storageInstructions: "Pozole improves with time and keeps for up to 5 days refrigerated. Store garnishes separately. Can be frozen (without garnishes) for up to 3 months. The hominy may absorb more liquid when stored - add broth when reheating.",
+    culturalContext: "Pozole has ancient Aztec origins and was considered sacred, traditionally served during religious ceremonies. The word comes from Nahuatl 'pozolli' meaning 'foam.' Red pozole represents one of the three traditional colors, along with white and green."
+  },
+  {
+    id: 'mole-poblano',
+    title: 'Mole Poblano',
+    cookingTime: '4 hours',
+    cookTimeMin: 240,
+    prepTimeMin: 60,
+    difficulty: 'ADVANCED',
+    category: 'CELEBRATION',
+    contentType: 'MEAT',
+    image: '/placeholder.svg',
+    mamaId: 2,
+    mamaName: 'Abuela Rosa',
+    mamaEmoji: '🌶️',
+    ingredients: [
+      '1 whole turkey, cut into pieces (or large chicken)',
+      'FOR THE MOLE SAUCE:',
+      '6 ancho chiles',
+      '4 mulato chiles',
+      '2 pasilla chiles',
+      '2 chipotle chiles',
+      '4 tomatoes',
+      '6 tomatillos',
+      '1 white onion',
+      '8 garlic cloves',
+      '1/4 cup sesame seeds',
+      '1/4 cup pumpkin seeds',
+      '2 corn tortillas, torn',
+      '2 slices bread, torn',
+      '50g Mexican chocolate',
+      '1 tsp cinnamon',
+      '1/2 tsp anise seeds',
+      '4 cloves',
+      '1/2 tsp black peppercorns'
+    ],
+    instructions: [
+      'Toast each type of chile separately until puffed, soak in hot water',
+      'Char tomatoes, tomatillos, onion, and garlic until blackened',
+      'Toast seeds, tortillas, bread, and spices until fragrant',
+      'Blend everything in batches with chile soaking liquid until smooth',
+      'Strain mixture through fine-mesh sieve for silky texture',
+      'Fry mole paste in large pot for 30 minutes, stirring constantly',
+      'Add chocolate and simmer with turkey pieces for 1 hour',
+      'Adjust consistency with turkey broth as needed',
+      'Serve with warm tortillas and Mexican rice'
+    ],
+    servings: 10,
+    description: 'Mexico\'s national dish - complex sauce with chocolate, chiles, and spices over turkey',
+    voiceIntro: "¡Órale! Mole Poblano - the crown jewel of Mexican cuisine. This is not quick food, this is love food that takes time and patience.",
+    displayTips: [
+      "Toast each chile type separately - they have different timing",
+      "Make this a day ahead - mole improves overnight!"
+    ],
+    stepVoiceTips: {
+      1: "Toast each chile type separately - they all have different timing and you don't want any burnt",
+      4: "Save some turkey or chicken broth - you'll need it for consistency adjustments",
+      5: "If your mole gets too thick, thin with warm chicken broth, not water",
+      6: "Keep stirring when adding chocolate - it can seize if not mixed properly",
+      7: "Don't let the chocolate overpower - mole should be complex, not a chocolate sauce",
+      8: "Strain your mole if you want it completely smooth - traditional but optional",
+      9: "Make this a day ahead - mole improves overnight like a good relationship!"
+    },
+    voiceTips: [
+      "Toast each chile type separately - they all have different timing and you don't want any burnt",
+      "Don't let the chocolate overpower - mole should be complex, not a chocolate sauce",
+      "If your mole gets too thick, thin with warm chicken broth, not water",
+      "Make this a day ahead - mole improves overnight like a good relationship!",
+      "Strain your mole if you want it completely smooth - traditional but optional",
+      "Save some turkey or chicken broth - you'll need it for consistency adjustments",
+      "Keep stirring when adding chocolate - it can seize if not mixed properly"
+    ],
+    featured: true,
+    voiceEnabled: true,
+    equipment: ['Very large pot', 'Blender', 'Fine-mesh strainer', 'Comal or heavy skillet', 'Wooden spoon', 'Multiple bowls for ingredients'],
+    storageInstructions: "Mole improves with age and can be refrigerated for up to 1 week or frozen for 6 months. Store separately from meat when possible. Reheat gently, thinning with broth as needed. The chocolate may separate slightly when reheated - just stir well.",
+    culturalContext: "Legend says mole poblano was created by nuns at the Convent of Santa Rosa in Puebla to honor a visiting bishop. With over 20 ingredients, it represents the complexity and depth of Mexican cuisine. Each family guards their recipe secrets, passed down through generations."
   },
 
   // Mae Malai's Recipes
@@ -749,68 +658,40 @@ export const recipes: Recipe[] = [
     mamaId: 3,
     mamaName: 'Mae Malai',
     mamaEmoji: '🌿',
-    ingredients: [
-      '1 lb (450g) ground chicken or pork, coarsely ground',
-      '4-6 cloves garlic, minced',
-      '3-5 Thai bird\'s eye chilies, sliced (adjust for heat)',
-      '2 tablespoons vegetable oil',
-      '2 tablespoons fish sauce (nam pla)',
-      '1 tablespoon oyster sauce',
-      '1 tablespoon light soy sauce',
-      '1 teaspoon dark soy sauce (for color)',
-      '1 teaspoon brown sugar',
-      '2 large handfuls fresh Thai holy basil leaves (bai krapao)',
-      'FOR SERVING:',
-      '2 cups steamed jasmine rice',
-      '2 eggs for frying (optional but traditional)',
-      'Cucumber slices',
-      'Lime wedges',
-      'Additional chilies for garnish'
-    ],
+    ingredients: ['500g ground chicken', '4 cloves garlic', '2-3 bird\'s eye chilies', '2 tbsp vegetable oil', '2 tbsp fish sauce', '1 tbsp oyster sauce', '1 tbsp soy sauce', '1 tsp sugar', 'Thai holy basil leaves', 'Fried eggs for serving'],
     instructions: [
-      'Heat wok or large skillet over highest heat until smoking hot - this is crucial for authentic wok hei flavor',
-      'Add oil and immediately add minced garlic and sliced chilies. Stir-fry for 10-15 seconds until fragrant',
-      'Add ground chicken, breaking it apart with spatula. Stir-fry vigorously for 3-4 minutes until chicken changes color',
-      'Create well in center of wok. Add fish sauce, oyster sauce, both soy sauces, and brown sugar to the well',
-      'Quickly stir sauces together in the well, then toss everything to combine. Cook 2-3 more minutes until chicken is cooked through',
-      'Remove wok from heat. Immediately add Thai holy basil leaves and toss just until wilted - about 30 seconds',
-      'Meanwhile, if making fried eggs, fry in separate pan until edges are crispy and yolks still runny',
-      'Serve immediately over steamed rice topped with fried egg. Garnish with cucumber slices and lime wedges'
+      'Heat oil in wok over high heat',
+      'Add minced garlic and chilies, stir-fry until fragrant',
+      'Add ground chicken, breaking it up as it cooks',
+      'Season with fish sauce, oyster sauce, soy sauce, and sugar',
+      'Add holy basil leaves and toss until wilted',
+      'Serve over rice with fried egg on top'
     ],
     servings: 2,
-    description: 'Thailand\'s beloved street food - ground chicken stir-fried with holy basil, chilies, and aromatic sauces over rice',
-    equipment: ['Wok or large skillet', 'Separate pan for eggs', 'Rice cooker or pot'],
-    storageInstructions: 'Best eaten immediately while hot. Leftovers keep 2 days refrigerated - reheat in hot wok with splash of water.',
-    culturalContext: 'Thailand\'s most popular one-plate meal, pad krapao represents the perfect balance of flavors that defines Thai cuisine.',
-    voiceIntro: 'Sawadee ka! Today we cook with fire and holy basil - the flavor that makes every Thai person homesick. Fast cooking, big flavor!',
-    voiceTips: [
-      'Your wok must be smoking hot - this gives the dish its essential wok hei, the breath of the wok',
-      'Holy basil is not sweet basil - it has a spicy, almost clove-like flavor that makes this dish special',
-      'Don\'t overcook the basil - it should just wilt and release its perfume',
-      'The chicken should have some caramelization - high heat creates those delicious crispy bits',
-      'Taste your sauces before adding - balance sweet, salty, and umami like a symphony',
-      'The fried egg is traditional - crispy edges, runny yolk mixing with rice is heaven',
-      'Eat immediately while the basil is still bright - pad krapao waits for no one'
+    description: 'Spicy Thai stir-fry with holy basil - comfort food at its finest',
+    voiceIntro: "Sawasdee kha! Today we make Pad Krapao - Thai comfort food that is spicy, aromatic, and so satisfying. Very popular street food!",
+    displayTips: [
+      "Use Thai holy basil if you can find it - different from sweet basil",
+      "Don't be shy with the chilies - this dish should have heat!"
     ],
-    subsNote: 'Holy basil (bai krapao) is essential but hard to find - substitute with Thai sweet basil plus a pinch of mint and black pepper. Ground pork is equally traditional.',
-    voiceEnabled: true,
-    stepTimers: [
-      null, // Heat wok - no timer needed
-      { display: '10-15 sec', duration: 13, description: 'Fragrant garlic and chilies' }, // Aromatics
-      { display: '3-4 min', duration: 210, description: 'Chicken changes color' }, // Cook chicken
-      null, // Add sauces - no timer needed
-      { display: '2-3 min', duration: 150, description: 'Chicken cooked through' }, // Finish chicken
-      { display: '~30 sec', duration: 30, description: 'Wilted holy basil' }, // Add basil
-      { display: '2-3 min', duration: 150, description: 'Crispy edges, runny yolk' }, // Fry eggs
-      null // Serve immediately - no timer needed
-    ]
+    stepVoiceTips: {
+      2: "Don't be shy with the chilies - this dish should have some heat!",
+      3: "Cook the ground meat on high heat so it gets nice and crispy in places",
+      5: "Use Thai holy basil if you can find it - it has a different flavor than sweet basil"
+    },
+    voiceTips: [
+      "Use Thai holy basil if you can find it - it has a different flavor than sweet basil",
+      "Don't be shy with the chilies - this dish should have some heat!",
+      "Cook the ground meat on high heat so it gets nice and crispy in places"
+    ],
+    voiceEnabled: true
   },
   {
     id: 'green-curry',
-    title: 'Green Curry',
-    cookingTime: '35 min',
-    cookTimeMin: 35,
-    prepTimeMin: 20,
+    title: 'Thai Green Curry',
+    cookingTime: '30 min',
+    cookTimeMin: 30,
+    prepTimeMin: 15,
     difficulty: 'MEDIUM',
     category: 'EVERYDAY',
     contentType: 'MEAT',
@@ -819,142 +700,125 @@ export const recipes: Recipe[] = [
     mamaName: 'Mae Malai',
     mamaEmoji: '🌿',
     ingredients: [
-      '3-4 tablespoons Thai green curry paste (nam prik gaeng keow wan)',
-      '1 can (400ml/14oz) premium coconut milk, chilled overnight',
-      '1 lb (450g) boneless chicken thigh, cut into bite-sized pieces',
-      '6-8 small Thai eggplants (makheua phuang), quartered, or 1 large eggplant cubed',
-      '3-4 makrut lime leaves, torn into pieces',
-      '2-3 Thai bird\'s eye chilies, sliced (optional for extra heat)',
-      '2 tablespoons fish sauce (nam pla)',
-      '1 tablespoon palm sugar or brown sugar',
-      '1 red bell pepper, sliced into strips',
-      '1 cup fresh Thai basil leaves (horapa)',
-      '2 tablespoons vegetable oil',
-      'Steamed jasmine rice for serving'
+      '500g chicken thigh, sliced',
+      '400ml coconut milk',
+      '2-3 tbsp green curry paste',
+      '2 Thai eggplants, quartered',
+      '100g Thai basil leaves',
+      '2 kaffir lime leaves',
+      '2 tbsp fish sauce',
+      '1 tbsp palm sugar',
+      '2-3 bird\'s eye chilies'
     ],
     instructions: [
-      'Open chilled coconut milk can without shaking. Scoop out 3-4 tablespoons of thick cream from the top',
-      'Heat oil in a wok or heavy pan over medium-high heat. Add coconut cream and fry for 2-3 minutes until oil separates',
-      'Add green curry paste to the pan. Fry for 3-4 minutes, stirring constantly, until very fragrant and darker in color',
-      'Add chicken pieces and stir to coat with curry paste. Cook for 5-6 minutes until chicken changes color',
-      'Gradually add remaining coconut milk, stirring to combine. Bring to a gentle simmer',
-      'Add eggplant pieces and torn lime leaves. Simmer for 8-10 minutes until eggplant is tender',
-      'Season with fish sauce and palm sugar. Add bell pepper strips and simmer 2-3 minutes',
-      'Taste and adjust seasoning - it should be rich, aromatic, with balanced sweet, salty, and spicy notes',
-      'Remove from heat and stir in fresh Thai basil leaves until wilted',
-      'Serve immediately over steamed jasmine rice with extra basil and sliced chilies on the side'
+      'Fry curry paste in thick coconut cream until fragrant',
+      'Add chicken pieces and cook until sealed',
+      'Add remaining coconut milk gradually, stirring constantly',
+      'Add eggplant and simmer until tender',
+      'Season with fish sauce and palm sugar',
+      'Add basil leaves and lime leaves just before serving',
+      'Serve with jasmine rice'
     ],
     servings: 4,
-    description: 'Aromatic Thai green curry with tender chicken and vegetables in rich coconut sauce',
-    equipment: ['Wok or heavy-bottomed pan', 'Rice cooker or pot for rice', 'Sharp knife'],
-    storageInstructions: 'Refrigerate up to 3 days. Reheat gently, adding coconut milk if needed. Flavors improve overnight.',
-    culturalContext: 'Green curry represents the heart of Thai cuisine - balancing sweet, salty, sour, and spicy in perfect harmony.',
-    featured: true,
-    voiceIntro: 'Ah, green curry - like the jungle after monsoon rain. Today we create balance, the soul of Thai cooking.',
-    voiceTips: [
-      'Listen to the curry paste when it fries - it should bubble and release its perfume like flowers blooming',
-      'The coconut cream must be thick on top - this is the secret to proper oil separation',
-      'Don\'t rush the paste - let it fry until it darkens and smells like heaven',
-      'Add coconut milk slowly, like trust building between friends - gradual and gentle',
-      'Thai eggplant should be tender but not mushy - they\'ll continue cooking in the hot curry',
-      'Balance is everything - taste and adjust like tuning a beautiful song',
-      'Basil goes in last moment - we want the fresh perfume, not cooked leaves'
+    description: 'Creamy coconut curry with chicken, eggplant, and aromatic herbs',
+    voiceIntro: "Kha! Green curry is my specialty - creamy, spicy, and full of wonderful aromatics. The secret is in the paste!",
+    displayTips: [
+      "Don't add all coconut milk at once - add gradually",
+      "Taste and adjust - curry pastes vary in saltiness"
     ],
-    subsNote: 'No Thai eggplant? Use regular eggplant, salted and drained. Bottled curry paste works fine - Mae Pranom or Thai Kitchen brands are good. Sweet basil can substitute for Thai basil.',
-    voiceEnabled: true
+    stepVoiceTips: {
+      1: "Make your own curry paste if you have time - the flavor is so much better!",
+      2: "Don't add all the coconut milk at once - add gradually for better texture",
+      4: "Thai eggplant is traditional but regular eggplant works fine too",
+      6: "Taste and adjust - some curry pastes are saltier than others"
+    },
+    voiceTips: [
+      "Make your own curry paste if you have time - the flavor is so much better!",
+      "Don't add all the coconut milk at once - add gradually for better texture",
+      "Thai eggplant is traditional but regular eggplant works fine too",
+      "Taste and adjust - some curry pastes are saltier than others"
+    ],
+    featured: true,
+    voiceEnabled: true,
+    equipment: ['Wok or large pan', 'Wooden spoon', 'Mortar and pestle (for paste)', 'Sharp knife'],
+    culturalContext: "Green curry (Gaeng Keow Wan) is one of Thailand's most beloved dishes. The green color comes from fresh green chilies, and the balance of sweet, salty, and spicy represents the harmony central to Thai cooking philosophy."
   },
   {
     id: 'pad-thai',
     title: 'Pad Thai',
-    cookingTime: '35 min',
-    cookTimeMin: 35,
+    cookingTime: '20 min',
+    cookTimeMin: 20,
     prepTimeMin: 25,
     difficulty: 'MEDIUM',
-    category: 'EVERYDAY',
-    contentType: 'FISH',
+    category: 'QUICK',
+    contentType: 'MEAT',
     image: '/placeholder.svg',
     mamaId: 3,
     mamaName: 'Mae Malai',
     mamaEmoji: '🌿',
     ingredients: [
-      'FOR THE NOODLES:',
-      '8oz (225g) dried rice stick noodles (banh pho width)',
-      'Warm water for soaking',
+      '200g rice noodles (5mm wide)',
+      '200g prawns or chicken, sliced',
+      '2 eggs',
+      '100g firm tofu, cubed',
+      '2 tbsp vegetable oil',
       'FOR THE SAUCE:',
-      '3 tablespoons tamarind paste (or 2 tbsp lime juice + 1 tbsp rice vinegar)',
-      '3 tablespoons fish sauce (nam pla)',
-      '3 tablespoons palm sugar or brown sugar',
-      '1 tablespoon vegetable oil',
-      'FOR THE STIR-FRY:',
-      '3 tablespoons vegetable oil, divided',
-      '3 cloves garlic, minced',
-      '1/2 lb (225g) medium shrimp, peeled and deveined',
-      '2 large eggs, lightly beaten',
-      '1 cup firm tofu, cubed (optional)',
-      '3 green onions, cut into 2-inch pieces',
-      '2 cups fresh bean sprouts',
-      '2 tablespoons preserved turnip (chai po), chopped (optional)',
-      'FOR GARNISH:',
-      '1/4 cup roasted peanuts, roughly chopped',
-      '2 limes, cut into wedges',
-      '1/4 cup fresh cilantro, chopped',
-      'Extra bean sprouts',
-      'Sliced red chilies',
-      'Thai chili flakes (optional)'
+      '3 tbsp tamarind paste',
+      '3 tbsp fish sauce',
+      '3 tbsp palm sugar',
+      '1 tbsp soy sauce',
+      'GARNISHES:',
+      '100g bean sprouts',
+      '4 spring onions, cut in lengths',
+      '50g roasted peanuts, crushed',
+      'Lime wedges',
+      'Thai basil leaves'
     ],
     instructions: [
-      'Soak rice noodles in warm water 20-30 minutes until flexible but still firm. They should bend without breaking but not be mushy',
-      'While noodles soak, whisk together tamarind paste, fish sauce, and palm sugar until sugar dissolves completely',
-      'Heat wok or large skillet over high heat until smoking. Add 1 tablespoon oil and swirl to coat',
-      'Add minced garlic and stir-fry 15 seconds until fragrant. Add shrimp and cook 1-2 minutes until pink',
-      'Push shrimp to one side of wok. Add remaining oil to empty side, then pour in beaten eggs',
-      'Let eggs set for 30 seconds, then scramble gently. When almost set, mix with shrimp',
-      'Drain noodles well. Add noodles to wok and toss everything together for 1-2 minutes',
-      'Pour sauce mixture over noodles. Toss continuously for 2-3 minutes until noodles absorb sauce and become glossy',
-      'Add tofu (if using), green onions, half the bean sprouts, and preserved turnip. Toss for 1 minute',
-      'Taste and adjust - should be balanced sweet, sour, and salty. Add more of any sauce component as needed',
-      'Remove from heat. Serve immediately on plates garnished with peanuts, lime wedges, cilantro, and remaining bean sprouts',
-      'Provide extra lime, chilies, and chili flakes on the side for individual customization'
+      'Soak rice noodles in warm water until just flexible, drain',
+      'Mix all sauce ingredients until sugar dissolves',
+      'Heat oil in wok, scramble eggs and set aside',
+      'Fry tofu until golden, add prawns/chicken and cook through',
+      'Push everything to one side, add noodles and sauce',
+      'Toss everything together, add cooked eggs back in',
+      'Add half the bean sprouts and spring onions, toss briefly',
+      'Serve immediately with remaining garnishes and lime'
     ],
     servings: 2,
-    description: 'Thailand\'s national dish - silky rice noodles with shrimp, eggs, and bean sprouts in perfect sweet-sour-salty harmony',
-    equipment: ['Large wok or skillet', 'Large bowl for soaking noodles', 'Small whisk'],
-    storageInstructions: 'Best eaten immediately. Pad Thai doesn\'t reheat well - noodles become mushy. Make fresh each time.',
-    culturalContext: 'Created in the 1930s to promote Thai nationalism, Pad Thai showcases the Thai mastery of balancing fundamental flavors.',
-    voiceIntro: 'Ah, Pad Thai - our national treasure! Today we balance sweet, sour, salty like walking on silk thread. Every bite must sing harmony.',
-    voiceTips: [
-      'The noodles are like silk ribbons - soak until flexible but still with some bite',
-      'Your wok must breathe fire - high heat gives Pad Thai its essential smoky flavor',
-      'Don\'t scramble the eggs too much - let them stay in soft, silky curds',
-      'The sauce should coat every noodle like morning dew on lotus leaves',
-      'Taste and adjust - if too sweet add lime, too sour add sugar, too bland add fish sauce',
-      'Bean sprouts add the essential crunch - some raw, some cooked, this is the texture dance',
-      'Serve immediately while noodles still glisten - Pad Thai loses its soul when it waits'
+    description: 'Thailand\'s national dish - sweet, sour, and salty stir-fried noodles',
+    voiceIntro: "Sawasdee! Pad Thai is Thailand's most famous dish. Balance is everything - sweet, sour, salty, and just a little spicy!",
+    displayTips: [
+      "Have all ingredients prepped before you start - cooks very fast",
+      "Soak noodles in warm water until just flexible, don't overcook"
     ],
-    subsNote: 'No tamarind? Mix lime juice and rice vinegar. Dried shrimp can replace fresh. Vegetarian version: omit shrimp and fish sauce, use soy sauce and extra vegetables.',
+    stepVoiceTips: {
+      1: "Soak your rice noodles in warm water until just flexible - don't overcook them in water!",
+      2: "Have all ingredients prepped before you start - Pad Thai cooks very fast",
+      5: "Push ingredients to one side of wok when adding eggs - this way they set properly",
+      6: "Add tamarind paste gradually - some brands are more sour than others",
+      7: "If you can't find tamarind, substitute with lime juice and a tiny bit of vinegar",
+      8: "Bean sprouts should stay crunchy - add them at the very end"
+    },
+    voiceTips: [
+      "Soak your rice noodles in warm water until just flexible - don't overcook them in water!",
+      "Have all ingredients prepped before you start - Pad Thai cooks very fast",
+      "Push ingredients to one side of wok when adding eggs - this way they set properly",
+      "Add tamarind paste gradually - some brands are more sour than others",
+      "If you can't find tamarind, substitute with lime juice and a tiny bit of vinegar",
+      "Bean sprouts should stay crunchy - add them at the very end"
+    ],
     voiceEnabled: true,
-    stepTimers: [
-      { display: '20-30 min', duration: 1500, description: 'Flexible but firm noodles' }, // Soak noodles
-      null, // Make sauce - no timer
-      null, // Heat wok - no timer
-      { display: '~15 sec', duration: 15, description: 'Fragrant garlic' }, // Cook garlic
-      { display: '1-2 min', duration: 90, description: 'Pink cooked shrimp' }, // Cook shrimp
-      { display: '~30 sec', duration: 30, description: 'Set eggs before scrambling' }, // Cook eggs
-      { display: '1-2 min', duration: 90, description: 'Combined ingredients' }, // Toss noodles
-      { display: '2-3 min', duration: 150, description: 'Glossy sauce-coated noodles' }, // Add sauce
-      { display: '1 min', duration: 60, description: 'Heated through vegetables' }, // Add vegetables
-      null, // Taste and adjust - no timer
-      null, // Serve - no timer
-      null // Provide garnishes - no timer
-    ]
+    equipment: ['Large wok or skillet', 'Large bowl for soaking noodles', 'Small bowl for sauce', 'Wok spatula or tongs', 'Multiple small bowls for prep'],
+    storageInstructions: "Pad Thai is best served immediately but leftovers can be refrigerated for 1-2 days. Add a splash of water when reheating and stir gently. The noodles may clump together when cold - this is normal.",
+    culturalContext: "Created in the 1930s as part of a nationalist campaign to promote Thai identity, Pad Thai literally means 'Thai-style stir-fried noodles.' The dish perfectly embodies the Thai principle of balancing sweet, sour, salty, and spicy flavors in every bite."
   },
   {
     id: 'khao-soi',
-    title: 'Khao Soi',
-    cookingTime: '2 hours',
-    cookTimeMin: 120,
-    prepTimeMin: 30,
-    difficulty: 'ADVANCED',
+    title: 'Khao Soi Gai',
+    cookingTime: '45 min',
+    cookTimeMin: 45,
+    prepTimeMin: 20,
+    difficulty: 'MEDIUM',
     category: 'WEEKEND',
     contentType: 'MEAT',
     image: '/placeholder.svg',
@@ -962,171 +826,129 @@ export const recipes: Recipe[] = [
     mamaName: 'Mae Malai',
     mamaEmoji: '🌿',
     ingredients: [
-      'FOR THE CURRY PASTE:',
-      '6 dried New Mexico or guajillo chiles, stemmed and seeded',
-      '3 dried red Fresno chiles (or 2 tsp chili flakes)',
-      '4 shallots, sliced',
-      '6 cloves garlic, sliced',
-      '2-inch piece galangal or ginger, sliced',
-      '3 lemongrass stalks, tender parts only, sliced',
-      '1 tablespoon coriander seeds, toasted',
-      '1 teaspoon turmeric powder',
-      '1 teaspoon shrimp paste (optional)',
-      'FOR THE CURRY:',
-      '2 cans (14oz each) coconut milk, chilled overnight',
-      '2 lbs (900g) bone-in chicken thighs and drumsticks',
-      '2 cups chicken stock',
-      '3 tablespoons fish sauce',
-      '2 tablespoons palm sugar or brown sugar',
-      '1 tablespoon tamarind paste',
-      'FOR THE NOODLES:',
-      '1 lb (450g) fresh egg noodles (or dried wheat noodles)',
-      'Oil for deep frying',
-      'FOR GARNISHES:',
-      '4 shallots, thinly sliced',
-      '4 green onions, sliced',
-      '1/2 cup fresh cilantro, chopped',
+      '600g chicken thighs, bone-in',
+      '400ml coconut milk',
+      '500ml chicken stock',
+      '400g fresh egg noodles',
+      '3 tbsp Khao Soi curry paste (or red curry paste)',
+      '2 tbsp fish sauce',
+      '1 tbsp palm sugar',
+      '2 tbsp soy sauce',
+      'FOR GARNISH:',
+      '100g crispy fried noodles',
+      'Pickled mustard greens',
+      'Shallots, thinly sliced',
       'Lime wedges',
-      'Thai chili oil or chili flakes',
-      'Pickled mustard greens (dong choi), chopped'
+      'Chili oil',
+      'Fresh cilantro'
     ],
     instructions: [
-      'Soak dried chiles in hot water 20 minutes until softened. Drain and roughly chop',
-      'In mortar and pestle or food processor, pound/blend soaked chiles, shallots, garlic, galangal, lemongrass, coriander, turmeric, and shrimp paste into smooth paste',
-      'Open chilled coconut milk without shaking. Scoop out 1 cup thick cream from top',
-      'Heat thick coconut cream in large pot over medium heat. Fry until oil separates, about 5 minutes',
-      'Add curry paste and fry for 8-10 minutes, stirring constantly, until very fragrant and darkened',
-      'Add chicken pieces and brown on all sides, about 8 minutes total',
-      'Add remaining coconut milk, chicken stock, fish sauce, palm sugar, and tamarind paste',
-      'Bring to gentle simmer, cover partially, and cook 45 minutes until chicken is very tender',
-      'Meanwhile, cook fresh noodles in boiling water according to package directions. Drain and divide among serving bowls',
-      'Reserve a handful of cooked noodles. Heat oil to 350°F and deep fry reserved noodles until golden and crispy',
-      'Remove chicken from curry, shred meat from bones, and return to pot. Simmer 10 more minutes',
-      'Taste and adjust seasoning - should be rich, slightly sweet, with good depth of flavor',
-      'Ladle hot curry over noodles in bowls. Top with crispy fried noodles and arrange garnishes alongside',
-      'Serve immediately with pickled mustard greens, extra lime, and chili oil for each person to customize'
+      'Deep fry some fresh noodles until golden and crispy, set aside',
+      'Simmer chicken thighs in coconut milk and stock until tender',
+      'Remove chicken, shred meat, discard bones and skin',
+      'Fry curry paste in same pot until fragrant',
+      'Add coconut milk mixture back, bring to gentle simmer',
+      'Season with fish sauce, palm sugar, and soy sauce',
+      'Cook fresh noodles separately until just tender',
+      'Serve noodles in bowls, top with chicken, curry broth, and all garnishes'
     ],
     servings: 4,
-    description: 'Northern Thailand\'s iconic curry noodle soup - rich coconut curry with tender chicken over egg noodles, crowned with crispy noodles',
-    equipment: ['Mortar and pestle or food processor', 'Large heavy pot', 'Deep fryer or heavy pot for frying', 'Fine-mesh strainer'],
-    storageInstructions: 'Curry base keeps 4 days refrigerated. Store crispy noodles separately in airtight container. Assemble fresh for serving.',
-    culturalContext: 'Born in Chiang Mai from Burmese influences, Khao Soi represents northern Thailand\'s unique culinary identity - rich, warming, complex.',
-    voiceIntro: 'Sawadee ka! Today we travel north to Chiang Mai - where mountains meet curry in a bowl of golden comfort. This is soul food, Thai style.',
-    voiceTips: [
-      'The curry paste is the heart - pound until smooth as silk, this takes patience',
-      'Listen for the coconut cream to sing when oil separates - this is the foundation',
-      'Fry that paste until it\'s dark and fragrant like temple incense - don\'t rush this step',
-      'The chicken should fall off the bone - northern style is tender and rich',
-      'Crispy noodles are not optional - they add the textural magic that makes Khao Soi special',
-      'Each bowl should have layers - soft noodles, rich curry, tender chicken, crispy topping',
-      'Garnishes let everyone make it their own - this is part of the Khao Soi ceremony'
+    description: 'Northern Thai coconut curry noodle soup with crispy noodles on top',
+    voiceIntro: "Sawasdee kha! Khao Soi is northern Thailand's treasure - rich coconut curry soup with crispy noodles on top. So comforting!",
+    displayTips: [
+      "Fry some noodles until crispy for topping - adds texture",
+      "Don't let coconut milk boil vigorously - it will separate"
     ],
-    subsNote: 'Simplified version: Use 1/4 cup red curry paste plus 1 tsp turmeric instead of making paste from scratch. Massaman curry paste works too. Fried wonton strips substitute for crispy noodles.',
+    stepVoiceTips: {
+      1: "Fry some noodles until crispy for topping - this adds wonderful texture contrast",
+      3: "Don't let the coconut milk boil vigorously - it will separate and look broken",
+      4: "Red curry paste works if you can't find Khao Soi paste, but add extra spices",
+      5: "Chicken thighs are better than breast - they stay tender and juicy",
+      7: "Pickle mustard greens are traditional but cabbage works as substitute",
+      8: "Serve with lime, shallots, and pickled mustard greens on the side"
+    },
+    voiceTips: [
+      "Fry some noodles until crispy for topping - this adds wonderful texture contrast",
+      "Don't let the coconut milk boil vigorously - it will separate and look broken",
+      "Red curry paste works if you can't find Khao Soi paste, but add extra spices",
+      "Chicken thighs are better than breast - they stay tender and juicy",
+      "Pickle mustard greens are traditional but cabbage works as substitute",
+      "Serve with lime, shallots, and pickled mustard greens on the side"
+    ],
     voiceEnabled: true,
-    stepTimers: [
-      { display: '20 min', duration: 1200, description: 'Softened chiles' }, // Soak chiles
-      null, // Make curry paste - no timer
-      null, // Separate coconut cream - no timer
-      { display: '~5 min', duration: 300, description: 'Oil separated coconut cream' }, // Fry coconut cream
-      { display: '8-10 min', duration: 540, description: 'Very fragrant darkened paste' }, // Fry curry paste
-      { display: '~8 min', duration: 480, description: 'Browned chicken pieces' }, // Brown chicken
-      null, // Add liquids - no timer
-      { display: '45 min', duration: 2700, description: 'Very tender chicken' }, // Simmer curry
-      null, // Cook noodles - no timer
-      { display: '~3 min', duration: 180, description: 'Golden crispy noodles' }, // Fry noodles
-      null, // Shred chicken - no timer
-      { display: '10 min', duration: 600, description: 'Flavors melded' }, // Final simmer
-      null, // Assemble bowls - no timer
-      null // Serve with garnishes - no timer
-    ]
+    equipment: ['Large pot', 'Deep fryer or wok for noodles', 'Strainer', 'Ladle', 'Multiple bowls for garnishes'],
+    storageInstructions: "Store components separately - broth can be refrigerated for 3 days, reheat gently. Cook fresh noodles when ready to serve. Crispy noodles stay crisp in airtight container for 2 days.",
+    culturalContext: "Khao Soi originates from northern Thailand, influenced by Burmese cuisine through trade routes. The name means 'cut rice,' referring to the way noodles were traditionally cut by hand. It's comfort food for northern Thai families, especially during cooler months."
   },
   {
     id: 'massaman-beef',
     title: 'Massaman Beef Curry',
-    cookingTime: '3 hours',
-    cookTimeMin: 180,
+    cookingTime: '2 hours',
+    cookTimeMin: 120,
     prepTimeMin: 20,
-    difficulty: 'ADVANCED',
-    category: 'CELEBRATION',
+    difficulty: 'MEDIUM',
+    category: 'WEEKEND',
     contentType: 'MEAT',
     image: '/placeholder.svg',
     mamaId: 3,
     mamaName: 'Mae Malai',
     mamaEmoji: '🌿',
     ingredients: [
-      'FOR THE CURRY:',
-      '3 lbs (1.4kg) beef chuck roast, cut into 2-inch cubes',
-      '1/4 cup massaman curry paste (store-bought or homemade)',
-      '2 cans (14oz each) coconut milk, chilled overnight',
-      '2 cups beef stock',
-      '3 tablespoons fish sauce',
-      '3 tablespoons palm sugar or brown sugar',
-      '2 tablespoons tamarind paste',
-      '6 whole green cardamom pods, lightly crushed',
-      '1 cinnamon stick',
-      '4 whole cloves',
-      '2 star anise',
-      '2 bay leaves',
-      'FOR THE VEGETABLES:',
-      '1.5 lbs (680g) waxy potatoes, peeled and cut into 2-inch chunks',
-      '1 large yellow onion, cut into large wedges',
-      '1/2 cup roasted peanuts, roughly chopped',
-      'FOR SERVING:',
-      'Steamed jasmine rice',
-      'Fresh cilantro for garnish',
-      'Sliced red chilies',
-      'Extra roasted peanuts'
+      '1kg beef chuck roast, cut in chunks',
+      '400ml coconut milk',
+      '300ml beef stock',
+      '3 tbsp Massaman curry paste',
+      '3 medium potatoes, peeled and quartered',
+      '1 large onion, cut in wedges',
+      '3 tbsp tamarind paste',
+      '3 tbsp palm sugar',
+      '3 tbsp fish sauce',
+      '100g roasted peanuts',
+      '4 cardamom pods',
+      '2 cinnamon sticks',
+      '4 star anise'
     ],
     instructions: [
-      'Open chilled coconut milk without shaking. Scoop out 1/2 cup thick cream from top',
-      'Heat thick coconut cream in heavy Dutch oven over medium heat until oil separates, about 5-6 minutes',
-      'Add massaman curry paste and fry for 5-8 minutes, stirring constantly, until very fragrant and dark red',
-      'Add beef cubes and brown on all sides, about 10 minutes total. The paste should coat the meat beautifully',
-      'Add remaining coconut milk, beef stock, fish sauce, palm sugar, and tamarind paste',
-      'Add whole spices (cardamom, cinnamon, cloves, star anise, bay leaves) tied in cheesecloth for easy removal',
-      'Bring to gentle simmer, cover partially, and cook 1.5 hours, stirring occasionally',
-      'Add potato chunks and onion wedges. Continue simmering 45 minutes until beef is fork-tender and potatoes are cooked',
-      'Stir in chopped peanuts and simmer 15 more minutes. Curry should be thick enough to coat a spoon',
-      'Remove spice bundle and taste for seasoning. Adjust with more palm sugar, fish sauce, or tamarind as needed',
-      'The curry should be rich, slightly sweet, with warm spice notes and tender beef that falls apart',
-      'Serve hot over jasmine rice, garnished with cilantro, sliced chilies, and extra peanuts'
+      'Brown beef chunks in heavy pot until golden on all sides',
+      'Add thick coconut cream and Massaman paste, fry until fragrant',
+      'Add remaining coconut milk, stock, and whole spices',
+      'Simmer covered for 1.5 hours until beef is tender',
+      'Add potatoes and onion, cook until vegetables are tender',
+      'Stir in peanuts, tamarind paste, palm sugar, and fish sauce',
+      'Adjust seasoning and consistency with more stock if needed',
+      'Serve with jasmine rice and cucumber salad'
     ],
     servings: 6,
-    description: 'Thailand\'s royal curry - Persian-influenced beef braised until fork-tender in coconut milk with warm spices and peanuts',
-    equipment: ['Heavy Dutch oven or large pot', 'Cheesecloth for spice bundle'],
-    storageInstructions: 'Refrigerate up to 4 days or freeze up to 3 months. Flavors improve overnight. Reheat gently, adding coconut milk if needed.',
-    culturalContext: 'Born from Persian traders in Thai royal courts, Massaman represents the sophisticated fusion of cultures that defines Thai cuisine.',
-    voiceIntro: 'Sawadee ka! Today we make the curry of kings - Massaman from the royal palace. Spices from far lands, patience from old wisdom.',
-    voiceTips: [
-      'The coconut cream must separate its oil - this is the foundation of rich Massaman',
-      'Fry that paste until it\'s dark as teak wood and smells like paradise',
-      'Brown the beef with love - each piece should be kissed by the curry paste',
-      'Low and slow like meditation - rushing ruins the tender beef',
-      'Potatoes should hold their shape but be creamy inside - choose waxy varieties',
-      'Peanuts add richness at the end - like gold coins in treasure chest',
-      'Taste for balance - sweet, salty, sour, and warming spices in harmony',
-      'This curry is even better tomorrow - flavors marry like old friends'
+    description: 'Rich, fragrant Persian-influenced curry with tender beef and potatoes',
+    voiceIntro: "Sawasdee! Massaman is the gentle curry - rich, fragrant, with Persian influences. Perfect for special occasions!",
+    displayTips: [
+      "Don't rush the cooking - low and slow makes tender beef",
+      "Beef chuck roast becomes incredibly tender when slow-cooked"
     ],
-    subsNote: 'Chicken thighs work beautifully - reduce cooking time to 90 minutes total. No massaman paste? Mix red curry paste with ground cinnamon, cardamom, and nutmeg. Beef short ribs are also excellent.',
+    stepVoiceTips: {
+      2: "Beef chuck roast is perfect for this - it becomes incredibly tender when slow-cooked",
+      3: "Toast your peanuts lightly before adding - brings out more flavor",
+      4: "Don't rush the cooking - low and slow makes the beef melt in your mouth",
+      5: "Potatoes should be tender but not falling apart - add them later in cooking",
+      6: "Tamarind paste adds the perfect sour note - don't skip it!",
+      7: "If curry gets too thick, add more coconut milk or beef broth"
+    },
+    voiceTips: [
+      "Beef chuck roast is perfect for this - it becomes incredibly tender when slow-cooked",
+      "Toast your peanuts lightly before adding - brings out more flavor",
+      "Don't rush the cooking - low and slow makes the beef melt in your mouth",
+      "Tamarind paste adds the perfect sour note - don't skip it!",
+      "If curry gets too thick, add more coconut milk or beef broth",
+      "Potatoes should be tender but not falling apart - add them later in cooking"
+    ],
     voiceEnabled: true,
-    stepTimers: [
-      null, // Separate coconut cream - no timer
-      { display: '5-6 min', duration: 330, description: 'Oil separated coconut cream' }, // Fry coconut cream
-      { display: '5-8 min', duration: 390, description: 'Very fragrant dark red paste' }, // Fry curry paste
-      { display: '~10 min', duration: 600, description: 'Browned beef coated with paste' }, // Brown beef
-      null, // Add liquids and seasonings - no timer
-      null, // Add spice bundle - no timer
-      { display: '1.5 hours', duration: 5400, description: 'Beef starting to become tender' }, // Simmer beef
-      { display: '45 min', duration: 2700, description: 'Fork-tender beef and cooked potatoes' }, // Add vegetables
-      { display: '15 min', duration: 900, description: 'Rich thick curry with peanuts' }, // Add peanuts
-      null, // Remove spices and adjust seasoning - no timer
-      null, // Check final consistency - no timer
-      null // Serve with garnishes - no timer
-    ]
+    equipment: ['Heavy-bottomed pot or Dutch oven', 'Wooden spoon', 'Sharp knife', 'Cutting board'],
+    storageInstructions: "Massaman curry improves with time and can be refrigerated for up to 5 days. The flavors meld and deepen overnight. Can be frozen for up to 3 months. Reheat gently, adding coconut milk or stock to adjust consistency.",
+    culturalContext: "Massaman curry shows the Persian influence on Thai cuisine through ancient trade routes. The name derives from 'Mussulman' (Muslim), reflecting its origins. With warming spices like cardamom and cinnamon, it's considered the most aromatic of Thai curries."
   }
 ];
 
-// Utility functions
+// Utility Functions
 export const getRecipesByMama = (mamaId: number): Recipe[] => {
   return recipes.filter(recipe => recipe.mamaId === mamaId);
 };
@@ -1140,35 +962,7 @@ export const getRecipeOfWeek = (): Recipe | undefined => {
 };
 
 export const getRecipesByCategory = (category: string): Recipe[] => {
-  if (category === 'All') return recipes;
-  
-  // Handle content-based categories (old system)
-  const contentTypeMap: { [key: string]: ContentType } = {
-    'Meat': 'MEAT',
-    'Fish': 'FISH', 
-    'Vegetarian': 'VEGETARIAN',
-    'Rice/Pasta': 'VEGETARIAN' // Most rice/pasta recipes are vegetarian
-  };
-  
-  if (contentTypeMap[category]) {
-    return recipes.filter(recipe => recipe.contentType === contentTypeMap[category]);
-  }
-  
-  // Handle time-based categories (new system)
-  const timeBasedCategories: Category[] = ['QUICK', 'EVERYDAY', 'WEEKEND', 'CELEBRATION'];
-  if (timeBasedCategories.includes(category as Category)) {
-    return recipes.filter(recipe => recipe.category === category);
-  }
-  
-  // Handle aliases
-  if (category === 'Quick') {
-    return recipes.filter(recipe => recipe.category === 'QUICK');
-  }
-  if (category === 'Weekend') {
-    return recipes.filter(recipe => recipe.category === 'WEEKEND');
-  }
-  
-  return recipes.filter(recipe => recipe.category === category);
+  return recipes.filter(recipe => recipe.category === category.toUpperCase());
 };
 
 export const getRecipeById = (id: string): Recipe | undefined => {

@@ -71,10 +71,26 @@ const RecipeDetail = () => {
   };
 
   const renderInstructions = (instruction: string, index: number) => {
+    // Check if this is a section header (ends with colon)
+    const isSectionHeader = instruction.trim().endsWith(':');
+    
     // Use structured timer data if available, otherwise fall back to regex
     const stepTimer = recipe.stepTimers?.[index];
     const timerRegex = /(\d+\s*(?:minutes?|mins?|hours?|hrs?))/gi;
     const timerMatch = !stepTimer ? instruction.match(timerRegex) : null;
+    
+    if (isSectionHeader) {
+      return (
+        <div key={index} className="mb-4">
+          <div className="inline-flex items-center gap-2 bg-gradient-to-r from-primary/10 to-primary/5 border border-primary/20 rounded-lg px-4 py-2">
+            <div className="w-2 h-2 bg-primary rounded-full"></div>
+            <span className="font-heading font-bold text-primary text-sm uppercase tracking-wider">
+              {instruction}
+            </span>
+          </div>
+        </div>
+      );
+    }
     
     return (
       <div key={index} className="flex gap-4 mb-6">
@@ -264,29 +280,30 @@ const RecipeDetail = () => {
 
         {activeTab === 'instructions' && (
           <div className="space-y-6">
+            {/* Display Tips */}
+            {recipe.displayTips && recipe.displayTips.length > 0 && (
+              <div className="bg-gradient-to-br from-amber-50 to-orange-50 border-l-4 border-primary rounded-lg p-4">
+                <h3 className="font-handwritten text-lg text-primary font-bold mb-2 flex items-center gap-2">
+                  <span className="text-xl">{recipe.mamaEmoji}</span>
+                  {recipe.mamaName}'s Essential Tips
+                </h3>
+                <ul className="space-y-2 font-handwritten text-foreground">
+                  {recipe.displayTips.map((tip, index) => (
+                    <li key={index} className="flex items-start gap-2">
+                      <span className="text-primary mt-1">•</span>
+                      <span>{tip}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
             {/* Instructions */}
             <div className="space-y-6">
               {recipe.instructions.map((instruction, index) => 
                 renderInstructions(instruction, index)
               )}
             </div>
-
-            {/* Mama's Tips */}
-            {recipe.voiceTips && recipe.voiceTips.length > 0 && (
-              <div className="bg-gradient-to-br from-amber-50 to-orange-50 border-l-4 border-primary rounded-lg p-4 mt-8">
-                <h3 className="font-handwritten text-lg text-primary font-bold mb-2">
-                  {recipe.mamaName}'s Tips
-                </h3>
-                <ul className="space-y-2 font-handwritten text-foreground">
-                  {recipe.voiceTips.map((tip, index) => (
-                    <li key={index}>• {tip}</li>
-                  ))}
-                </ul>
-                <p className="text-right mt-3 font-handwritten text-primary/70 italic">
-                  — With love, {recipe.mamaName}
-                </p>
-              </div>
-            )}
           </div>
         )}
       </div>
