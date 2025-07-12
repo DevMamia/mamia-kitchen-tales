@@ -4,7 +4,6 @@ import { VoiceService } from '@/services/voiceService';
 
 interface ConversationState {
   isConnected: boolean;
-  isRecording: boolean;
   currentTranscript: string;
   partialTranscript: string;
   error: string | null;
@@ -15,7 +14,6 @@ export const useConversation = () => {
   const [voiceService] = useState(() => VoiceService.getInstance());
   const [state, setState] = useState<ConversationState>({
     isConnected: false,
-    isRecording: false,
     currentTranscript: '',
     partialTranscript: '',
     error: null
@@ -90,7 +88,6 @@ export const useConversation = () => {
       await conversationalService.stopConversation();
       updateState({ 
         isConnected: false,
-        isRecording: false,
         currentTranscript: '',
         partialTranscript: '',
         error: null

@@ -1,16 +1,17 @@
-interface ConversationMessage {
-  type: 'connected' | 'user_transcript' | 'agent_response_audio' | 'agent_response_transcript' | 'error' | 'disconnected';
-  transcript?: string;
-  is_final?: boolean;
-  audio?: string; // base64 encoded audio
-  message?: string;
+import { VoiceService } from './voiceService';
+
+// TypeScript declarations for Web Speech API
+declare global {
+  interface Window {
+    SpeechRecognition: any;
+    webkitSpeechRecognition: any;
+  }
 }
 
 interface ConversationConfig {
   voiceId: string;
   mamaId: string;
   onTranscript?: (text: string, isFinal: boolean) => void;
-  onAudioChunk?: (audioData: ArrayBuffer) => void;
   onCommand?: (command: string) => void;
   onError?: (error: string) => void;
 }
@@ -23,12 +24,10 @@ const VOICE_COMMANDS = {
 
 export class ConversationalService {
   private static instance: ConversationalService;
-  private websocket: WebSocket | null = null;
-  private audioContext: AudioContext | null = null;
-  private audioQueue: AudioBuffer[] = [];
-  private isPlaying = false;
-  private pingInterval: number | null = null;
+  private recognition: any | null = null;
   private config: ConversationConfig | null = null;
+  private isListening = false;
+  private voiceService = VoiceService.getInstance();
 
   static getInstance(): ConversationalService {
     if (!ConversationalService.instance) {
@@ -42,10 +41,73 @@ export class ConversationalService {
   async startConversation(config: ConversationConfig, stepText: string): Promise<void> {
     try {
       this.config = config;
-      await this.initializeAudioContext();
-      await this.connectWebSocket();
-      await this.sendInitMessage(stepText);
-      this.startPingInterval();
+      
+      // Check for Speech Recognition support
+      if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+        throw new Error('Speech recognition not supported in this browser');
+      }
+
+      // Initialize speech recognition
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      this.recognition = new SpeechRecognition();
+      
+      this.recognition.continuous = true;
+      this.recognition.interimResults = true;
+      this.recognition.lang = 'en-US';
+
+      this.recognition.onstart = () => {
+        console.log('Speech recognition started');
+        this.isListening = true;
+      };
+
+      this.recognition.onresult = (event) => {
+        let interimTranscript = '';
+        let finalTranscript = '';
+
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          const transcript = event.results[i][0].transcript;
+          if (event.results[i].isFinal) {
+            finalTranscript += transcript;
+          } else {
+            interimTranscript += transcript;
+          }
+        }
+
+        if (interimTranscript) {
+          this.config?.onTranscript?.(interimTranscript, false);
+        }
+
+        if (finalTranscript) {
+          this.config?.onTranscript?.(finalTranscript, true);
+          this.detectVoiceCommand(finalTranscript.toLowerCase());
+          this.handleUserInput(finalTranscript);
+        }
+      };
+
+      this.recognition.onerror = (event) => {
+        console.error('Speech recognition error:', event.error);
+        this.config?.onError?.(`Speech recognition error: ${event.error}`);
+      };
+
+      this.recognition.onend = () => {
+        console.log('Speech recognition ended');
+        this.isListening = false;
+        // Auto-restart if we're still in conversation mode
+        if (this.config && this.recognition) {
+          setTimeout(() => {
+            if (this.recognition && this.config) {
+              this.recognition.start();
+            }
+          }, 100);
+        }
+      };
+
+      // Start listening
+      this.recognition.start();
+
+      // Speak the initial step text
+      await this.voiceService.speak(stepText, config.mamaId);
+
     } catch (error) {
       console.error('Failed to start conversation:', error);
       this.config?.onError?.('Failed to start conversation: ' + (error instanceof Error ? error.message : String(error)));
@@ -54,119 +116,15 @@ export class ConversationalService {
   }
 
   async stopConversation(): Promise<void> {
-    this.clearPingInterval();
+    this.isListening = false;
     
-    if (this.websocket) {
-      this.websocket.close();
-      this.websocket = null;
+    if (this.recognition) {
+      this.recognition.stop();
+      this.recognition = null;
     }
     
-    if (this.audioContext) {
-      await this.audioContext.close();
-      this.audioContext = null;
-    }
-    
-    this.audioQueue = [];
-    this.isPlaying = false;
+    this.voiceService.stopCurrentAudio();
     this.config = null;
-  }
-
-  private async initializeAudioContext(): Promise<void> {
-    this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-    if (this.audioContext.state === 'suspended') {
-      await this.audioContext.resume();
-    }
-  }
-
-  private async connectWebSocket(): Promise<void> {
-    return new Promise((resolve, reject) => {
-      // Connect to our Supabase edge function relay
-      this.websocket = new WebSocket('wss://jfocambuvgkztcktukar.supabase.co/functions/v1/conversational-ai');
-      
-      this.websocket.onopen = () => {
-        console.log('Connected to conversational AI relay');
-        resolve();
-      };
-
-      this.websocket.onerror = (error) => {
-        console.error('WebSocket error:', error);
-        this.config?.onError?.('WebSocket connection failed');
-        reject(new Error('WebSocket connection failed'));
-      };
-
-      this.websocket.onmessage = (event) => {
-        this.handleWebSocketMessage(event.data);
-      };
-
-      this.websocket.onclose = () => {
-        console.log('WebSocket connection closed');
-        this.config?.onError?.('Connection closed');
-      };
-    });
-  }
-
-  private async sendInitMessage(stepText: string): Promise<void> {
-    if (!this.websocket || !this.config) return;
-
-    const initMessage = {
-      type: 'init',
-      voiceId: this.config.voiceId,
-      mamaId: this.config.mamaId,
-      stepText: stepText
-    };
-
-    this.websocket.send(JSON.stringify(initMessage));
-  }
-
-  private handleWebSocketMessage(data: string): void {
-    try {
-      const message: ConversationMessage = JSON.parse(data);
-      
-      switch (message.type) {
-        case 'connected':
-          console.log('Conversation initialized');
-          break;
-          
-        case 'user_transcript':
-          if (message.transcript) {
-            this.handleTranscript(message.transcript, message.is_final || false);
-          }
-          break;
-          
-        case 'agent_response_audio':
-          if (message.audio) {
-            this.handleAudioChunk(message.audio);
-          }
-          break;
-          
-        case 'agent_response_transcript':
-          console.log('Agent transcript:', message.transcript);
-          break;
-          
-        case 'error':
-          console.error('Conversation error:', message.message);
-          this.config?.onError?.(message.message || 'Unknown error');
-          break;
-
-        case 'disconnected':
-          console.log('ElevenLabs disconnected');
-          this.config?.onError?.('ElevenLabs disconnected');
-          break;
-          
-        default:
-          console.log('Unknown message type:', message.type);
-      }
-    } catch (error) {
-      console.error('Error parsing WebSocket message:', error);
-    }
-  }
-
-  private handleTranscript(text: string, isFinal: boolean): void {
-    this.config?.onTranscript?.(text, isFinal);
-    
-    if (isFinal) {
-      this.detectVoiceCommand(text.toLowerCase());
-    }
   }
 
   private detectVoiceCommand(text: string): void {
@@ -180,73 +138,104 @@ export class ConversationalService {
     }
   }
 
-  private async handleAudioChunk(base64Audio: string): Promise<void> {
-    if (!this.audioContext) return;
+  private async handleUserInput(text: string): Promise<void> {
+    if (!this.config) return;
 
-    try {
-      const binaryData = atob(base64Audio);
-      const arrayBuffer = new ArrayBuffer(binaryData.length);
-      const uint8Array = new Uint8Array(arrayBuffer);
-      
-      for (let i = 0; i < binaryData.length; i++) {
-        uint8Array[i] = binaryData.charCodeAt(i);
-      }
-
-      const audioBuffer = await this.audioContext.decodeAudioData(arrayBuffer);
-      this.audioQueue.push(audioBuffer);
-      
-      if (!this.isPlaying) {
-        this.playNextAudio();
-      }
-    } catch (error) {
-      console.error('Failed to process audio chunk:', error);
+    // Generate contextual response based on input
+    const responses = this.generateMamaResponse(text, this.config.mamaId);
+    
+    if (responses.length > 0) {
+      const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+      await this.voiceService.speak(randomResponse, this.config.mamaId);
     }
   }
 
-  private playNextAudio(): void {
-    if (!this.audioContext || this.audioQueue.length === 0) {
-      this.isPlaying = false;
-      return;
+  private generateMamaResponse(input: string, mamaId: string): string[] {
+    const lowerInput = input.toLowerCase();
+    
+    // Common cooking questions and responses
+    if (lowerInput.includes('how') && (lowerInput.includes('long') || lowerInput.includes('time'))) {
+      if (mamaId === 'nonna') {
+        return [
+          "Caro, trust your nose! When it smells perfect, it's ready.",
+          "Cooking time depends on your stove, tesoro. Watch and taste!"
+        ];
+      } else if (mamaId === 'abuela') {
+        return [
+          "Mijo, cooking is not about the clock, it's about the love you put in!",
+          "Watch the color change, that's how you know, corazón."
+        ];
+      } else {
+        return [
+          "In Thai cooking, we cook with our hearts, not just timers.",
+          "Let your senses guide you, little one."
+        ];
+      }
     }
 
-    this.isPlaying = true;
-    const audioBuffer = this.audioQueue.shift()!;
-    const source = this.audioContext.createBufferSource();
-    source.buffer = audioBuffer;
-    source.connect(this.audioContext.destination);
-    
-    source.onended = () => {
-      this.playNextAudio();
-    };
-    
-    source.start();
-  }
-
-  private startPingInterval(): void {
-    this.pingInterval = window.setInterval(() => {
-      if (this.websocket?.readyState === WebSocket.OPEN) {
-        this.websocket.send(JSON.stringify({ type: 'ping' }));
+    if (lowerInput.includes('help') || lowerInput.includes('stuck') || lowerInput.includes('wrong')) {
+      if (mamaId === 'nonna') {
+        return [
+          "Non ti preoccupare! Even I make mistakes. What's troubling you?",
+          "Tell Nonna what happened, we'll fix it together!"
+        ];
+      } else if (mamaId === 'abuela') {
+        return [
+          "Ay, mi amor, don't worry! Every cook has these moments.",
+          "Tell me what's wrong, mijo. Abuela will help you."
+        ];
+      } else {
+        return [
+          "Take a deep breath. In Thai cooking, patience solves many problems.",
+          "Tell me what you're seeing, child. We'll work through it."
+        ];
       }
-    }, 25000); // Ping every 25 seconds
-  }
+    }
 
-  private clearPingInterval(): void {
-    if (this.pingInterval) {
-      clearInterval(this.pingInterval);
-      this.pingInterval = null;
+    if (lowerInput.includes('good') || lowerInput.includes('great') || lowerInput.includes('perfect')) {
+      if (mamaId === 'nonna') {
+        return [
+          "Bravissimo! You're becoming a real chef!",
+          "Perfetto! Nonna is so proud of you!"
+        ];
+      } else if (mamaId === 'abuela') {
+        return [
+          "¡Qué bueno! You're doing fantastic, mijo!",
+          "Sí, sí! That's the spirit of a true cook!"
+        ];
+      } else {
+        return [
+          "Very good! Your cooking energy is beautiful.",
+          "Excellent! You're learning the Thai way well."
+        ];
+      }
+    }
+
+    // Default encouraging responses
+    if (mamaId === 'nonna') {
+      return [
+        "Sì, sì, you're doing well, caro!",
+        "Keep going, tesoro. You've got this!"
+      ];
+    } else if (mamaId === 'abuela') {
+      return [
+        "Muy bien, mijo! You're doing great!",
+        "That's it, corazón! Trust yourself!"
+      ];
+    } else {
+      return [
+        "Yes, you're on the right path.",
+        "Good, keep following your instincts."
+      ];
     }
   }
 
   sendMessage(text: string): void {
-    if (this.websocket?.readyState === WebSocket.OPEN) {
-      this.websocket.send(JSON.stringify({
-        type: 'user_message',
-        text: text
-      }));
-    }
+    // For compatibility with existing interface
+    this.handleUserInput(text);
   }
 
   isConnected(): boolean {
-    return this.websocket?.readyState === WebSocket.OPEN;
+    return this.isListening && this.recognition !== null;
   }
 }

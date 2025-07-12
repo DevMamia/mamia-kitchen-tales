@@ -289,7 +289,6 @@ const Cook = () => {
           <div className="px-4 mb-6">
             <ConversationInterface
               isConnected={conversation.isConnected}
-              isRecording={conversation.isRecording}
               currentTranscript={conversation.currentTranscript}
               partialTranscript={conversation.partialTranscript}
               error={conversation.error}

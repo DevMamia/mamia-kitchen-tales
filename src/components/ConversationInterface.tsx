@@ -6,7 +6,6 @@ import { cn } from '@/lib/utils';
 
 interface ConversationInterfaceProps {
   isConnected: boolean;
-  isRecording: boolean;
   currentTranscript: string;
   partialTranscript: string;
   error: string | null;
@@ -16,7 +15,6 @@ interface ConversationInterfaceProps {
 
 export const ConversationInterface = ({
   isConnected,
-  isRecording,
   currentTranscript,
   partialTranscript,
   error,
@@ -57,8 +55,7 @@ export const ConversationInterface = ({
           size="lg"
           className={cn(
             "rounded-full w-16 h-16 shadow-lg transition-all duration-200",
-            isRecording && "animate-pulse scale-110",
-            isConnected && "bg-destructive hover:bg-destructive/90"
+            isConnected && "animate-pulse scale-110 bg-destructive hover:bg-destructive/90"
           )}
           onClick={isConnected ? onStopConversation : onStartConversation}
           disabled={!!error}
@@ -77,7 +74,7 @@ export const ConversationInterface = ({
           {error ? (
             "Voice chat unavailable"
           ) : isConnected ? (
-            isRecording ? "Listening..." : "Tap to end voice chat"
+            "Listening... Tap to end voice chat"
           ) : (
             "Tap to start voice chat with your Mama"
           )}
