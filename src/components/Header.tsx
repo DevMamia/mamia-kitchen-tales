@@ -22,7 +22,7 @@ export const Header = () => {
         <div className="flex items-center gap-4">
           <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center shadow-lg border border-white/30">
             <img 
-              src="/lovable-uploads/8a6cad47-4228-4cfb-bc36-6580877d3bb8.png" 
+              src="/lovable-uploads/f93a6daa-6445-4c83-aaf2-c75c2b4824bc.png" 
               alt="MAMIA Logo" 
               className="w-12 h-12 object-contain"
             />
