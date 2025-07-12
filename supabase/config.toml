@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.get-voice-ids]
 verify_jwt = false
+
+[functions.conversational-ai]
+verify_jwt = false

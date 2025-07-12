@@ -1,13 +1,9 @@
 interface ConversationMessage {
-  type: 'transcript' | 'audio' | 'ping' | 'error';
-  transcript?: {
-    text: string;
-    is_final: boolean;
-  };
-  audio?: {
-    chunk: string; // base64 encoded audio
-  };
-  error?: string;
+  type: 'connected' | 'user_transcript' | 'agent_response_audio' | 'agent_response_transcript' | 'error' | 'disconnected';
+  transcript?: string;
+  is_final?: boolean;
+  audio?: string; // base64 encoded audio
+  message?: string;
 }
 
 interface ConversationConfig {
@@ -52,7 +48,7 @@ export class ConversationalService {
       this.startPingInterval();
     } catch (error) {
       console.error('Failed to start conversation:', error);
-      this.config?.onError?.(`Failed to start conversation: ${error}`);
+      this.config?.onError?.('Failed to start conversation: ' + (error instanceof Error ? error.message : String(error)));
       throw error;
     }
   }
@@ -84,18 +80,18 @@ export class ConversationalService {
 
   private async connectWebSocket(): Promise<void> {
     return new Promise((resolve, reject) => {
-      // Note: API key will be sent in init message, not in headers for WebSocket
-
-      this.websocket = new WebSocket('wss://api.elevenlabs.io/v1/conversation');
+      // Connect to our Supabase edge function relay
+      this.websocket = new WebSocket('wss://jfocambuvgkztcktukar.supabase.co/functions/v1/conversational-ai');
       
       this.websocket.onopen = () => {
-        console.log('Conversational AI WebSocket connected');
+        console.log('Connected to conversational AI relay');
         resolve();
       };
 
       this.websocket.onerror = (error) => {
         console.error('WebSocket error:', error);
-        reject(error);
+        this.config?.onError?.('WebSocket connection failed');
+        reject(new Error('WebSocket connection failed'));
       };
 
       this.websocket.onmessage = (event) => {
@@ -103,7 +99,7 @@ export class ConversationalService {
       };
 
       this.websocket.onclose = () => {
-        console.log('Conversational AI WebSocket closed');
+        console.log('WebSocket connection closed');
         this.config?.onError?.('Connection closed');
       };
     });
@@ -112,31 +108,14 @@ export class ConversationalService {
   private async sendInitMessage(stepText: string): Promise<void> {
     if (!this.websocket || !this.config) return;
 
-    // For ConversationalAI, we need to get the API key from the existing Edge Function
-    try {
-      const { data } = await fetch('https://jfocambuvgkztcktukar.supabase.co/functions/v1/get-voice-ids', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
-      }).then(r => r.json()).catch(() => ({}));
-      
-      const apiKey = data?.ELEVENLABS_API_KEY;
-      
-      if (!apiKey) {
-        throw new Error('ElevenLabs API key not available');
-      }
+    const initMessage = {
+      type: 'init',
+      voiceId: this.config.voiceId,
+      mamaId: this.config.mamaId,
+      stepText: stepText
+    };
 
-      const initMessage = {
-        type: 'init',
-        api_key: apiKey,
-        voice_id: this.config.voiceId,
-        context: `You are a cooking assistant named after the voice character. Help the user with step: "${stepText}". Be encouraging, warm, and give specific cooking advice. Keep responses brief and conversational.`
-      };
-
-      this.websocket.send(JSON.stringify(initMessage));
-    } catch (error) {
-      console.error('Failed to initialize conversation:', error);
-      this.config?.onError?.('Failed to get API key for conversation');
-    }
+    this.websocket.send(JSON.stringify(initMessage));
   }
 
   private handleWebSocketMessage(data: string): void {
@@ -144,23 +123,41 @@ export class ConversationalService {
       const message: ConversationMessage = JSON.parse(data);
       
       switch (message.type) {
-        case 'transcript':
+        case 'connected':
+          console.log('Conversation initialized');
+          break;
+          
+        case 'user_transcript':
           if (message.transcript) {
-            this.handleTranscript(message.transcript.text, message.transcript.is_final);
+            this.handleTranscript(message.transcript, message.is_final || false);
           }
           break;
-        case 'audio':
+          
+        case 'agent_response_audio':
           if (message.audio) {
-            this.handleAudioChunk(message.audio.chunk);
+            this.handleAudioChunk(message.audio);
           }
           break;
-        case 'error':
-          console.error('Conversation error:', message.error);
-          this.config?.onError?.(message.error || 'Unknown error');
+          
+        case 'agent_response_transcript':
+          console.log('Agent transcript:', message.transcript);
           break;
+          
+        case 'error':
+          console.error('Conversation error:', message.message);
+          this.config?.onError?.(message.message || 'Unknown error');
+          break;
+
+        case 'disconnected':
+          console.log('ElevenLabs disconnected');
+          this.config?.onError?.('ElevenLabs disconnected');
+          break;
+          
+        default:
+          console.log('Unknown message type:', message.type);
       }
     } catch (error) {
-      console.error('Failed to parse WebSocket message:', error);
+      console.error('Error parsing WebSocket message:', error);
     }
   }
 
@@ -243,7 +240,7 @@ export class ConversationalService {
   sendMessage(text: string): void {
     if (this.websocket?.readyState === WebSocket.OPEN) {
       this.websocket.send(JSON.stringify({
-        type: 'message',
+        type: 'user_message',
         text: text
       }));
     }
