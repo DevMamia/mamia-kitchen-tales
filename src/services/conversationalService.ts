@@ -141,26 +141,34 @@ export class ConversationalService {
   private async handleUserInput(text: string): Promise<void> {
     if (!this.config) return;
 
+    console.log(`[ConversationalService] Handling user input: "${text}" for mama: ${this.config.mamaId}`);
+
     // Generate contextual response based on input
     const responses = this.generateMamaResponse(text, this.config.mamaId);
     
     if (responses.length > 0) {
       const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+      console.log(`[ConversationalService] Generated response: "${randomResponse}"`);
       await this.voiceService.speak(randomResponse, this.config.mamaId);
     }
   }
 
   private generateMamaResponse(input: string, mamaId: string): string[] {
     const lowerInput = input.toLowerCase();
+    console.log(`[ConversationalService] Generating response for mama: ${mamaId}, input: ${lowerInput}`);
+    
+    // Convert numeric ID to mama voice ID if needed
+    const resolvedMamaId = this.resolveMamaId(mamaId);
+    console.log(`[ConversationalService] Resolved mama ID: ${resolvedMamaId}`);
     
     // Common cooking questions and responses
     if (lowerInput.includes('how') && (lowerInput.includes('long') || lowerInput.includes('time'))) {
-      if (mamaId === 'nonna') {
+      if (resolvedMamaId === 'nonna_lucia') {
         return [
           "Caro, trust your nose! When it smells perfect, it's ready.",
           "Cooking time depends on your stove, tesoro. Watch and taste!"
         ];
-      } else if (mamaId === 'abuela') {
+      } else if (resolvedMamaId === 'abuela_rosa') {
         return [
           "Mijo, cooking is not about the clock, it's about the love you put in!",
           "Watch the color change, that's how you know, corazón."
@@ -174,12 +182,12 @@ export class ConversationalService {
     }
 
     if (lowerInput.includes('help') || lowerInput.includes('stuck') || lowerInput.includes('wrong')) {
-      if (mamaId === 'nonna') {
+      if (resolvedMamaId === 'nonna_lucia') {
         return [
           "Non ti preoccupare! Even I make mistakes. What's troubling you?",
           "Tell Nonna what happened, we'll fix it together!"
         ];
-      } else if (mamaId === 'abuela') {
+      } else if (resolvedMamaId === 'abuela_rosa') {
         return [
           "Ay, mi amor, don't worry! Every cook has these moments.",
           "Tell me what's wrong, mijo. Abuela will help you."
@@ -193,12 +201,12 @@ export class ConversationalService {
     }
 
     if (lowerInput.includes('good') || lowerInput.includes('great') || lowerInput.includes('perfect')) {
-      if (mamaId === 'nonna') {
+      if (resolvedMamaId === 'nonna_lucia') {
         return [
           "Bravissimo! You're becoming a real chef!",
           "Perfetto! Nonna is so proud of you!"
         ];
-      } else if (mamaId === 'abuela') {
+      } else if (resolvedMamaId === 'abuela_rosa') {
         return [
           "¡Qué bueno! You're doing fantastic, mijo!",
           "Sí, sí! That's the spirit of a true cook!"
@@ -212,12 +220,12 @@ export class ConversationalService {
     }
 
     // Default encouraging responses
-    if (mamaId === 'nonna') {
+    if (resolvedMamaId === 'nonna_lucia') {
       return [
         "Sì, sì, you're doing well, caro!",
         "Keep going, tesoro. You've got this!"
       ];
-    } else if (mamaId === 'abuela') {
+    } else if (resolvedMamaId === 'abuela_rosa') {
       return [
         "Muy bien, mijo! You're doing great!",
         "That's it, corazón! Trust yourself!"
@@ -233,6 +241,20 @@ export class ConversationalService {
   sendMessage(text: string): void {
     // For compatibility with existing interface
     this.handleUserInput(text);
+  }
+
+  private resolveMamaId(mamaId: string): string {
+    // Handle numeric IDs from Cook page
+    switch (mamaId) {
+      case '1':
+        return 'nonna_lucia';
+      case '2':
+        return 'abuela_rosa';
+      case '3':
+        return 'mae_malai';
+      default:
+        return mamaId; // Already in correct format
+    }
   }
 
   isConnected(): boolean {

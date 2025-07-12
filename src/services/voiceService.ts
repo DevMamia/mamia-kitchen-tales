@@ -73,7 +73,7 @@ export class VoiceService {
   private isPlaying = false;
   private voiceIds: Record<string, string> = {};
   private config: VoiceConfig = {
-    mode: 'essential',
+    mode: 'full', // Changed to 'full' for better reliability
     volume: 0.8,
     speed: 1.0,
     enabled: true
@@ -118,27 +118,31 @@ export class VoiceService {
   async speak(text: string, mamaId: string): Promise<void> {
     if (!this.config.enabled) return;
 
-    // Get mama info to determine voice
-    const mama = getMamaById(parseInt(mamaId));
-    const voiceKey = mama?.voiceId || 'nonna_lucia';
+    console.log(`[VoiceService] Speaking text: "${text}" for mama: ${mamaId}`);
 
-    // In essential mode, use pre-cached phrases
+    // Resolve mama ID (handle both numeric and voice IDs)
+    const resolvedMamaId = this.resolveMamaId(mamaId);
+    console.log(`[VoiceService] Resolved mama ID: ${resolvedMamaId}`);
+
+    // In essential mode, try pre-cached phrases first, then fall back to full TTS
     if (this.config.mode === 'essential') {
-      const phrase = ESSENTIAL_PHRASES[voiceKey]?.[text];
+      const phrase = ESSENTIAL_PHRASES[resolvedMamaId]?.[text];
       if (phrase) {
-        // Play pre-cached audio (placeholder)
-        console.log(`Playing cached phrase for ${mama?.name}: ${phrase}`);
+        console.log(`[VoiceService] Playing cached phrase for ${resolvedMamaId}: ${phrase}`);
+        await this.playEssentialPhrase(phrase);
         return;
       }
+      console.log(`[VoiceService] No cached phrase found, falling back to full TTS`);
     }
 
-    // In full mode, add to queue for TTS generation
-    if (this.config.mode === 'full') {
-      // Get the actual voice ID for this mama
-      const actualVoiceId = this.voiceIds[voiceKey] || MAMA_VOICES[voiceKey]?.voiceId;
-      if (actualVoiceId) {
-        this.addToQueue(text, actualVoiceId);
-      }
+    // Fall back to full TTS mode for any text not in essential phrases
+    const actualVoiceId = this.voiceIds[resolvedMamaId] || MAMA_VOICES[resolvedMamaId]?.voiceId;
+    console.log(`[VoiceService] Using voice ID: ${actualVoiceId}`);
+    
+    if (actualVoiceId) {
+      this.addToQueue(text, actualVoiceId);
+    } else {
+      console.warn(`[VoiceService] No voice ID found for ${resolvedMamaId}`);
     }
   }
 
@@ -311,5 +315,21 @@ export class VoiceService {
 
   public getQueueLength(): number {
     return this.audioQueue.length;
+  }
+
+  private resolveMamaId(mamaId: string): string {
+    // Handle numeric IDs from Cook page
+    switch (mamaId) {
+      case '1':
+        return 'nonna_lucia';
+      case '2':
+        return 'abuela_rosa';
+      case '3':
+        return 'mae_malai';
+      default:
+        // Try to find by voice ID from mamas.ts
+        const mama = getMamaById(parseInt(mamaId));
+        return mama?.voiceId || mamaId;
+    }
   }
 }
