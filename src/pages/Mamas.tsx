@@ -7,7 +7,7 @@ import { mamas } from '@/data/mamas';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 
-// Using mamas from centralized data
+// Using mamas from centralized data with character card images
 const mamasDisplay = mamas.map(mama => ({
   id: mama.id,
   name: mama.name,
@@ -23,7 +23,10 @@ const mamasDisplay = mamas.map(mama => ({
   action: mama.emoji === '🍷' ? "stirring risotto" :
           mama.emoji === '🌶️' ? "grinding spices" : "pounding curry paste",
   watermark: mama.emoji === '🍷' ? Wine : mama.emoji === '🌶️' ? Flower2 : Leaf,
-  accent: mama.emoji
+  accent: mama.emoji,
+  characterImage: mama.id === 1 ? "/lovable-uploads/f93a6daa-6445-4c83-aaf2-c75c2b4824bc.png" :
+                 mama.id === 2 ? "/lovable-uploads/95d2de88-6de2-4a87-b5e5-deda3096c455.png" :
+                 "/lovable-uploads/35c616ae-06a9-49cb-b3e3-287c89fb124d.png"
 }));
 
 const Mamas = () => {
@@ -58,89 +61,26 @@ const Mamas = () => {
               const WatermarkIcon = mama.watermark;
               return (
                 <CarouselItem key={mama.id} className="basis-[85%] pl-4">
-                  <div 
-                    className="relative h-full rounded-3xl overflow-hidden shadow-warm"
-                    style={{ backgroundColor: mama.background }}
-                  >
-                    {/* Watermark */}
-                    <div className="absolute top-6 right-6 opacity-10">
-                      <WatermarkIcon size={80} className="text-white" />
-                    </div>
-
-                    {/* Decorative pattern for Mexican card */}
-                    {mama.id === 2 && (
-                      <div className="absolute inset-0 opacity-5">
-                        <div className="grid grid-cols-8 gap-4 p-4">
-                          {Array.from({ length: 32 }).map((_, i) => (
-                            <Flower2 key={i} size={16} className="text-white" />
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    <div className="relative h-full p-5 flex text-white">
-                      {/* Left Content Area */}
-                      <div className="flex-1 flex flex-col justify-between pr-3">
-                        {/* Top Section */}
-                        <div>
-                          <p className="text-xs font-bold tracking-widest opacity-90 mb-2">{mama.cuisine.toUpperCase()}</p>
-                          <h3 className="font-heading font-bold text-3xl mb-2 leading-tight">{mama.name}</h3>
-                          
-                          {/* Cooking Action */}
-                          <div className="flex items-center gap-2 mb-3">
-                            <ChefHat size={16} className="opacity-80" />
-                            <p className="text-xs opacity-80 font-medium">{mama.action}</p>
-                          </div>
-                        </div>
-
-                        {/* Middle Section - Signature Dish */}
-                        <div className="bg-white/15 backdrop-blur-sm rounded-xl p-3 mb-3">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="text-lg">{mama.accent}</span>
-                            <p className="text-xs font-bold tracking-wider opacity-80">SIGNATURE DISH</p>
-                          </div>
-                          <p className="font-heading font-bold text-lg">{mama.signatureDish}</p>
-                        </div>
-
-                        {/* Philosophy Quote - Shortened */}
-                        <div className="mb-3">
-                          <p className="font-handwritten text-xs italic opacity-90 leading-relaxed">
-                            "{mama.philosophy.split('.')[0]}."
-                          </p>
-                        </div>
-
-                        {/* Bottom Section */}
-                        <div>
-                          {/* CTA Button */}
-                          <button 
-                            onClick={() => navigate(`/mama/${mama.id}`)}
-                            className="w-full bg-white text-gray-800 font-heading font-bold py-2.5 px-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 mb-2 flex items-center justify-center gap-2 text-sm"
-                          >
-                            <span>📖</span>
-                            <span>Open {mama.name.split(' ')[0]}'s Cookbook</span>
-                          </button>
-
-                          {/* Cultural greeting */}
-                          <div className="text-center">
-                            <p className="font-handwritten text-sm mb-1">{mama.greeting}</p>
-                            <p className="text-xs opacity-70">"{mama.greetingTranslation}"</p>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Right Side - Character Illustration */}
-                      <div className="w-28 flex flex-col items-center justify-center">
-                        <div className="w-24 h-24 rounded-full bg-white/20 border-3 border-white/30 flex items-center justify-center mb-2">
-                          <div className="w-20 h-20 rounded-full bg-white/10 flex items-center justify-center">
-                            <span className="text-3xl">👵🏻</span>
-                          </div>
-                        </div>
-                        
-                        {/* Small cooking illustration */}
-                        <div className="bg-white/15 rounded-lg p-1.5">
-                          <ChefHat size={18} className="text-white/80" />
-                        </div>
-                      </div>
+                  <div className="relative h-full rounded-3xl overflow-hidden shadow-warm">
+                    {/* Character Card Image as Background */}
+                    <img 
+                      src={mama.characterImage} 
+                      alt={`${mama.name} character card`}
+                      className="absolute inset-0 w-full h-full object-cover"
+                    />
+                    
+                    {/* Overlay for interaction button */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+                    
+                    {/* Interactive Button Overlay */}
+                    <div className="absolute bottom-4 left-4 right-4">
+                      <button 
+                        onClick={() => navigate(`/mama/${mama.id}`)}
+                        className="w-full bg-white/95 backdrop-blur-sm text-gray-800 font-heading font-bold py-3 px-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center gap-2 text-sm hover:bg-white"
+                      >
+                        <span>📖</span>
+                        <span>Open {mama.name.split(' ')[0]}'s Cookbook</span>
+                      </button>
                     </div>
                   </div>
                 </CarouselItem>
