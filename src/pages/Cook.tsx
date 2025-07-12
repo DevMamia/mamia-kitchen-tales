@@ -5,9 +5,11 @@ import { ArrowLeft, Volume2, ChevronLeft, ChevronRight, Upload, X, Settings, Che
 import { Button } from '@/components/ui/button';
 import { VoiceStatusIndicator } from '@/components/VoiceStatusIndicator';
 import { CookingTimer } from '@/components/CookingTimer';
+import { ConversationInterface } from '@/components/ConversationInterface';
 import { getRecipeWithMama, recipes } from '@/data/recipes';
 import { getMamaById } from '@/data/mamas';
 import { useVoice } from '@/hooks/useVoice';
+import { useConversation } from '@/hooks/useConversation';
 
 const Cook = () => {
   const { recipeId } = useParams();
@@ -19,6 +21,7 @@ const Cook = () => {
   const [timerCompleted, setTimerCompleted] = useState(false);
 
   const { speak, isPlaying, config } = useVoice();
+  const conversation = useConversation();
 
   // Find the recipe with mama info
   const recipeData = recipeId ? getRecipeWithMama(recipeId) : null;
@@ -166,6 +169,42 @@ const Cook = () => {
     // Could add notification sound here
   };
 
+  const handleStartConversation = async () => {
+    if (!recipe || !mama) return;
+    
+    const stepText = recipe.instructions[currentStep - 1];
+    await conversation.startConversation(
+      mama.voiceId, 
+      stepText,
+      handleVoiceCommand
+    );
+  };
+
+  const handleVoiceCommand = (command: string) => {
+    switch (command.toLowerCase()) {
+      case 'next':
+        if (currentStep < totalSteps) {
+          setCurrentStep(currentStep + 1);
+          setTimerCompleted(false);
+        }
+        break;
+      case 'back':
+      case 'previous':
+        if (currentStep > 1) {
+          setCurrentStep(currentStep - 1);
+          setTimerCompleted(false);
+        }
+        break;
+      case 'repeat':
+        if (recipe && mama) {
+          speak(recipe.instructions[currentStep - 1], mama.id.toString());
+        }
+        break;
+      default:
+        console.log('Unknown voice command:', command);
+    }
+  };
+
   return (
     <div className="min-h-[calc(100vh-8rem)] bg-gradient-to-b from-orange-50/20 to-background">
       {/* Header with Exit */}
@@ -245,8 +284,23 @@ const Cook = () => {
         )}
       </div>
 
-      {/* Voice Status Indicator */}
-      <VoiceStatusIndicator className="justify-center" />
+        {/* Conversational AI Interface */}
+        {cookingMode && (
+          <div className="px-4 mb-6">
+            <ConversationInterface
+              isConnected={conversation.isConnected}
+              isRecording={conversation.isRecording}
+              currentTranscript={conversation.currentTranscript}
+              partialTranscript={conversation.partialTranscript}
+              error={conversation.error}
+              onStartConversation={() => handleStartConversation()}
+              onStopConversation={conversation.stopConversation}
+            />
+          </div>
+        )}
+
+        {/* Voice Status Indicator */}
+        <VoiceStatusIndicator className="justify-center" />
 
       {/* Controls */}
       <div className="px-4 mb-6">
