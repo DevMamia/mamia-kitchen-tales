@@ -38,8 +38,9 @@
     --radius: 0.75rem;
 
     /* Logo and Header Colors */
-    --logo-cream: 35 35% 82%;         /* Warm golden cream #F4E4BC */
-    --logo-brown: 25 50% 25%;         /* Rich brown #7A4F2A */
+    --logo-cream: 37 87% 84%;         /* Cream background #FBDFB3 from logo */
+    --logo-brown: 24 62% 24%;         /* Brown frame #643617 from logo */
+    --logo-brown-accent: 35 65% 56%;  /* Medium brown accent #D49856 */
 
     /* Cultural accent colors with gradients */
     --italian-accent: 0 75% 45%;      /* Rich red #CC3333 */
