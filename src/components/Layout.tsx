@@ -14,7 +14,7 @@ export const Layout = ({ children, pageTitle, pageSubtitle }: LayoutProps) => {
     <div className="max-w-sm mx-auto bg-background min-h-screen relative shadow-paper">
       <Header />
       
-      <main className="pt-16 pb-20 px-4 min-h-screen">
+      <main className="pt-20 pb-20 px-4 min-h-screen">
         {(pageTitle || pageSubtitle) && (
           <div className="text-center mb-6 pt-2">
             {pageTitle && (
