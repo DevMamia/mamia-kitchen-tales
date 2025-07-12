@@ -61,27 +61,16 @@ const Mamas = () => {
               const WatermarkIcon = mama.watermark;
               return (
                 <CarouselItem key={mama.id} className="basis-[85%] pl-4">
-                  <div className="relative h-full rounded-3xl overflow-hidden shadow-warm">
-                    {/* Character Card Image as Background */}
+                  <div 
+                    onClick={() => navigate(`/mama/${mama.id}`)}
+                    className="relative h-full rounded-3xl overflow-hidden shadow-warm cursor-pointer transition-transform duration-200 hover:scale-105 bg-cream"
+                  >
+                    {/* Character Card Image */}
                     <img 
                       src={mama.characterImage} 
                       alt={`${mama.name} character card`}
-                      className="absolute inset-0 w-full h-full object-cover"
+                      className="w-full h-full object-contain"
                     />
-                    
-                    {/* Overlay for interaction button */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
-                    
-                    {/* Interactive Button Overlay */}
-                    <div className="absolute bottom-4 left-4 right-4">
-                      <button 
-                        onClick={() => navigate(`/mama/${mama.id}`)}
-                        className="w-full bg-white/95 backdrop-blur-sm text-gray-800 font-heading font-bold py-3 px-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center gap-2 text-sm hover:bg-white"
-                      >
-                        <span>📖</span>
-                        <span>Open {mama.name.split(' ')[0]}'s Cookbook</span>
-                      </button>
-                    </div>
                   </div>
                 </CarouselItem>
               );
