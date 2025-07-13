@@ -14,6 +14,8 @@ interface TextToSpeechRequest {
 }
 
 serve(async (req) => {
+  console.log('text-to-speech function called');
+  
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });

@@ -75,42 +75,34 @@ export const PreCookingChat = ({ recipe, mama, onStartCooking }: PreCookingChatP
   };
 
   return (
-    <div className="max-w-md mx-auto p-4 space-y-4">
+    <div className="max-w-md mx-auto p-2 space-y-2">
       {/* Recipe Title & By Line */}
       <div className="space-y-1">
-        <h1 className="text-2xl font-heading font-bold text-foreground leading-tight">
+        <h1 className="text-xl font-heading font-bold text-foreground leading-tight">
           {recipe.title}
         </h1>
         <p className="text-xs text-muted-foreground">
           by <span className="font-medium text-primary">{mama.name}</span>
         </p>
-        <p className="text-sm text-muted-foreground leading-relaxed">
+        <p className="text-xs text-muted-foreground leading-relaxed">
           {recipe.description}
         </p>
       </div>
 
-      {/* Food Image - Reduced Height */}
+      {/* Food Image - Further Reduced Height */}
       <div className="relative">
         <img 
           src={recipe.image} 
           alt={recipe.title}
-          className="w-full h-48 object-cover rounded-2xl shadow-lg"
+          className="w-full h-32 object-cover rounded-xl shadow-lg"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent rounded-2xl"></div>
+        <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent rounded-xl"></div>
       </div>
-
-      {/* Voice Status - Compact */}
-      {isPlaying && (
-        <div className="flex items-center justify-center gap-2 text-primary bg-primary/10 rounded-lg py-1 px-3">
-          <div className="w-1.5 h-1.5 bg-primary rounded-full animate-pulse"></div>
-          <span className="text-xs font-medium">{mama.name} speaking...</span>
-        </div>
-      )}
 
       {/* Start Cooking Button */}
       <Button
         onClick={onStartCooking}
-        className="w-full text-base py-4 rounded-2xl font-heading font-bold"
+        className="w-full text-base py-3 rounded-xl font-heading font-bold"
         size="lg"
       >
         Start Cooking
@@ -121,7 +113,7 @@ export const PreCookingChat = ({ recipe, mama, onStartCooking }: PreCookingChatP
         <CollapsibleTrigger asChild>
           <Button
             variant="ghost"
-            className="w-full text-muted-foreground hover:text-foreground"
+            className="w-full text-muted-foreground hover:text-foreground text-sm py-2"
             size="sm"
           >
             <MessageCircle className="w-4 h-4 mr-2" />
@@ -130,9 +122,9 @@ export const PreCookingChat = ({ recipe, mama, onStartCooking }: PreCookingChatP
           </Button>
         </CollapsibleTrigger>
         
-        <CollapsibleContent className="space-y-4 mt-4">
-          <Card className="p-4">
-            <div className="space-y-3">
+        <CollapsibleContent className="space-y-2 mt-2">
+          <Card className="p-3">
+            <div className="space-y-2">
               <input
                 type="text"
                 value={question}
@@ -153,7 +145,7 @@ export const PreCookingChat = ({ recipe, mama, onStartCooking }: PreCookingChatP
               </Button>
               
               {answer && (
-                <div className="mt-3 p-3 bg-muted rounded-lg">
+                <div className="mt-2 p-2 bg-muted rounded-lg">
                   <p className="text-sm text-foreground">{answer}</p>
                 </div>
               )}
