@@ -16,9 +16,20 @@ export const Header = () => {
             style={{ 
               background: 'hsl(var(--logo-cream))',
               borderBottom: '3px solid hsl(var(--logo-brown))',
-              boxShadow: '0 4px 12px -2px hsl(var(--logo-brown) / 0.3)'
+              boxShadow: '0 6px 16px -4px hsl(var(--logo-brown) / 0.4), 0 2px 8px -2px hsl(var(--logo-brown) / 0.2)'
             }}>
-      <div className="flex items-center justify-end h-20 px-4">
+      <div className="flex items-center justify-between h-20 px-4">
+        <div className="flex items-center gap-3">
+          <img 
+            src="/lovable-uploads/124a16fb-67a1-4e97-a447-26777816342c.png" 
+            alt="MAMIA Logo" 
+            className="w-12 h-12 object-contain"
+          />
+          <h1 className="font-cinzel font-semibold text-2xl tracking-wide" 
+              style={{ color: 'hsl(var(--logo-brown))' }}>
+            Mamia
+          </h1>
+        </div>
 
         <DropdownMenu modal={false}>
           <DropdownMenuTrigger asChild>

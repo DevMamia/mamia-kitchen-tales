@@ -84,7 +84,8 @@ export default {
 			},
 			fontFamily: {
 				'heading': ['Nunito', 'system-ui', 'sans-serif'],
-				'handwritten': ['Kalam', 'cursive']
+				'handwritten': ['Kalam', 'cursive'],
+				'cinzel': ['Cinzel', 'serif']
 			},
 			keyframes: {
 				'accordion-down': {

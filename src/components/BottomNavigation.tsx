@@ -19,7 +19,7 @@ export const BottomNavigation = () => {
          style={{ 
            background: 'hsl(var(--logo-cream))',
            borderTop: '3px solid hsl(var(--logo-brown))',
-           boxShadow: '0 -4px 12px -2px hsl(var(--logo-brown) / 0.2)'
+           boxShadow: '0 -6px 16px -4px hsl(var(--logo-brown) / 0.4), 0 -2px 8px -2px hsl(var(--logo-brown) / 0.2)'
          }}>
       <div className="flex items-center justify-around h-20 px-2">
         {navItems.map((item) => {
