@@ -16,12 +16,6 @@ interface PreCookingChatProps {
 }
 
 export const PreCookingChat = ({ recipe, mama, onStartCooking }: PreCookingChatProps) => {
-  // Safety check for required props
-  if (!recipe || !mama || !onStartCooking) {
-    console.error('PreCookingChat: Missing required props', { recipe, mama, onStartCooking });
-    return null;
-  }
-
   const [isTextChatOpen, setIsTextChatOpen] = useState(false);
   const [question, setQuestion] = useState('');
   const [answer, setAnswer] = useState('');
@@ -31,9 +25,6 @@ export const PreCookingChat = ({ recipe, mama, onStartCooking }: PreCookingChatP
   const { getTemplateResponse, getCulturalGreeting } = useTemplateResponses();
   const { speak, isPlaying } = useVoice();
   const { user } = useAuth();
-
-  // Debug log to verify component version
-  console.log('PreCookingChat loaded - current version with auto-greeting');
 
   // Auto-play voice greeting when component mounts
   useEffect(() => {
