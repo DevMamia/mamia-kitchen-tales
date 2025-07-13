@@ -6,15 +6,18 @@ import { Button } from '@/components/ui/button';
 import { VoiceStatusIndicator } from '@/components/VoiceStatusIndicator';
 import { CookingTimer } from '@/components/CookingTimer';
 import { ConversationInterface } from '@/components/ConversationInterface';
+import { PreCookingChat } from '@/components/PreCookingChat';
+import { EnhancedVoiceInterface } from '@/components/EnhancedVoiceInterface';
 import { getRecipeWithMama, recipes } from '@/data/recipes';
 import { getMamaById } from '@/data/mamas';
 import { useVoice } from '@/hooks/useVoice';
 import { useConversation } from '@/hooks/useConversation';
+import { useConversationMemory } from '@/hooks/useConversationMemory';
 
 const Cook = () => {
   const { recipeId } = useParams();
   const navigate = useNavigate();
-  const [cookingMode, setCookingMode] = useState(false);
+  const [conversationPhase, setConversationPhase] = useState<'pre-cooking' | 'cooking'>('pre-cooking');
   const [currentStep, setCurrentStep] = useState(1);
   const [voiceStatus, setVoiceStatus] = useState<'speaking' | 'listening' | 'processing' | 'idle'>('idle');
   const [timerExpanded, setTimerExpanded] = useState(false);
@@ -25,6 +28,9 @@ const Cook = () => {
 
   // Find the recipe with mama info
   const recipeData = recipeId ? getRecipeWithMama(recipeId) : null;
+  
+  // Initialize conversation memory
+  const conversationMemory = recipeData ? useConversationMemory(recipeData.recipe, recipeData.mama) : null;
   
   // Store current recipe in localStorage when entering cooking mode
   useEffect(() => {
@@ -91,7 +97,7 @@ const Cook = () => {
   useEffect(() => {
     let wakeLock: any = null;
 
-    if (cookingMode && 'wakeLock' in navigator) {
+    if (conversationPhase === 'cooking' && 'wakeLock' in navigator) {
       navigator.wakeLock.request('screen').then((lock) => {
         wakeLock = lock;
       }).catch(() => {
@@ -104,58 +110,22 @@ const Cook = () => {
         wakeLock.release();
       }
     };
-  }, [cookingMode]);
+  }, [conversationPhase]);
 
-  if (!cookingMode) {
-    // Page 1: Welcome Page
+  const handleStartCooking = () => {
+    setConversationPhase('cooking');
+    conversationMemory?.startCookingPhase(currentStep);
+  };
+
+  if (conversationPhase === 'pre-cooking') {
+    // Phase 1: Pre-Cooking Chat Interface
     return (
-      <div className="min-h-[calc(100vh-8rem)] flex flex-col items-center justify-center p-6">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <div className="text-6xl mb-4">{mama?.emoji}</div>
-          <h1 className="text-3xl font-heading font-bold text-foreground mb-2">
-            Ready to cook with {mama?.name}?
-          </h1>
-          <p className="text-xl text-muted-foreground font-handwritten">
-            {recipe.title}
-          </p>
-        </div>
-
-        {/* Recipe Image */}
-        <div className="w-64 h-48 bg-muted rounded-2xl mb-8 overflow-hidden shadow-lg">
-          <img 
-            src={recipe.image} 
-            alt={recipe.title}
-            className="w-full h-full object-cover"
-          />
-        </div>
-
-        {/* Info Cards */}
-        <div className="grid grid-cols-2 gap-4 w-full max-w-sm mb-8">
-          <div className="bg-card rounded-xl p-4 text-center border border-border">
-            <div className="text-2xl font-bold text-orange-500 mb-1">{recipe.cookingTime}</div>
-            <div className="text-sm text-muted-foreground">Cook Time</div>
-          </div>
-          <div className="bg-card rounded-xl p-4 text-center border border-border">
-            <div className="text-2xl font-bold text-orange-500 mb-1">{totalSteps}</div>
-            <div className="text-sm text-muted-foreground">Steps</div>
-          </div>
-        </div>
-
-        {/* Start Cooking Button */}
-        <Button
-          onClick={() => setCookingMode(true)}
-          className="w-full max-w-sm bg-orange-500 text-white hover:bg-orange-600 text-xl py-6 rounded-2xl font-heading font-bold min-h-[64px]"
-        >
-          Start Cooking with {mama?.name}
-        </Button>
-
-        {/* Tips */}
-        <div className="mt-8 bg-orange-50 dark:bg-orange-900/20 rounded-xl p-4 max-w-sm">
-          <p className="text-sm text-orange-700 dark:text-orange-300 text-center font-handwritten">
-            💡 Make sure your ingredients are ready and your workspace is clear!
-          </p>
-        </div>
+      <div className="min-h-[calc(100vh-8rem)]">
+        <PreCookingChat
+          recipe={recipe}
+          mama={mama}
+          onStartCooking={handleStartCooking}
+        />
       </div>
     );
   }
@@ -184,6 +154,7 @@ const Cook = () => {
     switch (command.toLowerCase()) {
       case 'next':
         if (currentStep < totalSteps) {
+          conversationMemory?.markStepComplete(currentStep);
           setCurrentStep(currentStep + 1);
           setTimerCompleted(false);
         }
@@ -200,9 +171,18 @@ const Cook = () => {
           speak(recipe.instructions[currentStep - 1], mama.id.toString());
         }
         break;
+      case 'help':
+        conversationMemory?.markStepStruggling(currentStep);
+        break;
       default:
+        conversationMemory?.addUserQuestion(command);
         console.log('Unknown voice command:', command);
     }
+  };
+
+  const handleInterrupt = () => {
+    conversationMemory?.handleInterruption();
+    conversation.stopConversation();
   };
 
   return (
@@ -284,19 +264,23 @@ const Cook = () => {
         )}
       </div>
 
-        {/* Conversational AI Interface */}
-        {cookingMode && (
-          <div className="px-4 mb-6">
-            <ConversationInterface
-              isConnected={conversation.isConnected}
-              currentTranscript={conversation.currentTranscript}
-              partialTranscript={conversation.partialTranscript}
-              error={conversation.error}
-              onStartConversation={() => handleStartConversation()}
-              onStopConversation={conversation.stopConversation}
-            />
-          </div>
-        )}
+        {/* Enhanced Voice Interface */}
+        <div className="px-4 mb-6">
+          <EnhancedVoiceInterface
+            mama={mama}
+            isConnected={conversation.isConnected}
+            isSpeaking={isPlaying}
+            isListening={conversation.isConnected && !isPlaying}
+            currentTranscript={conversation.currentTranscript}
+            partialTranscript={conversation.partialTranscript}
+            error={conversation.error}
+            currentStep={currentStep}
+            totalSteps={totalSteps}
+            onStartConversation={handleStartConversation}
+            onStopConversation={conversation.stopConversation}
+            onInterrupt={handleInterrupt}
+          />
+        </div>
 
         {/* Voice Status Indicator */}
         <VoiceStatusIndicator className="justify-center" />
