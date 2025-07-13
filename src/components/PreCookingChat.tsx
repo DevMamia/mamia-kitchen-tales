@@ -48,10 +48,18 @@ export const PreCookingChat = ({ recipe, mama, onStartCooking }: PreCookingChatP
       const randomGreeting = greetingVariations[Math.floor(Math.random() * greetingVariations.length)];
       const finalGreeting = `${randomGreeting} Tell me when you're ready to start cooking!`;
       
+      console.log('[PreCookingChat] Attempting to play greeting:', finalGreeting);
+      
       // Play greeting after a short delay
-      setTimeout(() => {
-        speak(finalGreeting, mama.id.toString());
-        setHasPlayedGreeting(true);
+      setTimeout(async () => {
+        try {
+          await speak(finalGreeting, mama.id.toString());
+          setHasPlayedGreeting(true);
+          console.log('[PreCookingChat] Greeting played successfully');
+        } catch (error) {
+          console.error('[PreCookingChat] Failed to play greeting:', error);
+          setHasPlayedGreeting(true); // Still mark as played to avoid retries
+        }
       }, 500);
     }
   }, [speak, mama.id, recipe.title, user, hasPlayedGreeting]);
@@ -67,75 +75,56 @@ export const PreCookingChat = ({ recipe, mama, onStartCooking }: PreCookingChatP
   };
 
   return (
-    <div className="max-w-md mx-auto p-4 space-y-6">
-      {/* Recipe Title & Mama Byline */}
-      <div className="text-center space-y-2">
-        <h1 className="text-3xl font-heading font-bold text-foreground">
+    <div className="max-w-md mx-auto p-2 space-y-2">
+      {/* Recipe Title & By Line */}
+      <div className="space-y-1">
+        <h1 className="text-xl font-heading font-bold text-foreground leading-tight">
           {recipe.title}
         </h1>
-        <p className="text-base text-muted-foreground font-handwritten">
-          -- by {mama.name} {mama.emoji}
+        <p className="text-xs text-muted-foreground">
+          by <span className="font-medium text-primary">{mama.name}</span>
         </p>
-        <p className="text-sm text-muted-foreground mt-3 leading-relaxed">
+        <p className="text-xs text-muted-foreground leading-relaxed">
           {recipe.description}
         </p>
       </div>
 
-      {/* Food Image */}
+      {/* Food Image - Further Reduced Height */}
       <div className="relative">
         <img 
           src={recipe.image} 
           alt={recipe.title}
-          className="w-full h-56 object-cover rounded-2xl shadow-lg"
+          className="w-full h-32 object-cover rounded-xl shadow-lg"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent rounded-2xl"></div>
-      </div>
-
-      {/* Recipe Info - Compact */}
-      <div className="grid grid-cols-3 gap-2">
-        <Card className="p-2 text-center">
-          <Clock className="w-4 h-4 mx-auto mb-1 text-primary" />
-          <div className="text-xs font-bold text-primary">{recipe.cookingTime}</div>
-          <div className="text-xs text-muted-foreground">Time</div>
-        </Card>
-        <Card className="p-2 text-center">
-          <Users className="w-4 h-4 mx-auto mb-1 text-primary" />
-          <div className="text-xs font-bold text-primary">{recipe.servings}</div>
-          <div className="text-xs text-muted-foreground">Serves</div>
-        </Card>
-        <Card className="p-2 text-center">
-          <ChefHat className="w-4 h-4 mx-auto mb-1 text-primary" />
-          <div className="text-xs font-bold text-primary">{recipe.difficulty}</div>
-          <div className="text-xs text-muted-foreground">Level</div>
-        </Card>
+        <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent rounded-xl"></div>
       </div>
 
       {/* Start Cooking Button */}
       <Button
         onClick={onStartCooking}
-        className="w-full text-lg py-6 rounded-2xl font-heading font-bold"
+        className="w-full text-base py-3 rounded-xl font-heading font-bold"
         size="lg"
       >
         Start Cooking
       </Button>
 
-      {/* Text Questions */}
+      {/* Optional Text Questions - Subtle Dropdown */}
       <Collapsible open={isTextChatOpen} onOpenChange={setIsTextChatOpen}>
         <CollapsibleTrigger asChild>
           <Button
-            variant="outline"
-            className="w-full"
+            variant="ghost"
+            className="w-full text-muted-foreground hover:text-foreground text-sm py-2"
             size="sm"
           >
             <MessageCircle className="w-4 h-4 mr-2" />
-            Text {mama.name}
+            Text {mama.name}!
             <ChevronDown className="w-4 h-4 ml-2" />
           </Button>
         </CollapsibleTrigger>
         
-        <CollapsibleContent className="space-y-4 mt-4">
-          <Card className="p-4">
-            <div className="space-y-3">
+        <CollapsibleContent className="space-y-2 mt-2">
+          <Card className="p-3">
+            <div className="space-y-2">
               <input
                 type="text"
                 value={question}
@@ -156,7 +145,7 @@ export const PreCookingChat = ({ recipe, mama, onStartCooking }: PreCookingChatP
               </Button>
               
               {answer && (
-                <div className="mt-3 p-3 bg-muted rounded-lg">
+                <div className="mt-2 p-2 bg-muted rounded-lg">
                   <p className="text-sm text-foreground">{answer}</p>
                 </div>
               )}

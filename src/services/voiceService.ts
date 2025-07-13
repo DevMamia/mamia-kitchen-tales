@@ -85,18 +85,34 @@ export class VoiceService {
 
   private async initializeVoiceIds() {
     try {
+      console.log('[VoiceService] Initializing voice IDs...');
       // Get voice IDs from Supabase Edge Function secrets via a helper function
       const { data, error } = await supabase.functions.invoke('get-voice-ids');
+      
+      if (error) {
+        console.error('[VoiceService] Error fetching voice IDs:', error);
+        throw error;
+      }
+      
       if (data && !error) {
         this.voiceIds = {
           nonna_lucia: data.ELEVENLABS_NONNA_VOICE_ID,
           abuela_rosa: data.ELEVENLABS_ABUELA_VOICE_ID,
           mae_malai: data.ELEVENLABS_MAE_VOICE_ID
         };
-        console.log('Voice IDs initialized successfully');
+        console.log('[VoiceService] Voice IDs initialized successfully:', this.voiceIds);
+      } else {
+        console.warn('[VoiceService] No voice ID data received');
       }
     } catch (error) {
-      console.warn('Could not fetch voice IDs, using defaults:', error);
+      console.error('[VoiceService] Could not fetch voice IDs:', error);
+      // Use fallback voice IDs for development
+      this.voiceIds = {
+        nonna_lucia: 'EXAVITQu4vr4xnSDxMaL', // Sarah voice as fallback
+        abuela_rosa: 'FGY2WhTYpPnrIDTdsKH5', // Laura voice as fallback  
+        mae_malai: 'XB0fDUnXU5powFXDhCwa'  // Charlotte voice as fallback
+      };
+      console.log('[VoiceService] Using fallback voice IDs');
     }
   }
 
@@ -116,33 +132,42 @@ export class VoiceService {
   }
 
   async speak(text: string, mamaId: string): Promise<void> {
-    if (!this.config.enabled) return;
-
-    console.log(`[VoiceService] Speaking text: "${text}" for mama: ${mamaId}`);
-
-    // Resolve mama ID (handle both numeric and voice IDs)
-    const resolvedMamaId = this.resolveMamaId(mamaId);
-    console.log(`[VoiceService] Resolved mama ID: ${resolvedMamaId}`);
-
-    // In essential mode, try pre-cached phrases first, then fall back to full TTS
-    if (this.config.mode === 'essential') {
-      const phrase = ESSENTIAL_PHRASES[resolvedMamaId]?.[text];
-      if (phrase) {
-        console.log(`[VoiceService] Playing cached phrase for ${resolvedMamaId}: ${phrase}`);
-        await this.playEssentialPhrase(phrase);
-        return;
-      }
-      console.log(`[VoiceService] No cached phrase found, falling back to full TTS`);
+    if (!this.config.enabled) {
+      console.log('[VoiceService] Voice disabled, skipping speech');
+      return;
     }
 
-    // Fall back to full TTS mode for any text not in essential phrases
-    const actualVoiceId = this.voiceIds[resolvedMamaId] || MAMA_VOICES[resolvedMamaId]?.voiceId;
-    console.log(`[VoiceService] Using voice ID: ${actualVoiceId}`);
-    
-    if (actualVoiceId) {
-      this.addToQueue(text, actualVoiceId);
-    } else {
-      console.warn(`[VoiceService] No voice ID found for ${resolvedMamaId}`);
+    try {
+      console.log(`[VoiceService] Speaking text: "${text}" for mama: ${mamaId}`);
+
+      // Resolve mama ID (handle both numeric and voice IDs)
+      const resolvedMamaId = this.resolveMamaId(mamaId);
+      console.log(`[VoiceService] Resolved mama ID: ${resolvedMamaId}`);
+
+      // In essential mode, try pre-cached phrases first, then fall back to full TTS
+      if (this.config.mode === 'essential') {
+        const phrase = ESSENTIAL_PHRASES[resolvedMamaId]?.[text];
+        if (phrase) {
+          console.log(`[VoiceService] Playing cached phrase for ${resolvedMamaId}: ${phrase}`);
+          await this.playEssentialPhrase(phrase);
+          return;
+        }
+        console.log(`[VoiceService] No cached phrase found, falling back to full TTS`);
+      }
+
+      // Fall back to full TTS mode for any text not in essential phrases
+      const actualVoiceId = this.voiceIds[resolvedMamaId] || MAMA_VOICES[resolvedMamaId]?.voiceId;
+      console.log(`[VoiceService] Using voice ID: ${actualVoiceId} for resolved mama: ${resolvedMamaId}`);
+      
+      if (actualVoiceId) {
+        this.addToQueue(text, actualVoiceId);
+      } else {
+        console.error(`[VoiceService] No voice ID found for ${resolvedMamaId}. Available voice IDs:`, this.voiceIds);
+        throw new Error(`Voice ID not found for mama: ${resolvedMamaId}`);
+      }
+    } catch (error) {
+      console.error('[VoiceService] Error in speak method:', error);
+      // Don't throw error to prevent breaking the app
     }
   }
 
@@ -245,12 +270,16 @@ export class VoiceService {
       });
 
       if (error) {
-        throw new Error(`Voice service error: ${error.message}`);
+        console.error('[VoiceService] Edge function error:', error);
+        throw new Error(`Voice service error: ${error.message || 'Unknown error'}`);
       }
 
       if (!data?.audioData) {
+        console.error('[VoiceService] No audio data in response:', data);
         throw new Error('No audio data received from voice service');
       }
+
+      console.log(`[VoiceService] Received audio data, length: ${data.audioData.length}`);
 
       // Create and play audio from base64 data
       const audioBlob = new Blob([
@@ -270,27 +299,33 @@ export class VoiceService {
       // Play audio and handle completion
       await new Promise<void>((resolve, reject) => {
         audio.onended = () => {
+          console.log('[VoiceService] Audio playback ended');
           this.isPlaying = false;
           this.currentAudio = null;
           URL.revokeObjectURL(audioUrl);
           resolve();
         };
         
-        audio.onerror = () => {
+        audio.onerror = (e) => {
+          console.error('[VoiceService] Audio playback error:', e);
           this.isPlaying = false;
           this.currentAudio = null;
           URL.revokeObjectURL(audioUrl);
           reject(new Error('Audio playback failed'));
         };
         
-        audio.play().catch(reject);
+        console.log('[VoiceService] Starting audio playback...');
+        audio.play().catch((playError) => {
+          console.error('[VoiceService] Audio play() failed:', playError);
+          reject(playError);
+        });
       });
       
-      console.log(`[VoiceService] Finished playing: "${text}"`);
+      console.log(`[VoiceService] Successfully finished playing: "${text}"`);
     } catch (error) {
       this.isPlaying = false;
       this.currentAudio = null;
-      console.error('[VoiceService] Error generating speech:', error);
+      console.error('[VoiceService] Error in generateAndPlaySpeech:', error);
       throw error;
     }
   }
