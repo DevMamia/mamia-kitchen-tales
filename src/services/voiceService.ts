@@ -70,7 +70,8 @@ export class VoiceService {
   private static instance: VoiceService;
   private currentAudio: HTMLAudioElement | null = null;
   private audioQueue: Array<{ text: string; voiceId: string }> = [];
-  private isPlaying = false;
+  private isProcessingQueue = false;
+  private isCurrentlyPlayingState = false;
   private voiceIds: Record<string, string> = {};
   private config: VoiceConfig = {
     mode: 'full', // Changed to 'full' for better reliability
@@ -211,96 +212,117 @@ export class VoiceService {
 
   private addToQueue(text: string, voiceId: string): void {
     this.audioQueue.push({ text, voiceId });
-    if (!this.isPlaying) {
+    if (!this.isProcessingQueue) {
       this.processQueue();
     }
   }
 
   private async processQueue(): Promise<void> {
-    if (this.audioQueue.length === 0) {
-      this.isPlaying = false;
+    if (this.isProcessingQueue || this.audioQueue.length === 0) {
       return;
     }
 
-    this.isPlaying = true;
-    const { text, voiceId } = this.audioQueue.shift()!;
+    this.isProcessingQueue = true;
 
-    try {
-      await this.generateAndPlaySpeech(text, voiceId);
-    } catch (error) {
-      console.error('Error playing speech:', error);
+    while (this.audioQueue.length > 0) {
+      const { text, voiceId } = this.audioQueue.shift()!;
+      
+      try {
+        await this.generateAndPlaySpeech(text, voiceId);
+      } catch (error) {
+        console.error('[VoiceService] Error processing queue item:', error);
+        this.isCurrentlyPlayingState = false;
+        // Continue with next item instead of stopping the queue
+      }
     }
 
-    // Process next item in queue
-    setTimeout(() => this.processQueue(), 100);
+    this.isProcessingQueue = false;
   }
 
   private async generateAndPlaySpeech(text: string, voiceId: string): Promise<void> {
     try {
-      console.log(`[VoiceService] Generating speech for: "${text}" with voice: ${voiceId}`);
-      
       // Stop any currently playing audio
       this.stopCurrentAudio();
-
-      // Call our Supabase Edge Function for text-to-speech
+      this.isCurrentlyPlayingState = true;
+      
+      console.log(`[VoiceService] Calling TTS for: "${text.substring(0, 50)}..." with voiceId: ${voiceId}`);
+      
       const { data, error } = await supabase.functions.invoke('text-to-speech', {
         body: {
           text,
-          voiceId,
-          model: 'eleven_multilingual_v2',
-          stability: 0.5,
-          similarity_boost: 0.75
+          voiceId
         }
       });
 
       if (error) {
         console.error('[VoiceService] Edge function error details:', error);
-        throw new Error(`Voice service error: Edge Function returned a non-2xx status code`);
+        this.isCurrentlyPlayingState = false;
+        throw new Error(`Voice service error: ${error.message || 'Edge Function error'}`);
       }
 
       if (!data?.audioData) {
+        console.error('[VoiceService] No audio data in response:', data);
+        this.isCurrentlyPlayingState = false;
         throw new Error('No audio data received from voice service');
       }
 
-      // Create and play audio from base64 data
-      const audioBlob = new Blob([
-        Uint8Array.from(atob(data.audioData), c => c.charCodeAt(0))
-      ], { type: 'audio/mpeg' });
-      
-      const audioUrl = URL.createObjectURL(audioBlob);
-      const audio = new Audio(audioUrl);
-      
-      // Apply volume setting
-      audio.volume = this.config.volume;
-      
-      // Set current audio reference
-      this.currentAudio = audio;
-      this.isPlaying = true;
+      console.log(`[VoiceService] Received audio data, length: ${data.audioData.length}`);
 
-      // Play audio and handle completion
-      await new Promise<void>((resolve, reject) => {
-        audio.onended = () => {
-          this.isPlaying = false;
+      // Create audio blob from base64 data
+      const audioBlob = new Blob(
+        [Uint8Array.from(atob(data.audioData), c => c.charCodeAt(0))], 
+        { type: 'audio/mpeg' }
+      );
+      const audioUrl = URL.createObjectURL(audioBlob);
+
+      // Create and play audio
+      this.currentAudio = new Audio(audioUrl);
+      
+      return new Promise((resolve, reject) => {
+        if (!this.currentAudio) {
+          this.isCurrentlyPlayingState = false;
+          reject(new Error('Failed to create audio element'));
+          return;
+        }
+
+        this.currentAudio.onloadeddata = () => {
+          console.log(`[VoiceService] Audio loaded and playing: "${text.substring(0, 30)}..."`);
+        };
+
+        this.currentAudio.onended = () => {
+          console.log('[VoiceService] Audio playback ended');
+          if (this.currentAudio) {
+            URL.revokeObjectURL(this.currentAudio.src);
+          }
           this.currentAudio = null;
-          URL.revokeObjectURL(audioUrl);
+          this.isCurrentlyPlayingState = false;
           resolve();
         };
-        
-        audio.onerror = () => {
-          this.isPlaying = false;
+
+        this.currentAudio.onerror = (error) => {
+          console.error('[VoiceService] Audio playback error:', error);
+          if (this.currentAudio) {
+            URL.revokeObjectURL(this.currentAudio.src);
+          }
           this.currentAudio = null;
-          URL.revokeObjectURL(audioUrl);
+          this.isCurrentlyPlayingState = false;
           reject(new Error('Audio playback failed'));
         };
-        
-        audio.play().catch(reject);
+
+        this.currentAudio.play().catch(error => {
+          console.error('[VoiceService] Failed to play audio:', error);
+          if (this.currentAudio) {
+            URL.revokeObjectURL(this.currentAudio.src);
+          }
+          this.currentAudio = null;
+          this.isCurrentlyPlayingState = false;
+          reject(error);
+        });
       });
-      
-      console.log(`[VoiceService] Finished playing: "${text}"`);
+
     } catch (error) {
-      this.isPlaying = false;
-      this.currentAudio = null;
-      console.error('[VoiceService] Error generating speech:', error);
+      console.error('[VoiceService] Speech generation failed:', error);
+      this.isCurrentlyPlayingState = false;
       throw error;
     }
   }
@@ -309,18 +331,20 @@ export class VoiceService {
     if (this.currentAudio) {
       this.currentAudio.pause();
       this.currentAudio.currentTime = 0;
+      URL.revokeObjectURL(this.currentAudio.src);
       this.currentAudio = null;
     }
+    this.isCurrentlyPlayingState = false;
   }
 
   public clearQueue(): void {
     this.audioQueue = [];
     this.stopCurrentAudio();
-    this.isPlaying = false;
+    this.isCurrentlyPlayingState = false;
   }
 
   public isCurrentlyPlaying(): boolean {
-    return this.isPlaying;
+    return this.isCurrentlyPlayingState || (this.currentAudio !== null && !this.currentAudio.paused);
   }
 
   public getQueueLength(): number {
