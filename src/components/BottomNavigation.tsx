@@ -57,8 +57,8 @@ export const BottomNavigation = () => {
                   : 'hsl(var(--logo-brown) / 0.7)'
               }}
             >
-              <Icon size={20} className="mb-1" />
-              <span className="text-xs font-medium font-heading">
+              <Icon size={24} className="mb-1" />
+              <span className="text-sm font-bold font-heading">
                 {item.label}
               </span>
             </button>
