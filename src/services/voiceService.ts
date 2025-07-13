@@ -80,6 +80,7 @@ export class VoiceService {
   };
 
   private constructor() {
+    // Initialize voice IDs immediately
     this.initializeVoiceIds();
   }
 
@@ -93,7 +94,9 @@ export class VoiceService {
           abuela_rosa: data.ELEVENLABS_ABUELA_VOICE_ID,
           mae_malai: data.ELEVENLABS_MAE_VOICE_ID
         };
-        console.log('Voice IDs initialized successfully');
+        console.log('Voice IDs initialized successfully', this.voiceIds);
+      } else {
+        console.error('Error fetching voice IDs:', error);
       }
     } catch (error) {
       console.warn('Could not fetch voice IDs, using defaults:', error);
@@ -120,6 +123,12 @@ export class VoiceService {
 
     console.log(`[VoiceService] Speaking text: "${text}" for mama: ${mamaId}`);
 
+    // Wait for voice IDs to be initialized if needed
+    if (Object.keys(this.voiceIds).length === 0) {
+      console.log('[VoiceService] Waiting for voice IDs to initialize...');
+      await this.initializeVoiceIds();
+    }
+
     // Resolve mama ID (handle both numeric and voice IDs)
     const resolvedMamaId = this.resolveMamaId(mamaId);
     console.log(`[VoiceService] Resolved mama ID: ${resolvedMamaId}`);
@@ -136,13 +145,13 @@ export class VoiceService {
     }
 
     // Fall back to full TTS mode for any text not in essential phrases
-    const actualVoiceId = this.voiceIds[resolvedMamaId] || MAMA_VOICES[resolvedMamaId]?.voiceId;
-    console.log(`[VoiceService] Using voice ID: ${actualVoiceId}`);
+    const actualVoiceId = this.voiceIds[resolvedMamaId];
+    console.log(`[VoiceService] Using voice ID: ${actualVoiceId} for ${resolvedMamaId}`);
     
     if (actualVoiceId) {
       this.addToQueue(text, actualVoiceId);
     } else {
-      console.warn(`[VoiceService] No voice ID found for ${resolvedMamaId}`);
+      console.warn(`[VoiceService] No voice ID found for ${resolvedMamaId}. Available IDs:`, this.voiceIds);
     }
   }
 
@@ -245,7 +254,8 @@ export class VoiceService {
       });
 
       if (error) {
-        throw new Error(`Voice service error: ${error.message}`);
+        console.error('[VoiceService] Edge function error details:', error);
+        throw new Error(`Voice service error: Edge Function returned a non-2xx status code`);
       }
 
       if (!data?.audioData) {
