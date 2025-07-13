@@ -48,18 +48,10 @@ export const PreCookingChat = ({ recipe, mama, onStartCooking }: PreCookingChatP
       const randomGreeting = greetingVariations[Math.floor(Math.random() * greetingVariations.length)];
       const finalGreeting = `${randomGreeting} Tell me when you're ready to start cooking!`;
       
-      console.log('[PreCookingChat] Attempting to play greeting:', finalGreeting);
-      
       // Play greeting after a short delay
-      setTimeout(async () => {
-        try {
-          await speak(finalGreeting, mama.id.toString());
-          setHasPlayedGreeting(true);
-          console.log('[PreCookingChat] Greeting played successfully');
-        } catch (error) {
-          console.error('[PreCookingChat] Failed to play greeting:', error);
-          setHasPlayedGreeting(true); // Still mark as played to avoid retries
-        }
+      setTimeout(() => {
+        speak(finalGreeting, mama.id.toString());
+        setHasPlayedGreeting(true);
       }, 500);
     }
   }, [speak, mama.id, recipe.title, user, hasPlayedGreeting]);
@@ -75,56 +67,81 @@ export const PreCookingChat = ({ recipe, mama, onStartCooking }: PreCookingChatP
   };
 
   return (
-    <div className="max-w-md mx-auto p-2 space-y-2">
-      {/* Recipe Title & By Line */}
-      <div className="space-y-1">
-        <h1 className="text-xl font-heading font-bold text-foreground leading-tight">
-          {recipe.title}
+    <div className="max-w-md mx-auto p-6 space-y-8">
+      {/* Mama Portrait & Greeting */}
+      <div className="text-center space-y-4">
+        <div className="text-8xl mb-4">{mama.emoji}</div>
+        <h1 className="text-2xl font-heading font-bold text-foreground">
+          {mama.name}
         </h1>
-        <p className="text-xs text-muted-foreground">
-          by <span className="font-medium text-primary">{mama.name}</span>
+        <p className="text-lg text-muted-foreground font-handwritten">
+          {recipe.title}
         </p>
-        <p className="text-xs text-muted-foreground leading-relaxed">
-          {recipe.description}
-        </p>
+        
+        {/* Voice Status */}
+        {isPlaying && (
+          <div className="flex items-center justify-center gap-2 text-primary">
+            <div className="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
+            <span className="text-sm font-medium">{mama.name} speaking...</span>
+          </div>
+        )}
       </div>
 
-      {/* Food Image - Further Reduced Height */}
+      {/* Recipe Info */}
+      <div className="grid grid-cols-3 gap-3">
+        <Card className="p-3 text-center">
+          <Clock className="w-5 h-5 mx-auto mb-1 text-primary" />
+          <div className="text-sm font-bold text-primary">{recipe.cookingTime}</div>
+          <div className="text-xs text-muted-foreground">Time</div>
+        </Card>
+        <Card className="p-3 text-center">
+          <Users className="w-5 h-5 mx-auto mb-1 text-primary" />
+          <div className="text-sm font-bold text-primary">{recipe.servings}</div>
+          <div className="text-xs text-muted-foreground">Serves</div>
+        </Card>
+        <Card className="p-3 text-center">
+          <ChefHat className="w-5 h-5 mx-auto mb-1 text-primary" />
+          <div className="text-sm font-bold text-primary">{recipe.difficulty}</div>
+          <div className="text-xs text-muted-foreground">Level</div>
+        </Card>
+      </div>
+
+      {/* Food Image */}
       <div className="relative">
         <img 
           src={recipe.image} 
           alt={recipe.title}
-          className="w-full h-32 object-cover rounded-xl shadow-lg"
+          className="w-full h-48 object-cover rounded-2xl shadow-lg"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent rounded-xl"></div>
+        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent rounded-2xl"></div>
       </div>
 
       {/* Start Cooking Button */}
       <Button
         onClick={onStartCooking}
-        className="w-full text-base py-3 rounded-xl font-heading font-bold"
+        className="w-full text-lg py-6 rounded-2xl font-heading font-bold"
         size="lg"
       >
-        Start Cooking
+        Start Cooking with {mama.name}
       </Button>
 
-      {/* Optional Text Questions - Subtle Dropdown */}
+      {/* Optional Text Questions */}
       <Collapsible open={isTextChatOpen} onOpenChange={setIsTextChatOpen}>
         <CollapsibleTrigger asChild>
           <Button
-            variant="ghost"
-            className="w-full text-muted-foreground hover:text-foreground text-sm py-2"
+            variant="outline"
+            className="w-full"
             size="sm"
           >
             <MessageCircle className="w-4 h-4 mr-2" />
-            Text {mama.name}!
+            Text {mama.name}
             <ChevronDown className="w-4 h-4 ml-2" />
           </Button>
         </CollapsibleTrigger>
         
-        <CollapsibleContent className="space-y-2 mt-2">
-          <Card className="p-3">
-            <div className="space-y-2">
+        <CollapsibleContent className="space-y-4 mt-4">
+          <Card className="p-4">
+            <div className="space-y-3">
               <input
                 type="text"
                 value={question}
@@ -145,7 +162,7 @@ export const PreCookingChat = ({ recipe, mama, onStartCooking }: PreCookingChatP
               </Button>
               
               {answer && (
-                <div className="mt-2 p-2 bg-muted rounded-lg">
+                <div className="mt-3 p-3 bg-muted rounded-lg">
                   <p className="text-sm text-foreground">{answer}</p>
                 </div>
               )}
@@ -153,6 +170,13 @@ export const PreCookingChat = ({ recipe, mama, onStartCooking }: PreCookingChatP
           </Card>
         </CollapsibleContent>
       </Collapsible>
+
+      {/* Cultural Philosophy */}
+      <Card className="p-4 bg-gradient-to-r from-primary/5 to-secondary/5 border-primary/20">
+        <p className="text-sm text-muted-foreground text-center font-handwritten italic">
+          {mama.philosophy}
+        </p>
+      </Card>
     </div>
   );
 };

@@ -11,8 +11,6 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
-  console.log('get-voice-ids function called');
-
   try {
     // Return the voice IDs from environment variables
     const voiceIds = {
