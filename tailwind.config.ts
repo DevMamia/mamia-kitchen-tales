@@ -85,7 +85,7 @@ export default {
 			fontFamily: {
 				'heading': ['Nunito', 'system-ui', 'sans-serif'],
 				'handwritten': ['Kalam', 'cursive'],
-				'cinzel': ['Cinzel', 'serif']
+				'cinzel': ['Cormorant SC', 'serif']
 			},
 			keyframes: {
 				'accordion-down': {
