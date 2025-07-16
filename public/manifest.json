@@ -1,0 +1,50 @@
+{
+  "name": "MAMIA - Recipes from the Heart",
+  "short_name": "MAMIA",
+  "description": "Learn traditional cooking from grandmothers around the world with voice-guided recipes",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#E35336",
+  "background_color": "#FFF8DC",
+  "lang": "en",
+  "categories": ["food", "lifestyle", "education"],
+  "icons": [
+    {
+      "src": "/lovable-uploads/35c616ae-06a9-49cb-b3e3-287c89fb124d.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/lovable-uploads/35c616ae-06a9-49cb-b3e3-287c89fb124d.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Browse Recipes",
+      "short_name": "Recipes",
+      "description": "Browse all available recipes",
+      "url": "/recipes",
+      "icons": [{ "src": "/lovable-uploads/35c616ae-06a9-49cb-b3e3-287c89fb124d.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Meet the Mamas",
+      "short_name": "Mamas",
+      "description": "Discover grandmother chefs",
+      "url": "/mamas",
+      "icons": [{ "src": "/lovable-uploads/35c616ae-06a9-49cb-b3e3-287c89fb124d.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Shopping List",
+      "short_name": "Shopping",
+      "description": "View your shopping list",
+      "url": "/shopping-list",
+      "icons": [{ "src": "/lovable-uploads/35c616ae-06a9-49cb-b3e3-287c89fb124d.png", "sizes": "192x192" }]
+    }
+  ]
+}

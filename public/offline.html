@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MAMIA - Offline</title>
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: linear-gradient(135deg, #FFF8DC 0%, #F5E6D3 100%);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #3E2723;
+        }
+        .offline-container {
+            text-align: center;
+            padding: 2rem;
+            max-width: 400px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(227, 83, 54, 0.1);
+        }
+        .logo {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 1rem;
+            background: #E35336;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2rem;
+            font-weight: bold;
+        }
+        h1 {
+            color: #E35336;
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+        p {
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+        }
+        .retry-btn {
+            background: #E35336;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        .retry-btn:hover {
+            background: #d44427;
+        }
+        .features {
+            margin-top: 2rem;
+            text-align: left;
+        }
+        .feature {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+        .feature::before {
+            content: "✓";
+            color: #E35336;
+            margin-right: 0.5rem;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="offline-container">
+        <div class="logo">M</div>
+        <h1>You're Offline</h1>
+        <p>Don't worry! MAMIA works offline too. You can still browse your saved recipes and shopping lists.</p>
+        
+        <div class="features">
+            <div class="feature">Browse saved recipes</div>
+            <div class="feature">View your shopping list</div>
+            <div class="feature">Access cooking timers</div>
+        </div>
+        
+        <button class="retry-btn" onclick="window.location.reload()">
+            Try Again
+        </button>
+    </div>
+</body>
+</html>

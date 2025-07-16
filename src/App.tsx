@@ -7,6 +7,10 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Layout } from "./components/Layout";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ShoppingListProvider } from "./contexts/ShoppingListContext";
+import PWAInstallPrompt from "./components/PWAInstallPrompt";
+import PWAUpdateNotification from "./components/PWAUpdateNotification";
+import OfflineIndicator from "./components/OfflineIndicator";
+import PWADebugPanel from "./components/PWADebugPanel";
 import Mamas from "./pages/Mamas";
 import MamaCookbook from "./pages/MamaCookbook";
 import Recipes from "./pages/Recipes";
@@ -26,6 +30,10 @@ const App = () => (
         <ShoppingListProvider>
           <Toaster />
           <Sonner />
+          <PWAInstallPrompt />
+          <PWAUpdateNotification />
+          <OfflineIndicator />
+          <PWADebugPanel />
           <BrowserRouter>
             <Routes>
               <Route path="/" element={<Layout pageTitle="Choose Your Cooking Guide" pageSubtitle="Learn authentic recipes from traditional cooks"><Mamas /></Layout>} />

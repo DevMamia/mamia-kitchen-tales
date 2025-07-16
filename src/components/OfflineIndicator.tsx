@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { useOffline } from '@/hooks/useProductionFeatures';
+import { usePWA } from '@/hooks/usePWA';
 import { WifiOff, Wifi } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const OfflineIndicator: React.FC = () => {
-  const { isOffline } = useOffline();
+  const { isOffline } = usePWA();
   const [showIndicator, setShowIndicator] = useState(false);
 
   useEffect(() => {
