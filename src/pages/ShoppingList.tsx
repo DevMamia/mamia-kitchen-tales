@@ -26,8 +26,8 @@ import { Progress } from '@/components/ui/progress';
 import { useShoppingList } from '@/contexts/ShoppingListContext';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
-import { Tables } from '@/integrations/supabase/types';
 import DraggableShoppingItem from '@/components/DraggableShoppingItem';
+import { ShoppingListItem } from '@/types/shopping';
 import FloatingCartButton from '@/components/FloatingCartButton';
 
 export default function ShoppingList() {
@@ -392,7 +392,7 @@ export default function ShoppingList() {
                                 layout
                               >
                                 <DraggableShoppingItem 
-                                  item={item as Tables<'shopping_list_items'>}
+                                  item={item}
                                   isDragging={draggedItem === item.id}
                                 />
                               </motion.div>

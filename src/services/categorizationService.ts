@@ -1,70 +1,29 @@
-import { supabase } from "@/integrations/supabase/client";
-
 export interface FoodCategory {
   id: string;
   name: string;
   icon: string | null;
   sort_order: number;
-  user_id: string | null;
-}
-
-export interface IngredientAlias {
-  id: string;
-  canonical_name: string;
-  alias_name: string;
-  category_id: string | null;
 }
 
 class CategorizationService {
-  private categories: FoodCategory[] = [];
-  private aliases: IngredientAlias[] = [];
-  private initialized = false;
-
-  async initialize() {
-    if (this.initialized) return;
-    
-    try {
-      // Fetch categories
-      const { data: categories } = await supabase
-        .from('food_categories')
-        .select('*')
-        .order('sort_order');
-      
-      // Fetch aliases
-      const { data: aliases } = await supabase
-        .from('ingredient_aliases')
-        .select('*');
-      
-      this.categories = categories || [];
-      this.aliases = aliases || [];
-      this.initialized = true;
-    } catch (error) {
-      console.error('Failed to initialize categorization service:', error);
-    }
-  }
+  private categories: FoodCategory[] = [
+    { id: '1', name: 'Produce', icon: '🥬', sort_order: 1 },
+    { id: '2', name: 'Meat & Seafood', icon: '🥩', sort_order: 2 },
+    { id: '3', name: 'Dairy & Eggs', icon: '🥛', sort_order: 3 },
+    { id: '4', name: 'Pantry', icon: '🏺', sort_order: 4 },
+    { id: '5', name: 'Bakery', icon: '🍞', sort_order: 5 },
+    { id: '6', name: 'Beverages', icon: '🥤', sort_order: 6 },
+    { id: '7', name: 'Frozen', icon: '🧊', sort_order: 7 },
+    { id: '8', name: 'Other', icon: '📦', sort_order: 8 }
+  ];
+  private initialized = true;
 
   async getCategories(): Promise<FoodCategory[]> {
-    await this.initialize();
     return this.categories;
   }
 
   async categorizeIngredient(ingredientName: string): Promise<FoodCategory | null> {
-    await this.initialize();
-    
     const normalizedName = this.normalizeIngredientName(ingredientName);
-    
-    // First, check for exact alias match
-    const alias = this.aliases.find(a => 
-      a.alias_name.toLowerCase() === normalizedName ||
-      a.canonical_name.toLowerCase() === normalizedName
-    );
-    
-    if (alias && alias.category_id) {
-      const category = this.categories.find(c => c.id === alias.category_id);
-      if (category) return category;
-    }
-    
-    // Fallback to pattern matching
     return this.categorizeByPattern(normalizedName);
   }
 
@@ -109,43 +68,16 @@ class CategorizationService {
 
     for (const [categoryName, keywords] of Object.entries(patterns)) {
       if (keywords.some(keyword => normalizedName.includes(keyword))) {
-        return this.categories.find(c => c.name === categoryName && !c.user_id) || null;
+        return this.categories.find(c => c.name === categoryName) || null;
       }
     }
 
     // Default to "Other" category
-    return this.categories.find(c => c.name === 'Other' && !c.user_id) || null;
-  }
-
-  async createCustomCategory(name: string, icon?: string): Promise<FoodCategory | null> {
-    try {
-      const { data: user } = await supabase.auth.getUser();
-      if (!user.user) return null;
-
-      const { data, error } = await supabase
-        .from('food_categories')
-        .insert({
-          name,
-          icon,
-          user_id: user.user.id,
-          sort_order: this.categories.length + 1
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-      
-      this.categories.push(data);
-      return data;
-    } catch (error) {
-      console.error('Failed to create custom category:', error);
-      return null;
-    }
+    return this.categories.find(c => c.name === 'Other') || null;
   }
 
   async getDefaultCategory(): Promise<FoodCategory | null> {
-    await this.initialize();
-    return this.categories.find(c => c.name === 'Other' && !c.user_id) || null;
+    return this.categories.find(c => c.name === 'Other') || null;
   }
 }
 

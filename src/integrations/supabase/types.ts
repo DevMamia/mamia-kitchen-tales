@@ -215,6 +215,63 @@ export type Database = {
           },
         ]
       }
+      shopping_list_items: {
+        Row: {
+          category: string
+          category_id: string | null
+          checked: boolean
+          created_at: string
+          id: string
+          ingredient_name: string
+          quantity: string | null
+          recipe_id: string | null
+          recipe_name: string | null
+          shopping_list_id: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string
+          category_id?: string | null
+          checked?: boolean
+          created_at?: string
+          id?: string
+          ingredient_name: string
+          quantity?: string | null
+          recipe_id?: string | null
+          recipe_name?: string | null
+          shopping_list_id: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          category_id?: string | null
+          checked?: boolean
+          created_at?: string
+          id?: string
+          ingredient_name?: string
+          quantity?: string | null
+          recipe_id?: string | null
+          recipe_name?: string | null
+          shopping_list_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shopping_list_items_recipe_id_fkey"
+            columns: ["recipe_id"]
+            isOneToOne: false
+            referencedRelation: "recipes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shopping_list_items_shopping_list_id_fkey"
+            columns: ["shopping_list_id"]
+            isOneToOne: false
+            referencedRelation: "shopping_lists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       shopping_lists: {
         Row: {
           created_at: string | null
