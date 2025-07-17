@@ -124,8 +124,8 @@ const Cook = () => {
       // Set subscription tier (for now, default to free)
       hybridVoice.setSubscriptionTier('free');
       
-      // Speak the greeting and first step
-      const greeting = `Let's start cooking ${recipe.title}!`;
+      // Speak initial greeting and first step separately
+      const greeting = `Let's start cooking!`;
       const firstStepText = recipe.instructions[currentStep - 1];
       
       hybridVoice.speakGreeting(greeting, mama.voiceId)

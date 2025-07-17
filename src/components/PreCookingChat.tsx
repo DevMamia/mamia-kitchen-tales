@@ -5,7 +5,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { ChefHat, Clock, Users, MessageCircle, ChevronDown, Send } from 'lucide-react';
 import { Recipe } from '@/data/recipes';
 import { Mama } from '@/data/mamas';
-import { useVoice } from '@/hooks/useVoice';
+import { useHybridVoice } from '@/hooks/useHybridVoice';
 import { useTemplateResponses } from '@/hooks/useTemplateResponses';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -24,7 +24,7 @@ export const PreCookingChat = ({ recipe, mama, onStartCooking }: PreCookingChatP
   const [hasPlayedGreeting, setHasPlayedGreeting] = useState(false);
   
   const { getTemplateResponse } = useTemplateResponses();
-  const { speak, isPlaying } = useVoice();
+  const { speakGreeting, status } = useHybridVoice();
   const { user } = useAuth();
 
   // Auto-play voice greeting when component mounts
@@ -45,13 +45,13 @@ export const PreCookingChat = ({ recipe, mama, onStartCooking }: PreCookingChatP
       console.log('[PreCookingChat] Using mama ID:', mama.id.toString());
       
       setTimeout(() => {
-        speak(finalGreeting, mama.id.toString()).catch(error => {
+        speakGreeting(finalGreeting, mama.voiceId).catch(error => {
           console.error('[PreCookingChat] Failed to play greeting:', error);
         });
         setHasPlayedGreeting(true);
       }, 1000);
     }
-  }, [speak, mama.id, recipe.title, user, hasPlayedGreeting]);
+  }, [speakGreeting, mama.voiceId, recipe.title, user, hasPlayedGreeting]);
 
   const handleTextQuestion = async () => {
     if (!question.trim()) return;
@@ -108,7 +108,7 @@ export const PreCookingChat = ({ recipe, mama, onStartCooking }: PreCookingChatP
         </p>
         
         {/* Voice Status */}
-        {isPlaying && (
+        {(status.ttsActive || status.conversationActive) && (
           <div className="flex items-center justify-center gap-2 text-primary">
             <div className="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
             <span className="text-sm font-medium">{mama.name} speaking...</span>
