@@ -1,230 +1,118 @@
 import { useState, useCallback } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/contexts/AuthContext';
+import { Recipe } from '@/data/recipes';
+import { Mama } from '@/data/mamas';
 
-interface ConversationEntry {
-  timestamp: number;
-  phase: 'pre-cooking' | 'cooking';
-  mama: string;
-  content: string;
-  type: 'user' | 'mama';
+interface ConversationContext {
+  recipe: Recipe;
+  mama: Mama;
+  currentStep: number;
+  conversationPhase: 'pre-cooking' | 'cooking';
+  interruptionCount: number;
+  lastUserInput: string;
+  cookingProgress: {
+    completedSteps: number[];
+    strugglingSteps: number[];
+    userQuestions: string[];
+  };
 }
 
-interface UserPreferences {
-  cooking_level?: string;
-  dietary_preferences?: string[];
-  favorite_techniques?: string[];
-  cooking_achievements?: string[];
-}
-
-export const useConversationMemory = () => {
-  const { user } = useAuth();
-  const [isLoading, setIsLoading] = useState(false);
-
-  const getConversationKey = useCallback((recipeId: string) => {
-    return `conversation:${user?.id}:${recipeId}`;
-  }, [user?.id]);
-
-  const getUserKey = useCallback(() => {
-    return `user_context:${user?.id}`;
-  }, [user?.id]);
-
-  const saveConversationEntry = useCallback(async (
-    recipeId: string,
-    entry: Omit<ConversationEntry, 'timestamp'>
-  ) => {
-    if (!user) return;
-
-    try {
-      const { error } = await supabase.functions.invoke('upstash-cache', {
-        body: {
-          action: 'append',
-          key: getConversationKey(recipeId),
-          value: entry,
-          ttl: 86400 // 24 hours
-        }
-      });
-
-      if (error) {
-        console.error('Failed to save conversation entry:', error);
-      }
-    } catch (error) {
-      console.error('Error saving conversation entry:', error);
+export const useConversationMemory = (recipe: Recipe, mama: Mama) => {
+  const [context, setContext] = useState<ConversationContext>({
+    recipe,
+    mama,
+    currentStep: 1,
+    conversationPhase: 'pre-cooking',
+    interruptionCount: 0,
+    lastUserInput: '',
+    cookingProgress: {
+      completedSteps: [],
+      strugglingSteps: [],
+      userQuestions: []
     }
-  }, [user, getConversationKey]);
+  });
 
-  const getConversationHistory = useCallback(async (recipeId: string): Promise<ConversationEntry[]> => {
-    if (!user) return [];
+  const updateContext = useCallback((updates: Partial<ConversationContext>) => {
+    setContext(prev => ({ ...prev, ...updates }));
+  }, []);
 
-    try {
-      const { data, error } = await supabase.functions.invoke('upstash-cache', {
-        body: {
-          action: 'get',
-          key: getConversationKey(recipeId)
-        }
-      });
+  const startCookingPhase = useCallback((step: number) => {
+    updateContext({
+      conversationPhase: 'cooking',
+      currentStep: step,
+      interruptionCount: 0
+    });
+  }, [updateContext]);
 
-      if (error) {
-        console.error('Failed to get conversation history:', error);
-        return [];
-      }
-
-      return data?.data || [];
-    } catch (error) {
-      console.error('Error getting conversation history:', error);
-      return [];
-    }
-  }, [user, getConversationKey]);
-
-  const saveUserPreferences = useCallback(async (preferences: UserPreferences) => {
-    if (!user) return;
-
-    try {
-      const { error } = await supabase.functions.invoke('upstash-cache', {
-        body: {
-          action: 'set',
-          key: getUserKey(),
-          value: preferences,
-          ttl: 2592000 // 30 days
-        }
-      });
-
-      if (error) {
-        console.error('Failed to save user preferences:', error);
-      }
-    } catch (error) {
-      console.error('Error saving user preferences:', error);
-    }
-  }, [user, getUserKey]);
-
-  const getUserPreferences = useCallback(async (): Promise<UserPreferences | null> => {
-    if (!user) return null;
-
-    try {
-      const { data, error } = await supabase.functions.invoke('upstash-cache', {
-        body: {
-          action: 'get',
-          key: getUserKey()
-        }
-      });
-
-      if (error) {
-        console.error('Failed to get user preferences:', error);
-        return null;
-      }
-
-      return data?.data || null;
-    } catch (error) {
-      console.error('Error getting user preferences:', error);
-      return null;
-    }
-  }, [user, getUserKey]);
-
-  const clearConversationHistory = useCallback(async (recipeId: string) => {
-    if (!user) return;
-
-    try {
-      const { error } = await supabase.functions.invoke('upstash-cache', {
-        body: {
-          action: 'clear',
-          key: getConversationKey(recipeId)
-        }
-      });
-
-      if (error) {
-        console.error('Failed to clear conversation history:', error);
-      }
-    } catch (error) {
-      console.error('Error clearing conversation history:', error);
-    }
-  }, [user, getConversationKey]);
-
-  const getContextSummary = useCallback(async (recipeId: string) => {
-    const history = await getConversationHistory(recipeId);
-    const preferences = await getUserPreferences();
-
-    // Get recent conversation context (last 10 entries)
-    const recentContext = history.slice(-10).map(entry => ({
-      type: entry.type,
-      content: entry.content.substring(0, 200), // Truncate for context
-      phase: entry.phase
+  const handleInterruption = useCallback(() => {
+    setContext(prev => ({
+      ...prev,
+      interruptionCount: prev.interruptionCount + 1
     }));
+  }, []);
 
-    return {
-      recentConversation: recentContext,
-      userPreferences: preferences,
-      conversationCount: history.length
-    };
-  }, [getConversationHistory, getUserPreferences]);
+  const addUserQuestion = useCallback((question: string) => {
+    setContext(prev => ({
+      ...prev,
+      lastUserInput: question,
+      cookingProgress: {
+        ...prev.cookingProgress,
+        userQuestions: [...prev.cookingProgress.userQuestions, question]
+      }
+    }));
+  }, []);
 
-  // Cooking phase management
-  const startCookingPhase = useCallback(async (initialStep: number) => {
-    if (!user) return;
+  const markStepComplete = useCallback((stepNumber: number) => {
+    setContext(prev => ({
+      ...prev,
+      cookingProgress: {
+        ...prev.cookingProgress,
+        completedSteps: [...prev.cookingProgress.completedSteps, stepNumber]
+      }
+    }));
+  }, []);
+
+  const markStepStruggling = useCallback((stepNumber: number) => {
+    setContext(prev => ({
+      ...prev,
+      cookingProgress: {
+        ...prev.cookingProgress,
+        strugglingSteps: [...prev.cookingProgress.strugglingSteps, stepNumber]
+      }
+    }));
+  }, []);
+
+  const getContextualPrompt = useCallback(() => {
+    const { conversationPhase, currentStep, interruptionCount, cookingProgress } = context;
     
-    await saveConversationEntry('cooking-session', {
-      phase: 'cooking',
-      mama: 'system',
-      content: `Started cooking at step ${initialStep}`,
-      type: 'mama'
-    });
-  }, [saveConversationEntry, user]);
-
-  const markStepComplete = useCallback(async (stepNumber: number) => {
-    if (!user) return;
+    let prompt = `You are ${mama.name}, a ${mama.accent} cooking teacher. `;
     
-    await saveConversationEntry('cooking-session', {
-      phase: 'cooking',
-      mama: 'system',
-      content: `Completed step ${stepNumber}`,
-      type: 'mama'
-    });
-  }, [saveConversationEntry, user]);
-
-  const markStepStruggling = useCallback(async (stepNumber: number) => {
-    if (!user) return;
+    if (conversationPhase === 'pre-cooking') {
+      prompt += `The user is asking about ${recipe.title} before cooking. Share cultural stories, explain ingredients, and build excitement. `;
+    } else {
+      prompt += `The user is cooking ${recipe.title}, currently on step ${currentStep}. `;
+      
+      if (interruptionCount > 2) {
+        prompt += `The user has interrupted you ${interruptionCount} times - they might be struggling. Be extra encouraging. `;
+      }
+      
+      if (cookingProgress.strugglingSteps.includes(currentStep)) {
+        prompt += `The user previously struggled with this step. Provide extra guidance. `;
+      }
+    }
     
-    await saveConversationEntry('cooking-session', {
-      phase: 'cooking',
-      mama: 'system',
-      content: `User needs help with step ${stepNumber}`,
-      type: 'user'
-    });
-  }, [saveConversationEntry, user]);
-
-  const addUserQuestion = useCallback(async (question: string) => {
-    if (!user) return;
+    prompt += `Respond in character with your ${mama.accent} personality and accent. Keep responses conversational and encouraging.`;
     
-    await saveConversationEntry('cooking-session', {
-      phase: 'cooking',
-      mama: 'user',
-      content: question,
-      type: 'user'
-    });
-  }, [saveConversationEntry, user]);
-
-  const handleInterruption = useCallback(async () => {
-    if (!user) return;
-    
-    await saveConversationEntry('cooking-session', {
-      phase: 'cooking',
-      mama: 'system',
-      content: 'Cooking interrupted by user',
-      type: 'user'
-    });
-  }, [saveConversationEntry, user]);
+    return prompt;
+  }, [context, mama, recipe]);
 
   return {
-    saveConversationEntry,
-    getConversationHistory,
-    saveUserPreferences,
-    getUserPreferences,
-    clearConversationHistory,
-    getContextSummary,
+    context,
+    updateContext,
     startCookingPhase,
+    handleInterruption,
+    addUserQuestion,
     markStepComplete,
     markStepStruggling,
-    addUserQuestion,
-    handleInterruption,
-    isLoading
+    getContextualPrompt
   };
 };

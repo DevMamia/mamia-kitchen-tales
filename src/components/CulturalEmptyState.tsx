@@ -34,8 +34,8 @@ const CulturalEmptyState: React.FC<CulturalEmptyStateProps> = ({
       case 'thai':
         return {
           emoji: '👵🏻',
-          grandma: 'Yai',
-          message: message || "Yai is selecting the freshest herbs...",
+          grandma: 'Mae',
+          message: message || "Mae is selecting the freshest herbs...",
           accent: 'text-thai',
           pattern: 'bg-thai-pattern',
           culturalEmojis: ['🌿', '🥥', '🍛', '🌸']

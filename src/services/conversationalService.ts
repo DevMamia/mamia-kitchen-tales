@@ -9,7 +9,7 @@ declare global {
 }
 
 interface ConversationConfig {
-  voiceId?: string; // Made optional since backend handles voice ID resolution
+  voiceId: string;
   mamaId: string;
   onTranscript?: (text: string, isFinal: boolean) => void;
   onCommand?: (command: string) => void;
@@ -24,10 +24,9 @@ const VOICE_COMMANDS = {
 
 export class ConversationalService {
   private static instance: ConversationalService;
-  private elevenLabsWs: WebSocket | null = null;
+  private recognition: any | null = null;
   private config: ConversationConfig | null = null;
-  private connected = false;
-  private currentAgentId: string | null = null;
+  private isListening = false;
   private voiceService = VoiceService.getInstance();
 
   static getInstance(): ConversationalService {
@@ -39,123 +38,93 @@ export class ConversationalService {
 
   private constructor() {}
 
-  async startConversation(config: ConversationConfig, stepText: string, recipe?: any): Promise<void> {
-    this.config = config;
-
+  async startConversation(config: ConversationConfig, stepText: string): Promise<void> {
     try {
-      console.log('Starting ElevenLabs conversation for mama:', config.mamaId);
+      this.config = config;
+      
+      // Check for Speech Recognition support
+      if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+        throw new Error('Speech recognition not supported in this browser');
+      }
 
-      // Import supabase here to avoid circular dependencies
-      const { supabase } = await import('@/integrations/supabase/client');
+      // Initialize speech recognition
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      this.recognition = new SpeechRecognition();
+      
+      this.recognition.continuous = true;
+      this.recognition.interimResults = true;
+      this.recognition.lang = 'en-US';
 
-      // Create agent with recipe context
-      const { data: agentData, error: agentError } = await supabase.functions.invoke('elevenlabs-conversation', {
-        body: {
-          action: 'create-agent',
-          mamaId: config.mamaId,
-          recipe,
-          userContext: {
-            name: 'Cook', // Could be enhanced with actual user name
-            cooking_level: 'intermediate'
+      this.recognition.onstart = () => {
+        console.log('Speech recognition started');
+        this.isListening = true;
+      };
+
+      this.recognition.onresult = (event) => {
+        let interimTranscript = '';
+        let finalTranscript = '';
+
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          const transcript = event.results[i][0].transcript;
+          if (event.results[i].isFinal) {
+            finalTranscript += transcript;
+          } else {
+            interimTranscript += transcript;
           }
         }
-      });
 
-      if (agentError) {
-        console.error('Failed to create ElevenLabs agent:', agentError);
-        throw new Error('Failed to initialize voice conversation');
-      }
-
-      this.currentAgentId = agentData.agentId;
-
-      // Generate signed URL for conversation
-      const { data: urlData, error: urlError } = await supabase.functions.invoke('elevenlabs-conversation', {
-        body: {
-          action: 'generate-url',
-          agentId: this.currentAgentId
+        if (interimTranscript) {
+          this.config?.onTranscript?.(interimTranscript, false);
         }
-      });
 
-      if (urlError) {
-        console.error('Failed to generate conversation URL:', urlError);
-        throw new Error('Failed to initialize voice conversation');
-      }
-
-      // Connect to ElevenLabs WebSocket
-      this.elevenLabsWs = new WebSocket(urlData.signedUrl);
-
-      this.elevenLabsWs.onopen = () => {
-        console.log('Connected to ElevenLabs conversation');
-        this.connected = true;
+        if (finalTranscript) {
+          this.config?.onTranscript?.(finalTranscript, true);
+          this.detectVoiceCommand(finalTranscript.toLowerCase());
+          this.handleUserInput(finalTranscript);
+        }
       };
 
-      this.elevenLabsWs.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-        console.log('ElevenLabs message:', data.type);
+      this.recognition.onerror = (event) => {
+        console.error('Speech recognition error:', event.error);
+        this.config?.onError?.(`Speech recognition error: ${event.error}`);
+      };
 
-        switch (data.type) {
-          case 'conversation.started':
-            config.onTranscript?.('Connected to voice assistant', true);
-            break;
-          
-          case 'user_transcript':
-            config.onTranscript?.(data.transcript || '', data.isFinal || false);
-            
-            // Detect commands in user speech
-            if (data.transcript) {
-              this.detectVoiceCommand(data.transcript);
+      this.recognition.onend = () => {
+        console.log('Speech recognition ended');
+        this.isListening = false;
+        // Auto-restart if we're still in conversation mode
+        if (this.config && this.recognition) {
+          setTimeout(() => {
+            if (this.recognition && this.config) {
+              this.recognition.start();
             }
-            break;
-          
-          case 'agent_response':
-            // The agent is speaking, no need to process further
-            break;
-          
-          case 'error':
-            console.error('ElevenLabs conversation error:', data.message);
-            config.onError?.(data.message);
-            break;
+          }, 100);
         }
       };
 
-      this.elevenLabsWs.onerror = (error) => {
-        console.error('ElevenLabs WebSocket error:', error);
-        config.onError?.('Voice connection error');
-      };
+      // Start listening
+      this.recognition.start();
 
-      this.elevenLabsWs.onclose = () => {
-        console.log('ElevenLabs conversation closed');
-        this.connected = false;
-        this.currentAgentId = null;
-      };
+      // Speak the initial step text
+      await this.voiceService.speak(stepText, config.mamaId);
 
     } catch (error) {
-      console.error('Failed to start ElevenLabs conversation:', error);
-      
-      // Fallback to speech recognition if ElevenLabs fails
-      console.log('Falling back to speech recognition');
-      await this.startSpeechRecognitionFallback(config, stepText);
+      console.error('Failed to start conversation:', error);
+      this.config?.onError?.('Failed to start conversation: ' + (error instanceof Error ? error.message : String(error)));
+      throw error;
     }
-  }
-
-  private async startSpeechRecognitionFallback(config: ConversationConfig, stepText: string): Promise<void> {
-    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-      throw new Error('Voice conversation not supported in this browser');
-    }
-
-    // Implementation would go here - keeping existing speech recognition logic as fallback
-    console.log('Using speech recognition fallback');
   }
 
   async stopConversation(): Promise<void> {
-    if (this.elevenLabsWs && this.elevenLabsWs.readyState === WebSocket.OPEN) {
-      this.elevenLabsWs.close();
-      this.elevenLabsWs = null;
+    this.isListening = false;
+    
+    if (this.recognition) {
+      this.recognition.stop();
+      this.recognition = null;
     }
-    this.config = null;
-    this.connected = false;
-    this.currentAgentId = null;
+    
     this.voiceService.stopCurrentAudio();
+    this.config = null;
   }
 
   private detectVoiceCommand(text: string): void {
@@ -282,13 +251,13 @@ export class ConversationalService {
       case '2':
         return 'abuela_rosa';
       case '3':
-        return 'yai_malee';
+        return 'mae_malai';
       default:
         return mamaId; // Already in correct format
     }
   }
 
   isConnected(): boolean {
-    return this.connected;
+    return this.isListening && this.recognition !== null;
   }
 }

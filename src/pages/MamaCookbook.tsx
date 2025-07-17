@@ -8,7 +8,7 @@ import LoadingSkeleton from '@/components/LoadingSkeleton';
 const mamasData = [
   { id: 1, name: "Nonna Lucia", emoji: "🍷", cuisine: "Italian" },
   { id: 2, name: "Abuela Rosa", emoji: "🌶️", cuisine: "Mexican" },
-  { id: 3, name: "Yai Malee", emoji: "🌿", cuisine: "Thai" }
+  { id: 3, name: "Mae Malai", emoji: "🌿", cuisine: "Thai" }
 ];
 
 const MamaCookbook = () => {

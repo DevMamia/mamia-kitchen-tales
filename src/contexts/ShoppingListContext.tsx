@@ -51,23 +51,7 @@ export const ShoppingListProvider: React.FC<{ children: React.ReactNode }> = ({ 
       if (error) throw error;
       
       setShoppingLists(lists || []);
-      
-      // Create default shopping list if none exists
-      if (!lists || lists.length === 0) {
-        const { data: newList, error: createError } = await supabase
-          .from('shopping_lists')
-          .insert({
-            user_id: user.id,
-            name: 'My Shopping List'
-          })
-          .select()
-          .single();
-        
-        if (createError) throw createError;
-        
-        setShoppingLists([newList]);
-        setCurrentList(newList);
-      } else if (!currentList) {
+      if (lists && lists.length > 0 && !currentList) {
         setCurrentList(lists[0]);
       }
     } catch (error) {

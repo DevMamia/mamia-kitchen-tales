@@ -6,10 +6,10 @@ import { Check, Trash2, GripVertical } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useShoppingList } from '@/contexts/ShoppingListContext';
-import { ShoppingListItem } from '@/types/shopping';
+import { Tables } from '@/integrations/supabase/types';
 
 interface DraggableShoppingItemProps {
-  item: ShoppingListItem;
+  item: Tables<'shopping_list_items'>;
   isDragging?: boolean;
 }
 

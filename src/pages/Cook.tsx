@@ -8,11 +8,10 @@ import { CookingTimer } from '@/components/CookingTimer';
 import { ConversationInterface } from '@/components/ConversationInterface';
 import { PreCookingChat } from '@/components/PreCookingChat';
 import { EnhancedVoiceInterface } from '@/components/EnhancedVoiceInterface';
-import { ConversationModeToggle } from '@/components/ConversationModeToggle';
-import { AudioSystemIndicator } from '@/components/AudioSystemIndicator';
 import { getRecipeWithMama, recipes } from '@/data/recipes';
 import { getMamaById } from '@/data/mamas';
-import { useHybridVoice } from '@/hooks/useHybridVoice';
+import { useVoice } from '@/hooks/useVoice';
+import { useConversation } from '@/hooks/useConversation';
 import { useConversationMemory } from '@/hooks/useConversationMemory';
 
 const Cook = () => {
@@ -24,13 +23,14 @@ const Cook = () => {
   const [timerExpanded, setTimerExpanded] = useState(false);
   const [timerCompleted, setTimerCompleted] = useState(false);
 
-  const hybridVoice = useHybridVoice();
+  const { speak, isPlaying, config } = useVoice();
+  const conversation = useConversation();
 
   // Find the recipe with mama info
   const recipeData = recipeId ? getRecipeWithMama(recipeId) : null;
   
   // Initialize conversation memory
-  const conversationMemory = useConversationMemory();
+  const conversationMemory = recipeData ? useConversationMemory(recipeData.recipe, recipeData.mama) : null;
   
   // Store current recipe in localStorage when entering cooking mode
   useEffect(() => {
@@ -112,28 +112,6 @@ const Cook = () => {
     };
   }, [conversationPhase]);
 
-  // Setup hybrid voice system
-  useEffect(() => {
-    if (conversationPhase === 'cooking' && recipe && mama) {
-      // Set recipe context for conversation awareness
-      hybridVoice.setRecipeContext(recipe, currentStep);
-      
-      // Set step progression callback
-      hybridVoice.setStepProgressCallback(handleVoiceCommand);
-      
-      // Set subscription tier (for now, default to free)
-      hybridVoice.setSubscriptionTier('free');
-      
-      // Speak initial greeting and first step separately
-      const greeting = `Let's start cooking!`;
-      const firstStepText = recipe.instructions[currentStep - 1];
-      
-      hybridVoice.speakGreeting(greeting, mama.voiceId)
-        .then(() => hybridVoice.speakStep(firstStepText, mama.voiceId))
-        .catch(error => console.error('Failed to start cooking audio:', error));
-    }
-  }, [conversationPhase, recipe, mama, currentStep]);
-
   const handleStartCooking = () => {
     setConversationPhase('cooking');
     conversationMemory?.startCookingPhase(currentStep);
@@ -161,46 +139,50 @@ const Cook = () => {
     // Could add notification sound here
   };
 
-  const handleVoiceCommand = (action: 'next' | 'previous' | 'repeat') => {
-    switch (action) {
+  const handleStartConversation = async () => {
+    if (!recipe || !mama) return;
+    
+    const stepText = recipe.instructions[currentStep - 1];
+    await conversation.startConversation(
+      mama.voiceId, 
+      stepText,
+      handleVoiceCommand
+    );
+  };
+
+  const handleVoiceCommand = (command: string) => {
+    switch (command.toLowerCase()) {
       case 'next':
         if (currentStep < totalSteps) {
           conversationMemory?.markStepComplete(currentStep);
-          const newStep = currentStep + 1;
-          setCurrentStep(newStep);
+          setCurrentStep(currentStep + 1);
           setTimerCompleted(false);
-          
-          // Update recipe context and speak next step
-          if (recipe && mama) {
-            hybridVoice.setRecipeContext(recipe, newStep);
-            hybridVoice.speakStep(recipe.instructions[newStep - 1], mama.voiceId);
-          }
         }
         break;
+      case 'back':
       case 'previous':
         if (currentStep > 1) {
-          const newStep = currentStep - 1;
-          setCurrentStep(newStep);
+          setCurrentStep(currentStep - 1);
           setTimerCompleted(false);
-          
-          // Update recipe context and speak previous step
-          if (recipe && mama) {
-            hybridVoice.setRecipeContext(recipe, newStep);
-            hybridVoice.speakStep(recipe.instructions[newStep - 1], mama.voiceId);
-          }
         }
         break;
       case 'repeat':
         if (recipe && mama) {
-          hybridVoice.speakStep(recipe.instructions[currentStep - 1], mama.voiceId);
+          speak(recipe.instructions[currentStep - 1], mama.id.toString());
         }
         break;
+      case 'help':
+        conversationMemory?.markStepStruggling(currentStep);
+        break;
+      default:
+        conversationMemory?.addUserQuestion(command);
+        console.log('Unknown voice command:', command);
     }
   };
 
   const handleInterrupt = () => {
     conversationMemory?.handleInterruption();
-    hybridVoice.stopAll();
+    conversation.stopConversation();
   };
 
   return (
@@ -282,26 +264,32 @@ const Cook = () => {
         )}
       </div>
 
-        {/* Audio System Indicator */}
+        {/* Enhanced Voice Interface */}
         <div className="px-4 mb-6">
-          <AudioSystemIndicator showDetails={true} className="text-center" />
-        </div>
-
-        {/* Conversation Mode Toggle */}
-        <div className="px-4 mb-6">
-          <ConversationModeToggle
-            mamaId={mama.voiceId}
-            currentStepText={recipe.instructions[currentStep - 1]}
-            recipe={recipe}
-            subscriptionTier="free"
+          <EnhancedVoiceInterface
+            mama={mama}
+            isConnected={conversation.isConnected}
+            isSpeaking={isPlaying}
+            isListening={conversation.isConnected && !isPlaying}
+            currentTranscript={conversation.currentTranscript}
+            partialTranscript={conversation.partialTranscript}
+            error={conversation.error}
+            currentStep={currentStep}
+            totalSteps={totalSteps}
+            onStartConversation={handleStartConversation}
+            onStopConversation={conversation.stopConversation}
+            onInterrupt={handleInterrupt}
           />
         </div>
+
+        {/* Voice Status Indicator */}
+        <VoiceStatusIndicator className="justify-center" />
 
       {/* Controls */}
       <div className="px-4 mb-6">
         <div className="flex items-center justify-center gap-4">
           <Button
-            onClick={() => handleVoiceCommand('previous')}
+            onClick={() => setCurrentStep(Math.max(1, currentStep - 1))}
             disabled={currentStep === 1}
             variant="outline"
             className="text-lg py-6 px-8 min-h-[56px]"
@@ -311,11 +299,7 @@ const Cook = () => {
           </Button>
 
           <Button
-            onClick={() => {
-              if (recipe && mama) {
-                hybridVoice.speakStep(recipe.instructions[currentStep - 1], mama.voiceId);
-              }
-            }}
+            onClick={() => setVoiceStatus(voiceStatus === 'idle' ? 'speaking' : 'idle')}
             className="bg-orange-500 text-white hover:bg-orange-600 text-lg py-6 px-8 min-h-[56px] rounded-xl"
           >
             <Volume2 size={24} className="mr-2" />
@@ -323,7 +307,10 @@ const Cook = () => {
           </Button>
 
           <Button
-            onClick={() => handleVoiceCommand('next')}
+            onClick={() => {
+              setCurrentStep(Math.min(totalSteps, currentStep + 1));
+              setTimerCompleted(false);
+            }}
             disabled={currentStep === totalSteps}
             variant="outline"
             className="text-lg py-6 px-8 min-h-[56px]"

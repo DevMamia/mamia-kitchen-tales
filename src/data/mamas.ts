@@ -44,10 +44,10 @@ export const mamas: Mama[] = [
   },
   {
     id: 3,
-    name: 'Yai Malee',
+    name: 'Mae Malai',
     emoji: '🌿',
     accent: 'Thai',
-    voiceId: 'yai_malee', // Will map to ELEVENLABS_YAI_VOICE_ID
+    voiceId: 'mae_malai', // Will map to VITE_MAE_VOICE_ID
     themeColor: 'hsl(120, 60%, 50%)', // Fresh Thai green
     country: 'Thailand',
     specialties: ['Curry', 'Pad Thai', 'Som Tam'],

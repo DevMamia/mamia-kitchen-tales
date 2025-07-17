@@ -26,15 +26,25 @@ export const useConversation = () => {
   const startConversation = useCallback(async (
     mamaId: string,
     stepText: string,
-    recipe?: any,
     onCommand?: (command: string) => void
   ) => {
     try {
       updateState({ error: null, isConnected: false });
 
-      // Let the backend handle voice ID resolution entirely
-      // No need to validate voice IDs on the frontend
+      // Get voice ID for the mama using the existing Edge Function
+      const { data: voiceData } = await fetch('https://jfocambuvgkztcktukar.supabase.co/functions/v1/get-voice-ids', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      }).then(r => r.json()).catch(() => ({ data: null }));
+      
+      const voiceId = voiceData?.[`ELEVENLABS_${mamaId.toUpperCase()}_VOICE_ID`] || 'default-voice';
+      
+      if (!voiceId) {
+        throw new Error(`Voice ID not found for ${mamaId}`);
+      }
+
       await conversationalService.startConversation({
+        voiceId,
         mamaId,
         onTranscript: (text: string, isFinal: boolean) => {
           if (isFinal) {
@@ -54,7 +64,7 @@ export const useConversation = () => {
           console.error('Conversation error:', error);
           updateState({ error, isConnected: false });
         }
-      }, stepText, recipe);
+      }, stepText);
 
       updateState({ isConnected: true });
     } catch (error) {
@@ -65,10 +75,8 @@ export const useConversation = () => {
       });
       
       // Fallback to regular TTS
-      console.log('[useConversation] Falling back to VoiceService TTS with:', stepText, mamaId);
       try {
         await voiceService.speak(stepText, mamaId);
-        console.log('[useConversation] Fallback TTS succeeded');
       } catch (fallbackError) {
         console.error('Fallback TTS also failed:', fallbackError);
       }
