@@ -352,6 +352,12 @@ export class VoiceService {
   }
 
   private resolveMamaId(mamaId: string): string {
+    // First check if it's already a valid voice ID string
+    const validVoiceIds = ['nonna_lucia', 'abuela_rosa', 'yai_malee'];
+    if (validVoiceIds.includes(mamaId)) {
+      return mamaId;
+    }
+
     // Handle numeric IDs from Cook page
     switch (mamaId) {
       case '1':
@@ -361,9 +367,14 @@ export class VoiceService {
       case '3':
         return 'yai_malee';
       default:
-        // Try to find by voice ID from mamas.ts
-        const mama = getMamaById(parseInt(mamaId));
-        return mama?.voiceId || mamaId;
+        // Try to find by numeric ID from mamas.ts
+        const numericId = parseInt(mamaId);
+        if (!isNaN(numericId)) {
+          const mama = getMamaById(numericId);
+          return mama?.voiceId || mamaId;
+        }
+        // Return the original string if all else fails
+        return mamaId;
     }
   }
 }
