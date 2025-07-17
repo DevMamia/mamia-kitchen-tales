@@ -260,17 +260,19 @@ export class VoiceService {
         throw new Error(`Voice service error: ${error.message || 'Edge Function error'}`);
       }
 
-      if (!data?.audioData) {
+      if (!data?.audioContent && !data?.audioData) {
         console.error('[VoiceService] No audio data in response:', data);
         this.isCurrentlyPlayingState = false;
         throw new Error('No audio data received from voice service');
       }
 
-      console.log(`[VoiceService] Received audio data, length: ${data.audioData.length}`);
+      const audioBase64 = data.audioContent || data.audioData;
+
+      console.log(`[VoiceService] Received audio data, length: ${audioBase64.length}`);
 
       // Create audio blob from base64 data
       const audioBlob = new Blob(
-        [Uint8Array.from(atob(data.audioData), c => c.charCodeAt(0))], 
+        [Uint8Array.from(atob(audioBase64), c => c.charCodeAt(0))], 
         { type: 'audio/mpeg' }
       );
       const audioUrl = URL.createObjectURL(audioBlob);
@@ -352,18 +354,30 @@ export class VoiceService {
   }
 
   private resolveMamaId(mamaId: string): string {
+    console.log(`[VoiceService] Resolving mama ID: ${mamaId}`);
+    
     // Handle numeric IDs from Cook page
     switch (mamaId) {
       case '1':
+        console.log('[VoiceService] Resolved 1 -> nonna_lucia');
         return 'nonna_lucia';
       case '2':
+        console.log('[VoiceService] Resolved 2 -> abuela_rosa');
         return 'abuela_rosa';
       case '3':
+        console.log('[VoiceService] Resolved 3 -> yai_malee');
         return 'yai_malee';
       default:
+        // Handle direct string IDs
+        if (['nonna_lucia', 'abuela_rosa', 'yai_malee'].includes(mamaId)) {
+          console.log(`[VoiceService] Using direct ID: ${mamaId}`);
+          return mamaId;
+        }
         // Try to find by voice ID from mamas.ts
         const mama = getMamaById(parseInt(mamaId));
-        return mama?.voiceId || mamaId;
+        const resolved = mama?.voiceId || mamaId;
+        console.log(`[VoiceService] Fallback resolved to: ${resolved}`);
+        return resolved;
     }
   }
 }

@@ -65,8 +65,10 @@ export const useConversation = () => {
       });
       
       // Fallback to regular TTS
+      console.log('[useConversation] Falling back to VoiceService TTS with:', stepText, mamaId);
       try {
         await voiceService.speak(stepText, mamaId);
+        console.log('[useConversation] Fallback TTS succeeded');
       } catch (fallbackError) {
         console.error('Fallback TTS also failed:', fallbackError);
       }

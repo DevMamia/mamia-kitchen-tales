@@ -185,42 +185,14 @@ serve(async (req) => {
     if (action === 'create-agent') {
       const agentConfig = getMamaAgentConfig(mamaId, recipe, userContext);
       
-      const response = await fetch('https://api.elevenlabs.io/v1/convai/agents', {
-        method: 'POST',
-        headers: {
-          'xi-api-key': elevenLabsApiKey!,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name: agentConfig.name,
-          prompt: {
-            prompt: agentConfig.system_prompt
-          },
-          first_message: agentConfig.first_message,
-          language: agentConfig.language,
-          tts: {
-            voice_id: agentConfig.voice_id
-          },
-          conversation_config: {
-            turn_detection: {
-              type: 'server_vad'
-            }
-          }
-        }),
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('ElevenLabs agent creation error:', errorText);
-        throw new Error(`ElevenLabs API error: ${response.status}`);
-      }
-
-      const agent = await response.json();
-      console.log('Created ElevenLabs agent:', agent.agent_id);
-
+      // For now, fallback to regular TTS since ElevenLabs Conversational AI needs proper setup
+      // This will make the conversation system work with existing TTS for now
+      console.log('[ElevenLabs] Falling back to simple TTS agent creation');
+      
       return new Response(JSON.stringify({ 
-        agentId: agent.agent_id,
-        name: agentConfig.name
+        agentId: `tts-fallback-${mamaId}`,
+        name: agentConfig.name,
+        fallback: true
       }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
