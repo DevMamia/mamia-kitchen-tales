@@ -146,6 +146,7 @@ const Cook = () => {
     await conversation.startConversation(
       mama.voiceId, 
       stepText,
+      recipe,
       handleVoiceCommand
     );
   };
@@ -168,7 +169,7 @@ const Cook = () => {
         break;
       case 'repeat':
         if (recipe && mama) {
-          speak(recipe.instructions[currentStep - 1], mama.id.toString());
+          speak(recipe.instructions[currentStep - 1], mama.voiceId);
         }
         break;
       case 'help':

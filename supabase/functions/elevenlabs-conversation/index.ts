@@ -2,11 +2,27 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const elevenLabsApiKey = Deno.env.get('ELEVENLABS_API_KEY');
 
-// Voice IDs for each mama
+// Voice IDs for each mama - support both numeric and string IDs
 const VOICE_IDS = {
   '1': Deno.env.get('ELEVENLABS_NONNA_VOICE_ID'), // Nonna Lucia
   '2': Deno.env.get('ELEVENLABS_ABUELA_VOICE_ID'), // Abuela Rosa  
   '3': Deno.env.get('ELEVENLABS_YAI_VOICE_ID'), // Yai Malee
+  // String ID aliases
+  'nonna_lucia': Deno.env.get('ELEVENLABS_NONNA_VOICE_ID'),
+  'abuela_rosa': Deno.env.get('ELEVENLABS_ABUELA_VOICE_ID'),
+  'yai_malee': Deno.env.get('ELEVENLABS_YAI_VOICE_ID'),
+};
+
+// Helper function to resolve mama ID to numeric format
+const resolveMamaId = (mamaId: string): string => {
+  // Map string IDs to numeric IDs for configuration
+  const stringToNumeric: Record<string, string> = {
+    'nonna_lucia': '1',
+    'abuela_rosa': '2', 
+    'yai_malee': '3'
+  };
+  
+  return stringToNumeric[mamaId] || mamaId;
 };
 
 interface ConversationRequest {
@@ -31,11 +47,20 @@ const corsHeaders = {
 };
 
 const getMamaAgentConfig = (mamaId: string, recipe?: any, userContext?: any) => {
-  const voiceId = VOICE_IDS[mamaId as keyof typeof VOICE_IDS];
+  // First try to get voice ID directly, then try resolved ID
+  let voiceId = VOICE_IDS[mamaId as keyof typeof VOICE_IDS];
   
   if (!voiceId) {
-    throw new Error(`Voice ID not found for mama ${mamaId}`);
+    const resolvedId = resolveMamaId(mamaId);
+    voiceId = VOICE_IDS[resolvedId as keyof typeof VOICE_IDS];
   }
+  
+  if (!voiceId) {
+    throw new Error(`Voice ID not found for mama ${mamaId} (resolved: ${resolveMamaId(mamaId)})`);
+  }
+
+  // Use resolved numeric ID for configuration lookup
+  const configId = resolveMamaId(mamaId);
 
   const baseConfigs = {
     '1': { // Nonna Lucia
@@ -108,9 +133,9 @@ Keep responses calm, wise, and focused on mindful cooking.`,
     }
   };
 
-  const config = baseConfigs[mamaId as keyof typeof baseConfigs];
+  const config = baseConfigs[configId as keyof typeof baseConfigs];
   if (!config) {
-    throw new Error(`Configuration not found for mama ${mamaId}`);
+    throw new Error(`Configuration not found for mama ${mamaId} (resolved: ${configId})`);
   }
 
   // Add recipe context if provided

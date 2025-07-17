@@ -32,16 +32,28 @@ export const useConversation = () => {
     try {
       updateState({ error: null, isConnected: false });
 
-      // Get voice ID for the mama using the existing Edge Function
+      // Map mama ID to the correct voice ID format
+      const mamaToVoiceMapping = {
+        'nonna_lucia': 'ELEVENLABS_NONNA_VOICE_ID',
+        'abuela_rosa': 'ELEVENLABS_ABUELA_VOICE_ID', 
+        'yai_malee': 'ELEVENLABS_YAI_VOICE_ID'
+      };
+      
+      const voiceSecretName = mamaToVoiceMapping[mamaId as keyof typeof mamaToVoiceMapping];
+      if (!voiceSecretName) {
+        throw new Error(`Unknown mama ID: ${mamaId}`);
+      }
+
+      // Get voice ID from the edge function
       const { data: voiceData } = await fetch('https://jfocambuvgkztcktukar.supabase.co/functions/v1/get-voice-ids', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' }
       }).then(r => r.json()).catch(() => ({ data: null }));
       
-      const voiceId = voiceData?.[`ELEVENLABS_${mamaId.toUpperCase()}_VOICE_ID`] || 'default-voice';
+      const voiceId = voiceData?.[voiceSecretName];
       
       if (!voiceId) {
-        throw new Error(`Voice ID not found for ${mamaId}`);
+        throw new Error(`Voice ID not found for ${mamaId} (${voiceSecretName})`);
       }
 
       await conversationalService.startConversation({
