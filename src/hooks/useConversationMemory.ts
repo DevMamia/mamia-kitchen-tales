@@ -157,6 +157,62 @@ export const useConversationMemory = () => {
     };
   }, [getConversationHistory, getUserPreferences]);
 
+  // Cooking phase management
+  const startCookingPhase = useCallback(async (initialStep: number) => {
+    if (!user) return;
+    
+    await saveConversationEntry('cooking-session', {
+      phase: 'cooking',
+      mama: 'system',
+      content: `Started cooking at step ${initialStep}`,
+      type: 'mama'
+    });
+  }, [saveConversationEntry, user]);
+
+  const markStepComplete = useCallback(async (stepNumber: number) => {
+    if (!user) return;
+    
+    await saveConversationEntry('cooking-session', {
+      phase: 'cooking',
+      mama: 'system',
+      content: `Completed step ${stepNumber}`,
+      type: 'mama'
+    });
+  }, [saveConversationEntry, user]);
+
+  const markStepStruggling = useCallback(async (stepNumber: number) => {
+    if (!user) return;
+    
+    await saveConversationEntry('cooking-session', {
+      phase: 'cooking',
+      mama: 'system',
+      content: `User needs help with step ${stepNumber}`,
+      type: 'user'
+    });
+  }, [saveConversationEntry, user]);
+
+  const addUserQuestion = useCallback(async (question: string) => {
+    if (!user) return;
+    
+    await saveConversationEntry('cooking-session', {
+      phase: 'cooking',
+      mama: 'user',
+      content: question,
+      type: 'user'
+    });
+  }, [saveConversationEntry, user]);
+
+  const handleInterruption = useCallback(async () => {
+    if (!user) return;
+    
+    await saveConversationEntry('cooking-session', {
+      phase: 'cooking',
+      mama: 'system',
+      content: 'Cooking interrupted by user',
+      type: 'user'
+    });
+  }, [saveConversationEntry, user]);
+
   return {
     saveConversationEntry,
     getConversationHistory,
@@ -164,6 +220,11 @@ export const useConversationMemory = () => {
     getUserPreferences,
     clearConversationHistory,
     getContextSummary,
+    startCookingPhase,
+    markStepComplete,
+    markStepStruggling,
+    addUserQuestion,
+    handleInterruption,
     isLoading
   };
 };

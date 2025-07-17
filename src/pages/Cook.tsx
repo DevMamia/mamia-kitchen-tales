@@ -30,7 +30,7 @@ const Cook = () => {
   const recipeData = recipeId ? getRecipeWithMama(recipeId) : null;
   
   // Initialize conversation memory
-  const conversationMemory = recipeData ? useConversationMemory(recipeData.recipe, recipeData.mama) : null;
+  const conversationMemory = useConversationMemory();
   
   // Store current recipe in localStorage when entering cooking mode
   useEffect(() => {

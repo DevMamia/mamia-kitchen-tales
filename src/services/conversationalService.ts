@@ -9,7 +9,9 @@ declare global {
 }
 
 interface ConversationConfig {
-  onTranscript?: (final: string, partial: string) => void;
+  voiceId: string;
+  mamaId: string;
+  onTranscript?: (text: string, isFinal: boolean) => void;
   onCommand?: (command: string) => void;
   onError?: (error: string) => void;
 }
@@ -37,11 +39,11 @@ export class ConversationalService {
 
   private constructor() {}
 
-  async startConversation(config: ConversationConfig, stepText: string, mamaId: string, recipe?: any): Promise<void> {
+  async startConversation(config: ConversationConfig, stepText: string, recipe?: any): Promise<void> {
     this.config = config;
 
     try {
-      console.log('Starting ElevenLabs conversation for mama:', mamaId);
+      console.log('Starting ElevenLabs conversation for mama:', config.mamaId);
 
       // Import supabase here to avoid circular dependencies
       const { supabase } = await import('@/integrations/supabase/client');
@@ -50,7 +52,7 @@ export class ConversationalService {
       const { data: agentData, error: agentError } = await supabase.functions.invoke('elevenlabs-conversation', {
         body: {
           action: 'create-agent',
-          mamaId,
+          mamaId: config.mamaId,
           recipe,
           userContext: {
             name: 'Cook', // Could be enhanced with actual user name
@@ -93,11 +95,11 @@ export class ConversationalService {
 
         switch (data.type) {
           case 'conversation.started':
-            config.onTranscript?.('Connected to voice assistant', '');
+            config.onTranscript?.('Connected to voice assistant', true);
             break;
           
           case 'user_transcript':
-            config.onTranscript?.(data.transcript || '', '');
+            config.onTranscript?.(data.transcript || '', data.isFinal || false);
             
             // Detect commands in user speech
             if (data.transcript) {

@@ -65,7 +65,7 @@ export const useConversation = () => {
           console.error('Conversation error:', error);
           updateState({ error, isConnected: false });
         }
-      }, stepText);
+      }, stepText, recipe);
 
       updateState({ isConnected: true });
     } catch (error) {
