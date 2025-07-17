@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Clock, Users, ChefHat, Plus, Minus, ShoppingCart, Timer, Heart } from 'lucide-react';
+import { ArrowLeft, Clock, Users, ChefHat, Plus, Minus, ShoppingCart, Timer, Heart, Share2 } from 'lucide-react';
 import { recipes } from '@/data/recipes';
 import { getMamaById } from '@/data/mamas';
 import { Button } from '@/components/ui/button';
@@ -8,7 +8,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useShoppingList } from '@/contexts/ShoppingListContext';
 import ShoppingListModal from '@/components/ShoppingListModal';
 import { QuantityCalculationService } from '@/services/quantityCalculationService';
-import { IngredientAnimation, CelebrationEffects } from '@/components/CelebrationEffects';
+// Removed IngredientAnimation and CelebrationEffects imports
+// import { IngredientAnimation, CelebrationEffects } from '@/components/CelebrationEffects';
 
 const RecipeDetail = () => {
   const { recipeId } = useParams();
@@ -17,15 +18,18 @@ const RecipeDetail = () => {
   const [servings, setServings] = useState(4);
   const [checkedIngredients, setCheckedIngredients] = useState<Set<number>>(new Set());
   const [isFavorited, setIsFavorited] = useState(false);
-  const [isSticky, setIsSticky] = useState(false);
+  // Removed isSticky state as it's no longer used for sticky header
+  // const [isSticky, setIsSticky] = useState(false);
   const [showShoppingModal, setShowShoppingModal] = useState(false);
-  const [ingredientAnimations, setIngredientAnimations] = useState<Array<{
-    ingredient: string;
-    category: string;
-    position: { x: number; y: number };
-    id: string;
-  }>>([]);
-  const [showCelebration, setShowCelebration] = useState(false);
+  // Removed ingredientAnimations state as animations are removed
+  // const [ingredientAnimations, setIngredientAnimations] = useState<Array<{
+  //   ingredient: string;
+  //   category: string;
+  //   position: { x: number; y: number };
+  //   id: string;
+  // }>>([]);
+  // Removed showCelebration state as animations are removed
+  // const [showCelebration, setShowCelebration] = useState(false);
   const { user } = useAuth();
   const { addIngredientsToShoppingList } = useShoppingList();
 
@@ -37,15 +41,17 @@ const RecipeDetail = () => {
       setServings(recipe.servings);
     }
   }, [recipe]);
-
+  
+  // Removed useEffect for sticky header as it's no longer needed for the new design
+  /*
   useEffect(() => {
     const handleScroll = () => {
       setIsSticky(window.scrollY > 300);
     };
-
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+  */
 
   if (!recipe) {
     return (
@@ -113,8 +119,9 @@ const RecipeDetail = () => {
 
   const toggleFavorite = () => {
     setIsFavorited(!isFavorited);
-    setShowCelebration(true);
-    setTimeout(() => setShowCelebration(false), 1500);
+    // Removed CelebrationEffects trigger for simplicity
+    // setShowCelebration(true);
+    // setTimeout(() => setShowCelebration(false), 1500);
   };
 
   const handleStartCooking = () => {
@@ -150,7 +157,8 @@ const RecipeDetail = () => {
     const uncheckedIngredients = getUncheckedIngredients();
     if (uncheckedIngredients.length === 0) return;
 
-    // Create ingredient animations
+    // Removed ingredient animations for simplicity
+    /*
     const animations = uncheckedIngredients.slice(0, 8).map((ingredient, index) => ({
       ingredient: ingredient.name,
       category: 'pantry', // Default category, would be determined by categorization service
@@ -160,8 +168,8 @@ const RecipeDetail = () => {
       },
       id: `anim-${Date.now()}-${index}`
     }));
-    
     setIngredientAnimations(animations);
+    */
 
     await addIngredientsToShoppingList({
       ingredients: uncheckedIngredients,
@@ -217,100 +225,87 @@ const RecipeDetail = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Enhanced Hero Section */}
-      <div className="relative h-72 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/80"></div>
+    <div className="min-h-screen bg-background pb-8">
+      {/* Image Section */}
+      <div className="relative h-56 overflow-hidden"> {/* Adjusted height */}
         <img 
           src={recipe.image} 
           alt={recipe.title}
           className="w-full h-full object-cover"
         />
-        
-        {/* Header Controls */}
-        <div className="absolute top-6 left-4 right-4 flex items-center justify-between">
-          <button 
-            onClick={() => navigate(-1)}
-            className="w-10 h-10 bg-white/30 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/40 transition-colors shadow-md"
-          >
-            <ArrowLeft size={20} />
-          </button>
-          
-          <button 
-            onClick={toggleFavorite}
-            className={`w-10 h-10 ${isFavorited ? 'bg-red-500' : 'bg-white/30'} backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/40 transition-colors shadow-md`}
-          >
-            <Heart size={20} className={isFavorited ? 'fill-white' : ''} />
-          </button>
-        </div>
+      </div>
 
-        {/* Recipe Info Overlay */}
-        <div className="absolute bottom-0 left-0 right-0 p-6 text-white bg-gradient-to-t from-black/80 to-transparent pt-16">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-lg">
-              <span className="text-3xl">{recipe.mamaEmoji}</span>
-            </div>
-            <div>
-              <span className="text-sm font-medium opacity-90">Recipe by</span>
-              <h3 className="text-lg font-heading font-bold">{recipe.mamaName}</h3>
+      {/* Main Content Area - This will contain the info card, tabs, etc. */}
+      <div className="relative -mt-16 mx-4 z-10"> {/* Negative margin to overlap image */}
+        {/* Recipe Info Card (matches the image) */}
+        <div className="bg-card rounded-xl p-6 shadow-paper border border-border"> {/* Soft background, rounded, subtle shadow */}
+          {/* Header Controls (moved here) */}
+          <div className="absolute top-4 right-4 flex items-center gap-2">
+            <button 
+              onClick={() => navigate(-1)}
+              className="w-8 h-8 bg-muted/50 rounded-full flex items-center justify-center text-muted-foreground hover:bg-muted transition-colors"
+            >
+              <ArrowLeft size={16} />
+            </button>
+            <button 
+              onClick={toggleFavorite}
+              className={`w-8 h-8 ${isFavorited ? 'bg-red-500 text-white' : 'bg-muted/50 text-muted-foreground'} rounded-full flex items-center justify-center hover:bg-muted transition-colors`}
+            >
+              <Heart size={16} className={isFavorited ? 'fill-current' : ''} />
+            </button>
+            <button 
+              className="w-8 h-8 bg-muted/50 rounded-full flex items-center justify-center text-muted-foreground hover:bg-muted transition-colors"
+            >
+              <Share2 size={16} />
+            </button>
+          </div>
+
+          {/* Recipe Title and Mama Info */}
+          <div className="flex items-center justify-between mb-4">
+            <h1 className="font-heading font-bold text-2xl text-foreground">{recipe.title}</h1>
+            <div className="w-10 h-10 rounded-full bg-muted/50 flex items-center justify-center text-xl">
+              {recipe.mamaEmoji}
             </div>
           </div>
-          <h1 className="font-heading font-bold text-3xl mb-4 drop-shadow-md">{recipe.title}</h1>
-          
+
+          {/* Description */}
+          <p className="text-muted-foreground leading-relaxed font-handwritten text-base italic mb-4">
+            {recipe.description}
+          </p>
+
           {/* Stats */}
-          <div className="flex gap-4">
-            <div className="bg-white/30 backdrop-blur-sm rounded-lg px-3 py-2 flex items-center gap-2 shadow-md">
-              <Clock size={16} />
-              <span className="text-sm font-medium">{recipe.cookingTime}</span>
-            </div>
-            <div className="bg-white/30 backdrop-blur-sm rounded-lg px-3 py-2 flex items-center gap-2 shadow-md">
+          <div className="flex items-center justify-around text-sm text-muted-foreground border-t border-b border-border py-3 mb-4">
+            <div className="flex items-center gap-1">
               <Users size={16} />
-              <span className="text-sm font-medium">{recipe.servings} servings</span>
+              <span>{servings} servings</span> {/* Use current servings state */}
             </div>
-            <div className="bg-white/30 backdrop-blur-sm rounded-lg px-3 py-2 flex items-center gap-2 shadow-md">
+            <div className="flex items-center gap-1">
+              <Clock size={16} />
+              <span>{recipe.cookingTime}</span>
+            </div>
+            <div className="flex items-center gap-1">
               <ChefHat size={16} />
-              <span className="text-sm font-medium">{recipe.difficulty}</span>
+              <span>{recipe.difficulty}</span>
             </div>
           </div>
+
+          {/* Start Cooking Button */}
+          <button
+            onClick={handleStartCooking}
+            className="w-full bg-primary text-primary-foreground font-heading font-bold py-3 rounded-xl shadow-sm hover:bg-primary/90 transition-colors flex items-center justify-center gap-2"
+          >
+            <ChefHat size={20} /> {/* Replaced mama emoji with ChefHat */}
+            Let's cook with {recipe.mamaName.split(' ')[0]}
+          </button>
         </div>
-      </div>
 
-      {/* Description */}
-      <div className="p-6 bg-white border-b border-muted/50">
-        <p className="text-muted-foreground leading-relaxed font-handwritten text-lg italic">
-          {recipe.description}
-        </p>
-      </div>
-
-      {/* Start Cooking Button */}
-      <div className="px-6 py-6 bg-white">
-        <button
-          onClick={handleStartCooking}
-          className={`w-full ${
-            recipe.mamaId === 1 ? 'bg-gradient-to-r from-italian-marble to-italian-marble-warm' : 
-            recipe.mamaId === 2 ? 'bg-gradient-to-r from-mexican-tile to-mexican-tile-warm' :
-            'bg-gradient-to-r from-thai-silk to-thai-silk-warm'
-          } text-white font-heading font-bold py-5 px-6 rounded-xl shadow-warm hover:shadow-elegant transition-all duration-300 
-          flex items-center justify-center gap-3 gentle-pulse`}
-        >
-          <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-md">
-            <span className="text-xl">{recipe.mamaEmoji}</span>
-          </div>
-          <span className="text-xl">Let's cook with {recipe.mamaName.split(' ')[0]}!</span>
-        </button>
-      </div>
-
-      {/* Sticky Tab Navigation */}
-      <div className={`sticky top-0 z-10 bg-white border-b transition-all duration-200 ${
-        isSticky ? 'shadow-lg' : ''
-      }`}>
-        <div className="p-4">
-          <div className="bg-muted/70 rounded-lg p-1 flex shadow-sm">
+        {/* Tab Navigation (no sticky for now, simpler design) */}
+        <div className="mt-6 p-1 bg-card rounded-lg shadow-paper border border-border flex">
             <button
               onClick={() => setActiveTab('ingredients')}
               className={`flex-1 py-2 px-4 rounded-md font-heading font-bold text-sm transition-all duration-200 ${
                 activeTab === 'ingredients'
-                  ? 'bg-white text-foreground shadow-md'
+                  ? 'bg-primary text-primary-foreground shadow-sm' // Solid background for active tab
                   : 'text-muted-foreground hover:text-foreground'
               }`}
             >
@@ -320,25 +315,22 @@ const RecipeDetail = () => {
               onClick={() => setActiveTab('instructions')}
               className={`flex-1 py-2 px-4 rounded-md font-heading font-bold text-sm transition-all duration-200 ${
                 activeTab === 'instructions'
-                  ? 'bg-white text-foreground shadow-md'
+                  ? 'bg-primary text-primary-foreground shadow-sm'
                   : 'text-muted-foreground hover:text-foreground'
               }`}
             >
               Instructions
             </button>
-          </div>
         </div>
-      </div>
 
-      {/* Content */}
-      <div className="px-6 py-4">
+        {/* Content */}
+        <div className="px-2 py-4"> {/* Reduced padding */}
         {activeTab === 'ingredients' && (
           <div className="space-y-6">
             {/* Serving Adjuster */}
             <div className="bg-white rounded-xl p-4 shadow-warm border border-muted/30">
               <div className="flex items-center justify-between">
                 <span className="font-heading font-bold text-foreground flex items-center gap-2">
-                  <Users size={18} className="text-primary" />
                   Servings
                 </span>
                 <div className="flex items-center gap-3">
@@ -378,14 +370,14 @@ const RecipeDetail = () => {
                 }
                 
                 return (
-                  <div key={index} className="flex items-center gap-3 p-3 bg-white rounded-lg shadow-sm border border-muted/20 hover:border-muted/40 transition-colors">
+                  <div key={index} className="flex items-center gap-3 p-3 bg-card rounded-lg border border-border">
                     <button
                       onClick={() => toggleIngredient(index)}
                       className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all duration-200 ${
                         checkedIngredients.has(index)
                           ? 'bg-primary border-primary text-primary-foreground'
                           : 'border-muted-foreground/30 hover:border-primary'
-                      }`}
+                      }`} {/* Simplified border color */}
                     >
                       {checkedIngredients.has(index) && (
                         <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
@@ -393,7 +385,7 @@ const RecipeDetail = () => {
                         </svg>
                       )}
                     </button>
-                    <span className={`flex-1 transition-all duration-200 ${
+                    <span className={`flex-1 ${ // Removed transition-all duration-200
                       checkedIngredients.has(index) 
                         ? 'text-muted-foreground line-through' 
                         : 'text-foreground'
@@ -409,7 +401,7 @@ const RecipeDetail = () => {
             <Button 
               onClick={handleAddToShoppingList}
               disabled={getUncheckedIngredients().length === 0}
-              className="w-full font-heading font-bold py-3 h-12 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 shadow-warm"
+              className="w-full font-heading font-bold py-3 h-12 rounded-xl flex items-center justify-center gap-2 shadow-sm" // Simplified shadow
               variant={getUncheckedIngredients().length > 0 ? "default" : "outline"}
             >
               <ShoppingCart size={20} />
@@ -426,14 +418,14 @@ const RecipeDetail = () => {
         {activeTab === 'instructions' && (
           <div className="space-y-6">
             {/* Display Tips */}
-            {recipe.displayTips && recipe.displayTips.length > 0 ? (
-              <div className="bg-gradient-to-br from-amber-50 to-orange-50 border-l-4 border-primary rounded-lg p-4 shadow-warm">
+            {recipe.displayTips && recipe.displayTips.length > 0 && (
+              <div className="bg-card rounded-xl p-4 shadow-paper border border-border"> {/* New card styling */}
                 <h3 className="font-handwritten text-lg text-primary font-bold mb-3 flex items-center gap-2">
                   <span className="text-xl">{recipe.mamaEmoji}</span>
-                  {recipe.mamaName}'s Essential Tips
+                  {recipe.mamaName}'s Tips
                 </h3>
                 <ul className="space-y-3 font-handwritten text-foreground">
-                  {recipe.displayTips.map((tip, index) => (
+                  {recipe.displayTips.slice(0, 2).map((tip, index) => ( // Limit to 2 tips
                     <li key={index} className="flex items-start gap-3">
                       <span className="text-primary mt-1 text-lg">•</span>
                       <span>{tip}</span>
@@ -441,13 +433,15 @@ const RecipeDetail = () => {
                   ))}
                 </ul>
               </div>
-            ) : (
-              <div className="bg-gradient-to-br from-amber-50 to-orange-50 border-l-4 border-primary rounded-lg p-4 shadow-warm">
+            )}
+            {/* Fallback for no tips */}
+            {(!recipe.displayTips || recipe.displayTips.length === 0) && (
+              <div className="bg-card rounded-xl p-4 shadow-paper border border-border">
                 <div className="flex items-center gap-3">
                   <div className="text-3xl">{recipe.mamaEmoji}</div>
                   <div>
                     <h3 className="font-handwritten text-lg text-primary font-bold">
-                      {recipe.mamaName}'s Cooking Wisdom
+                      {recipe.mamaName}'s Tips
                     </h3>
                     <p className="text-foreground font-handwritten">
                       Start cooking to hear {recipe.mamaName.split(' ')[0]}'s voice guidance and cultural stories!
@@ -456,7 +450,6 @@ const RecipeDetail = () => {
                 </div>
               </div>
             )}
-
             {/* Instructions */}
             <div className="space-y-6">
               {recipe.instructions.map((instruction, index) => 
@@ -465,9 +458,10 @@ const RecipeDetail = () => {
             </div>
           </div>
         )}
+        </div>
       </div>
-
-      {/* Ingredient Animations */}
+      {/* Removed Ingredient Animations for simplicity */}
+      {/*
       {ingredientAnimations.map((animation) => (
         <IngredientAnimation
           key={animation.id}
@@ -475,28 +469,27 @@ const RecipeDetail = () => {
           category={animation.category}
           startPosition={animation.position}
           onComplete={() => {
-            setIngredientAnimations(prev => 
-              prev.filter(a => a.id !== animation.id)
-            );
+            setIngredientAnimations(prev => prev.filter(a => a.id !== animation.id));
           }}
         />
       ))}
-
+      */}
       {/* Shopping List Modal */}
       <ShoppingListModal
         isOpen={showShoppingModal}
         onClose={() => setShowShoppingModal(false)}
         addedCount={getUncheckedIngredients().length}
         recipeName={recipe?.title || 'Unknown Recipe'}
-        ingredientPositions={ingredientAnimations.map(a => a.position)}
+        // Removed ingredientPositions to simplify animations
       />
-      
-      {/* Favorite Animation */}
+      {/* Removed CelebrationEffects for simplicity */}
+      {/*
       <CelebrationEffects 
         trigger={showCelebration} 
         type="heart" 
         cultural={recipe.culture as 'italian' | 'mexican' | 'thai'} 
       />
+      */}
     </div>
   );
 };
