@@ -72,35 +72,46 @@ export class VoiceService {
   private audioQueue: Array<{ text: string; voiceId: string }> = [];
   private isProcessingQueue = false;
   private isCurrentlyPlayingState = false;
-  private voiceIds: Record<string, string> = {};
+  private voiceIds: Record<string, string> = {
+    // Hardcoded fallback voice IDs - these work with ElevenLabs
+    nonna_lucia: 'XB0fDUnXU5powFXDhCwa', // Charlotte voice
+    abuela_rosa: 'pFZP5JQG7iQjIQuC4Bku', // Lily voice  
+    yai_malee: 'EXAVITQu4vr4xnSDxMaL' // Sarah voice
+  };
   private config: VoiceConfig = {
     mode: 'full', // Changed to 'full' for better reliability
     volume: 0.8,
     speed: 1.0,
     enabled: true
   };
+  private isInitialized = false;
 
   private constructor() {
-    // Initialize voice IDs immediately
+    // Initialize voice IDs immediately with better error handling
     this.initializeVoiceIds();
   }
 
   private async initializeVoiceIds() {
     try {
+      console.log('[VoiceService] Attempting to fetch voice IDs from edge function...');
       // Get voice IDs from Supabase Edge Function secrets via a helper function
       const { data, error } = await supabase.functions.invoke('get-voice-ids');
-      if (data && !error) {
+      if (data && !error && data.ELEVENLABS_NONNA_VOICE_ID) {
         this.voiceIds = {
           nonna_lucia: data.ELEVENLABS_NONNA_VOICE_ID,
           abuela_rosa: data.ELEVENLABS_ABUELA_VOICE_ID,
           yai_malee: data.ELEVENLABS_YAI_VOICE_ID
         };
-        console.log('Voice IDs initialized successfully', this.voiceIds);
+        console.log('[VoiceService] Voice IDs fetched from edge function successfully:', this.voiceIds);
       } else {
-        console.error('Error fetching voice IDs:', error);
+        console.warn('[VoiceService] Edge function failed or returned no data, using fallback voice IDs:', error);
+        console.log('[VoiceService] Using fallback voice IDs:', this.voiceIds);
       }
     } catch (error) {
-      console.warn('Could not fetch voice IDs, using defaults:', error);
+      console.warn('[VoiceService] Could not fetch voice IDs from edge function, using fallback voice IDs:', error);
+      console.log('[VoiceService] Fallback voice IDs in use:', this.voiceIds);
+    } finally {
+      this.isInitialized = true;
     }
   }
 
@@ -124,10 +135,19 @@ export class VoiceService {
 
     console.log(`[VoiceService] Speaking text: "${text}" for mama: ${mamaId}`);
 
-    // Wait for voice IDs to be initialized if needed
-    if (Object.keys(this.voiceIds).length === 0) {
-      console.log('[VoiceService] Waiting for voice IDs to initialize...');
-      await this.initializeVoiceIds();
+    // Wait for initialization if needed
+    if (!this.isInitialized) {
+      console.log('[VoiceService] Waiting for initialization...');
+      await new Promise(resolve => {
+        const checkInit = () => {
+          if (this.isInitialized) {
+            resolve(void 0);
+          } else {
+            setTimeout(checkInit, 100);
+          }
+        };
+        checkInit();
+      });
     }
 
     // Resolve mama ID (handle both numeric and voice IDs)
@@ -153,6 +173,7 @@ export class VoiceService {
       this.addToQueue(text, actualVoiceId);
     } else {
       console.warn(`[VoiceService] No voice ID found for ${resolvedMamaId}. Available IDs:`, this.voiceIds);
+      console.warn(`[VoiceService] Requested mama ID was: ${mamaId}, resolved to: ${resolvedMamaId}`);
     }
   }
 
