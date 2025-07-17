@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Clock, Users, ChefHat, Plus, Minus, ShoppingCart, Timer } from 'lucide-react';
+import { ArrowLeft, Clock, Users, ChefHat, Plus, Minus, ShoppingCart, Timer, Heart } from 'lucide-react';
 import { recipes } from '@/data/recipes';
 import { getMamaById } from '@/data/mamas';
 import { Button } from '@/components/ui/button';
@@ -218,9 +218,9 @@ const RecipeDetail = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Hero Section */}
-      <div className="relative h-64 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-black/60"></div>
+      {/* Enhanced Hero Section */}
+      <div className="relative h-72 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/80"></div>
         <img 
           src={recipe.image} 
           alt={recipe.title}
@@ -228,34 +228,46 @@ const RecipeDetail = () => {
         />
         
         {/* Header Controls */}
-        <div className="absolute top-4 left-4 right-4 flex items-center justify-between">
+        <div className="absolute top-6 left-4 right-4 flex items-center justify-between">
           <button 
             onClick={() => navigate(-1)}
-            className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/30 transition-colors"
+            className="w-10 h-10 bg-white/30 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/40 transition-colors shadow-md"
           >
             <ArrowLeft size={20} />
+          </button>
+          
+          <button 
+            onClick={toggleFavorite}
+            className={`w-10 h-10 ${isFavorited ? 'bg-red-500' : 'bg-white/30'} backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/40 transition-colors shadow-md`}
+          >
+            <Heart size={20} className={isFavorited ? 'fill-white' : ''} />
           </button>
         </div>
 
         {/* Recipe Info Overlay */}
-        <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
-          <div className="flex items-center gap-2 mb-2">
-            <span className="text-2xl">{recipe.mamaEmoji}</span>
-            <span className="text-sm opacity-90">by {recipe.mamaName}</span>
+        <div className="absolute bottom-0 left-0 right-0 p-6 text-white bg-gradient-to-t from-black/80 to-transparent pt-16">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-lg">
+              <span className="text-3xl">{recipe.mamaEmoji}</span>
+            </div>
+            <div>
+              <span className="text-sm font-medium opacity-90">Recipe by</span>
+              <h3 className="text-lg font-heading font-bold">{recipe.mamaName}</h3>
+            </div>
           </div>
-          <h1 className="font-heading font-bold text-3xl mb-4">{recipe.title}</h1>
+          <h1 className="font-heading font-bold text-3xl mb-4 drop-shadow-md">{recipe.title}</h1>
           
           {/* Stats */}
-          <div className="flex gap-3">
-            <div className="bg-white/20 backdrop-blur-sm rounded-lg px-3 py-2 flex items-center gap-1">
+          <div className="flex gap-4">
+            <div className="bg-white/30 backdrop-blur-sm rounded-lg px-3 py-2 flex items-center gap-2 shadow-md">
               <Clock size={16} />
               <span className="text-sm font-medium">{recipe.cookingTime}</span>
             </div>
-            <div className="bg-white/20 backdrop-blur-sm rounded-lg px-3 py-2 flex items-center gap-1">
+            <div className="bg-white/30 backdrop-blur-sm rounded-lg px-3 py-2 flex items-center gap-2 shadow-md">
               <Users size={16} />
               <span className="text-sm font-medium">{recipe.servings} servings</span>
             </div>
-            <div className="bg-white/20 backdrop-blur-sm rounded-lg px-3 py-2 flex items-center gap-1">
+            <div className="bg-white/30 backdrop-blur-sm rounded-lg px-3 py-2 flex items-center gap-2 shadow-md">
               <ChefHat size={16} />
               <span className="text-sm font-medium">{recipe.difficulty}</span>
             </div>
@@ -264,40 +276,41 @@ const RecipeDetail = () => {
       </div>
 
       {/* Description */}
-      <div className="p-6 bg-white">
-        <p className="text-muted-foreground leading-relaxed font-handwritten text-lg">
+      <div className="p-6 bg-white border-b border-muted/50">
+        <p className="text-muted-foreground leading-relaxed font-handwritten text-lg italic">
           {recipe.description}
         </p>
       </div>
 
       {/* Start Cooking Button */}
-      <div className="px-6 pb-6 bg-white">
+      <div className="px-6 py-6 bg-white">
         <button
           onClick={handleStartCooking}
-          className={`w-full ${mama?.country === 'Italy' ? 'bg-gradient-to-r from-italian-marble to-italian-marble-warm' : 
-                     mama?.country === 'Mexico' ? 'bg-gradient-to-r from-mexican-tile to-mexican-tile-warm' :
-                     'bg-gradient-to-r from-thai-silk to-thai-silk-warm'} 
-                   text-white font-heading font-bold py-4 px-6 rounded-xl shadow-warm hover:shadow-elegant transition-all duration-300 
-                   flex items-center justify-center gap-3`}
+          className={`w-full ${
+            recipe.mamaId === 1 ? 'bg-gradient-to-r from-italian-marble to-italian-marble-warm' : 
+            recipe.mamaId === 2 ? 'bg-gradient-to-r from-mexican-tile to-mexican-tile-warm' :
+            'bg-gradient-to-r from-thai-silk to-thai-silk-warm'
+          } text-white font-heading font-bold py-5 px-6 rounded-xl shadow-warm hover:shadow-elegant transition-all duration-300 
+          flex items-center justify-center gap-3 gentle-pulse`}
         >
-          <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
+          <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-md">
             <span className="text-xl">{recipe.mamaEmoji}</span>
           </div>
-          <span className="text-lg">Let's cook together with {recipe.mamaName.split(' ')[0]}!</span>
+          <span className="text-xl">Let's cook with {recipe.mamaName.split(' ')[0]}!</span>
         </button>
       </div>
 
       {/* Sticky Tab Navigation */}
       <div className={`sticky top-0 z-10 bg-white border-b transition-all duration-200 ${
-        isSticky ? 'shadow-md' : ''
+        isSticky ? 'shadow-lg' : ''
       }`}>
         <div className="p-4">
-          <div className="bg-muted rounded-lg p-1 flex">
+          <div className="bg-muted/70 rounded-lg p-1 flex shadow-sm">
             <button
               onClick={() => setActiveTab('ingredients')}
               className={`flex-1 py-2 px-4 rounded-md font-heading font-bold text-sm transition-all duration-200 ${
                 activeTab === 'ingredients'
-                  ? 'bg-white text-foreground shadow-sm'
+                  ? 'bg-white text-foreground shadow-md'
                   : 'text-muted-foreground hover:text-foreground'
               }`}
             >
@@ -307,7 +320,7 @@ const RecipeDetail = () => {
               onClick={() => setActiveTab('instructions')}
               className={`flex-1 py-2 px-4 rounded-md font-heading font-bold text-sm transition-all duration-200 ${
                 activeTab === 'instructions'
-                  ? 'bg-white text-foreground shadow-sm'
+                  ? 'bg-white text-foreground shadow-md'
                   : 'text-muted-foreground hover:text-foreground'
               }`}
             >
@@ -322,20 +335,23 @@ const RecipeDetail = () => {
         {activeTab === 'ingredients' && (
           <div className="space-y-6">
             {/* Serving Adjuster */}
-            <div className="bg-white rounded-xl p-4 shadow-warm">
+            <div className="bg-white rounded-xl p-4 shadow-warm border border-muted/30">
               <div className="flex items-center justify-between">
-                <span className="font-heading font-bold text-foreground">Servings</span>
+                <span className="font-heading font-bold text-foreground flex items-center gap-2">
+                  <Users size={18} className="text-primary" />
+                  Servings
+                </span>
                 <div className="flex items-center gap-3">
                   <button
                     onClick={() => setServings(Math.max(1, servings - 1))}
-                    className="w-8 h-8 bg-muted rounded-full flex items-center justify-center hover:bg-muted/80 transition-colors"
+                    className="w-8 h-8 bg-muted rounded-full flex items-center justify-center hover:bg-muted/80 transition-colors shadow-sm"
                   >
                     <Minus size={16} />
                   </button>
                   <span className="font-heading font-bold text-xl w-8 text-center">{servings}</span>
                   <button
                     onClick={() => setServings(servings + 1)}
-                    className="w-8 h-8 bg-muted rounded-full flex items-center justify-center hover:bg-muted/80 transition-colors"
+                    className="w-8 h-8 bg-muted rounded-full flex items-center justify-center hover:bg-muted/80 transition-colors shadow-sm"
                   >
                     <Plus size={16} />
                   </button>
@@ -362,7 +378,7 @@ const RecipeDetail = () => {
                 }
                 
                 return (
-                  <div key={index} className="flex items-center gap-3 p-3 bg-white rounded-lg shadow-sm">
+                  <div key={index} className="flex items-center gap-3 p-3 bg-white rounded-lg shadow-sm border border-muted/20 hover:border-muted/40 transition-colors">
                     <button
                       onClick={() => toggleIngredient(index)}
                       className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all duration-200 ${
@@ -393,7 +409,7 @@ const RecipeDetail = () => {
             <Button 
               onClick={handleAddToShoppingList}
               disabled={getUncheckedIngredients().length === 0}
-              className="w-full font-heading font-bold py-3 h-12 rounded-xl transition-all duration-200 flex items-center justify-center gap-2"
+              className="w-full font-heading font-bold py-3 h-12 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 shadow-warm"
               variant={getUncheckedIngredients().length > 0 ? "default" : "outline"}
             >
               <ShoppingCart size={20} />
@@ -410,20 +426,34 @@ const RecipeDetail = () => {
         {activeTab === 'instructions' && (
           <div className="space-y-6">
             {/* Display Tips */}
-            {recipe.displayTips && recipe.displayTips.length > 0 && (
-              <div className="bg-gradient-to-br from-amber-50 to-orange-50 border-l-4 border-primary rounded-lg p-4">
-                <h3 className="font-handwritten text-lg text-primary font-bold mb-2 flex items-center gap-2">
+            {recipe.displayTips && recipe.displayTips.length > 0 ? (
+              <div className="bg-gradient-to-br from-amber-50 to-orange-50 border-l-4 border-primary rounded-lg p-4 shadow-warm">
+                <h3 className="font-handwritten text-lg text-primary font-bold mb-3 flex items-center gap-2">
                   <span className="text-xl">{recipe.mamaEmoji}</span>
                   {recipe.mamaName}'s Essential Tips
                 </h3>
-                <ul className="space-y-2 font-handwritten text-foreground">
+                <ul className="space-y-3 font-handwritten text-foreground">
                   {recipe.displayTips.map((tip, index) => (
-                    <li key={index} className="flex items-start gap-2">
-                      <span className="text-primary mt-1">•</span>
+                    <li key={index} className="flex items-start gap-3">
+                      <span className="text-primary mt-1 text-lg">•</span>
                       <span>{tip}</span>
                     </li>
                   ))}
                 </ul>
+              </div>
+            ) : (
+              <div className="bg-gradient-to-br from-amber-50 to-orange-50 border-l-4 border-primary rounded-lg p-4 shadow-warm">
+                <div className="flex items-center gap-3">
+                  <div className="text-3xl">{recipe.mamaEmoji}</div>
+                  <div>
+                    <h3 className="font-handwritten text-lg text-primary font-bold">
+                      {recipe.mamaName}'s Cooking Wisdom
+                    </h3>
+                    <p className="text-foreground font-handwritten">
+                      Start cooking to hear {recipe.mamaName.split(' ')[0]}'s voice guidance and cultural stories!
+                    </p>
+                  </div>
+                </div>
               </div>
             )}
 
