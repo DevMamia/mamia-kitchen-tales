@@ -8,7 +8,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useShoppingList } from '@/contexts/ShoppingListContext';
 import ShoppingListModal from '@/components/ShoppingListModal';
 import { QuantityCalculationService } from '@/services/quantityCalculationService';
-import { IngredientAnimation } from '@/components/CelebrationEffects';
+import { IngredientAnimation, CelebrationEffects } from '@/components/CelebrationEffects';
 
 const RecipeDetail = () => {
   const { recipeId } = useParams();
@@ -16,6 +16,7 @@ const RecipeDetail = () => {
   const [activeTab, setActiveTab] = useState<'ingredients' | 'instructions'>('ingredients');
   const [servings, setServings] = useState(4);
   const [checkedIngredients, setCheckedIngredients] = useState<Set<number>>(new Set());
+  const [isFavorited, setIsFavorited] = useState(false);
   const [isSticky, setIsSticky] = useState(false);
   const [showShoppingModal, setShowShoppingModal] = useState(false);
   const [ingredientAnimations, setIngredientAnimations] = useState<Array<{
@@ -24,6 +25,7 @@ const RecipeDetail = () => {
     position: { x: number; y: number };
     id: string;
   }>>([]);
+  const [showCelebration, setShowCelebration] = useState(false);
   const { user } = useAuth();
   const { addIngredientsToShoppingList } = useShoppingList();
 
@@ -107,6 +109,12 @@ const RecipeDetail = () => {
       newChecked.add(index);
     }
     setCheckedIngredients(newChecked);
+  };
+
+  const toggleFavorite = () => {
+    setIsFavorited(!isFavorited);
+    setShowCelebration(true);
+    setTimeout(() => setShowCelebration(false), 1500);
   };
 
   const handleStartCooking = () => {
@@ -451,6 +459,13 @@ const RecipeDetail = () => {
         addedCount={getUncheckedIngredients().length}
         recipeName={recipe?.title || 'Unknown Recipe'}
         ingredientPositions={ingredientAnimations.map(a => a.position)}
+      />
+      
+      {/* Favorite Animation */}
+      <CelebrationEffects 
+        trigger={showCelebration} 
+        type="heart" 
+        cultural={recipe.culture as 'italian' | 'mexican' | 'thai'} 
       />
     </div>
   );
