@@ -117,6 +117,31 @@ const Cook = () => {
     conversationMemory?.startCookingPhase(currentStep);
   };
 
+  // Auto-start voice conversation when entering cooking phase
+  useEffect(() => {
+    if (conversationPhase === 'cooking' && recipe && mama && !conversation.isConnected) {
+      const autoStartVoiceConversation = async () => {
+        try {
+          // Start with excitement and first step
+          const firstStepText = recipe.instructions[currentStep - 1];
+          const greeting = `Ok let's start cooking! ${firstStepText}`;
+          
+          await conversation.startConversation(
+            mama.voiceId,
+            greeting,
+            recipe,
+            handleVoiceCommand
+          );
+        } catch (error) {
+          console.error('Failed to auto-start voice conversation:', error);
+        }
+      };
+
+      // Small delay to ensure smooth transition
+      setTimeout(autoStartVoiceConversation, 500);
+    }
+  }, [conversationPhase, recipe, mama, conversation.isConnected, currentStep]);
+
   if (conversationPhase === 'pre-cooking') {
     // Phase 1: Pre-Cooking Chat Interface
     return (
@@ -265,7 +290,7 @@ const Cook = () => {
         )}
       </div>
 
-        {/* Enhanced Voice Interface */}
+        {/* Enhanced Voice Interface - Auto-active mode */}
         <div className="px-4 mb-6">
           <EnhancedVoiceInterface
             mama={mama}
