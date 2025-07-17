@@ -2,12 +2,14 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { ChefHat, Clock, Users, MessageCircle, ChevronDown, Send } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
+import { ChefHat, Clock, Users, MessageCircle, ChevronDown, Send, Crown } from 'lucide-react';
 import { Recipe } from '@/data/recipes';
 import { Mama } from '@/data/mamas';
 import { useTemplateResponses } from '@/hooks/useTemplateResponses';
 import { useVoice } from '@/hooks/useVoice';
 import { useAuth } from '@/contexts/AuthContext';
+import { useUserTier } from '@/hooks/useUserTier';
 
 interface PreCookingChatProps {
   recipe: Recipe;
@@ -25,31 +27,47 @@ export const PreCookingChat = ({ recipe, mama, onStartCooking }: PreCookingChatP
   const { getTemplateResponse, getCulturalGreeting } = useTemplateResponses();
   const { speak, isPlaying } = useVoice();
   const { user } = useAuth();
+  const { isPremium, voiceMode, setVoiceMode, usageCount, maxUsage, hasUsageLeft } = useUserTier();
 
-  // Auto-play voice greeting when component mounts
+  // Enhanced auto-play voice greeting when component mounts
   useEffect(() => {
-    if (user && !hasPlayedGreeting) {
+    if (!hasPlayedGreeting) {
       const userName = user?.user_metadata?.display_name || user?.email?.split('@')[0] || 'friend';
-      const greetingVariations = [
-        `Welcome ${userName}! Today we cook my ${recipe.title}. I can't wait to teach you!`,
-        `Ciao ${userName}! Ready to make the most delicious ${recipe.title}? I'm so excited!`,
-        `Hello ${userName}! Let's create magic with my ${recipe.title} recipe together!`
-      ];
       
-      const randomGreeting = greetingVariations[Math.floor(Math.random() * greetingVariations.length)];
+      // Mama-specific greetings with personality
+      const greetingVariations = {
+        'nonna_lucia': [
+          `Benvenuto ${userName}! Today we cook my beautiful ${recipe.title}. I'm so excited to share this with you, caro!`,
+          `Ciao ${userName}! Ready to make the most delicious ${recipe.title}? Nonna is here to guide you, tesoro!`,
+          `Hello ${userName}! Let's create magic with my ${recipe.title} recipe together. I can't wait to start!`
+        ],
+        'abuela_rosa': [
+          `¡Hola ${userName}! Today we're making my special ${recipe.title}. I'm so excited to cook with you, mi amor!`,
+          `Welcome ${userName}! Ready for some delicious ${recipe.title}? Abuela is here to help you, mija!`,
+          `¡Órale ${userName}! Let's make the most amazing ${recipe.title} together. I can't wait to begin!`
+        ],
+        'yai_malee': [
+          `Welcome ${userName}, dear! Today we find balance with my ${recipe.title}. I'm excited to share this journey with you!`,
+          `Hello ${userName}! Ready to create harmony with ${recipe.title}? Let's cook mindfully together!`,
+          `Greetings ${userName}! Today we blend flavors and wisdom with my ${recipe.title}. Shall we begin this beautiful journey?`
+        ]
+      };
+      
+      const mamaGreetings = greetingVariations[mama.voiceId as keyof typeof greetingVariations] || greetingVariations['nonna_lucia'];
+      const randomGreeting = mamaGreetings[Math.floor(Math.random() * mamaGreetings.length)];
       const finalGreeting = `${randomGreeting} Tell me when you're ready to start cooking!`;
       
-      console.log('[PreCookingChat] Playing greeting:', finalGreeting);
+      console.log('[PreCookingChat] Playing enhanced greeting:', finalGreeting);
       
       // Play greeting after a short delay
       setTimeout(() => {
-        speak(finalGreeting, mama.id.toString()).catch(error => {
+        speak(finalGreeting, mama.voiceId).catch(error => {
           console.error('[PreCookingChat] Failed to play greeting:', error);
         });
         setHasPlayedGreeting(true);
       }, 1000);
     }
-  }, [speak, mama.id, recipe.title, user, hasPlayedGreeting]);
+  }, [speak, mama.voiceId, recipe.title, user, hasPlayedGreeting]);
 
   const handleTextQuestion = async () => {
     if (!question.trim()) return;
@@ -111,6 +129,34 @@ export const PreCookingChat = ({ recipe, mama, onStartCooking }: PreCookingChatP
         <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent rounded-2xl"></div>
       </div>
 
+      {/* Premium Voice Mode Toggle */}
+      {isPremium && (
+        <Card className="p-4 border-primary/20 bg-gradient-to-r from-primary/5 to-secondary/5">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <Crown className="w-5 h-5 text-primary" />
+              <span className="text-sm font-medium text-foreground">Premium Voice Experience</span>
+            </div>
+            <Switch
+              checked={voiceMode === 'conversational'}
+              onCheckedChange={(checked) => setVoiceMode(checked ? 'conversational' : 'tts')}
+              disabled={!hasUsageLeft}
+            />
+          </div>
+          <div className="text-xs text-muted-foreground">
+            {voiceMode === 'conversational' 
+              ? `Voice Chat Mode • ${maxUsage - usageCount} sessions left today`
+              : 'Simple Voice Mode'
+            }
+          </div>
+          {!hasUsageLeft && (
+            <div className="text-xs text-orange-600 mt-1">
+              Daily voice chat limit reached. Upgrade to Family plan for unlimited conversations.
+            </div>
+          )}
+        </Card>
+      )}
+
       {/* Start Cooking Button */}
       <Button
         onClick={onStartCooking}
@@ -118,6 +164,9 @@ export const PreCookingChat = ({ recipe, mama, onStartCooking }: PreCookingChatP
         size="lg"
       >
         Start Cooking with {mama.name}
+        {isPremium && voiceMode === 'conversational' && hasUsageLeft && (
+          <span className="ml-2 text-sm opacity-75">• Voice Chat</span>
+        )}
       </Button>
 
       {/* Optional Text Questions */}

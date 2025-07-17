@@ -1,7 +1,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Volume2, ChevronLeft, ChevronRight, Upload, X, Settings, ChefHat } from 'lucide-react';
+import { ArrowLeft, Volume2, ChevronLeft, ChevronRight, Upload, X, Settings, ChefHat, Crown } from 'lucide-react';
+import { useConversation } from '@11labs/react';
 import { Button } from '@/components/ui/button';
 import { VoiceStatusIndicator } from '@/components/VoiceStatusIndicator';
 import { CookingTimer } from '@/components/CookingTimer';
@@ -11,8 +12,10 @@ import { EnhancedVoiceInterface } from '@/components/EnhancedVoiceInterface';
 import { getRecipeWithMama, recipes } from '@/data/recipes';
 import { getMamaById } from '@/data/mamas';
 import { useVoice } from '@/hooks/useVoice';
-import { useConversation } from '@/hooks/useConversation';
 import { useConversationMemory } from '@/hooks/useConversationMemory';
+import { useUserTier } from '@/hooks/useUserTier';
+import { useAuth } from '@/contexts/AuthContext';
+import { ConversationAgentService } from '@/services/conversationAgentService';
 
 const Cook = () => {
   const { recipeId } = useParams();
@@ -22,9 +25,12 @@ const Cook = () => {
   const [voiceStatus, setVoiceStatus] = useState<'speaking' | 'listening' | 'processing' | 'idle'>('idle');
   const [timerExpanded, setTimerExpanded] = useState(false);
   const [timerCompleted, setTimerCompleted] = useState(false);
+  const [agentService] = useState(() => new ConversationAgentService());
 
   const { speak, isPlaying, config } = useVoice();
-  const conversation = useConversation();
+  const { user } = useAuth();
+  const { isPremium, voiceMode, incrementUsage, hasUsageLeft } = useUserTier();
+  const elevenlabsConversation = useConversation();
 
   // Find the recipe with mama info
   const recipeData = recipeId ? getRecipeWithMama(recipeId) : null;
@@ -112,9 +118,20 @@ const Cook = () => {
     };
   }, [conversationPhase]);
 
-  const handleStartCooking = () => {
+  const handleStartCooking = async () => {
     setConversationPhase('cooking');
     conversationMemory?.startCookingPhase(currentStep);
+    
+    // Initialize agent service for premium users with conversational mode
+    if (isPremium && voiceMode === 'conversational' && hasUsageLeft) {
+      agentService.initialize(elevenlabsConversation);
+      incrementUsage();
+    }
+    
+    // Play soft landing TTS for all users
+    const instruction = recipe.instructions[0];
+    const softLanding = `Ok let's begin! ${instruction}`;
+    await speak(softLanding, mama.voiceId);
   };
 
   if (conversationPhase === 'pre-cooking') {
@@ -142,47 +159,99 @@ const Cook = () => {
   const handleStartConversation = async () => {
     if (!recipe || !mama) return;
     
-    const stepText = recipe.instructions[currentStep - 1];
-    await conversation.startConversation(
-      mama.voiceId, 
-      stepText,
-      handleVoiceCommand
-    );
-  };
-
-  const handleVoiceCommand = (command: string) => {
-    switch (command.toLowerCase()) {
-      case 'next':
-        if (currentStep < totalSteps) {
-          conversationMemory?.markStepComplete(currentStep);
-          setCurrentStep(currentStep + 1);
-          setTimerCompleted(false);
+    // For premium users with conversational mode
+    if (isPremium && voiceMode === 'conversational' && hasUsageLeft) {
+      const userName = user?.user_metadata?.display_name || user?.email?.split('@')[0] || 'friend';
+      const agentConfig = {
+        mama,
+        recipe,
+        currentStep,
+        userContext: {
+          name: userName,
+          cookingLevel: 'intermediate', // Could be fetched from user profile
         }
-        break;
-      case 'back':
-      case 'previous':
-        if (currentStep > 1) {
-          setCurrentStep(currentStep - 1);
-          setTimerCompleted(false);
-        }
-        break;
-      case 'repeat':
-        if (recipe && mama) {
-          speak(recipe.instructions[currentStep - 1], mama.id.toString());
-        }
-        break;
-      case 'help':
-        conversationMemory?.markStepStruggling(currentStep);
-        break;
-      default:
-        conversationMemory?.addUserQuestion(command);
-        console.log('Unknown voice command:', command);
+      };
+      
+      // Use a placeholder agent ID - in production this would be fetched from ElevenLabs
+      const agentId = 'agent-' + mama.voiceId;
+      await agentService.startConversation(agentConfig, agentId);
     }
   };
 
-  const handleInterrupt = () => {
+  const handleVoiceCommand = (command: string) => {
+    const lowerCommand = command.toLowerCase();
+    
+    // Universal voice commands for both tiers
+    if (lowerCommand.includes('next') || lowerCommand.includes('next step')) {
+      if (currentStep < totalSteps) {
+        conversationMemory?.markStepComplete(currentStep);
+        setCurrentStep(currentStep + 1);
+        setTimerCompleted(false);
+        
+        // Update agent context for premium users
+        if (isPremium && voiceMode === 'conversational') {
+          agentService.updateCookingContext(currentStep + 1, recipe.instructions[currentStep]);
+        }
+        
+        // Speak next step instruction
+        setTimeout(() => {
+          speak(recipe.instructions[currentStep], mama.voiceId);
+        }, 500);
+      }
+      return;
+    }
+    
+    if (lowerCommand.includes('back') || lowerCommand.includes('previous') || lowerCommand.includes('go back')) {
+      if (currentStep > 1) {
+        setCurrentStep(currentStep - 1);
+        setTimerCompleted(false);
+        
+        // Update agent context and speak previous step
+        if (isPremium && voiceMode === 'conversational') {
+          agentService.updateCookingContext(currentStep - 1, recipe.instructions[currentStep - 2]);
+        }
+        
+        setTimeout(() => {
+          speak(recipe.instructions[currentStep - 2], mama.voiceId);
+        }, 500);
+      }
+      return;
+    }
+    
+    if (lowerCommand.includes('repeat') || lowerCommand.includes('repeat that')) {
+      speak(recipe.instructions[currentStep - 1], mama.voiceId);
+      return;
+    }
+    
+    if (lowerCommand.includes('help') || lowerCommand.includes('confused') || lowerCommand.includes('stuck')) {
+      conversationMemory?.markStepStruggling(currentStep);
+      
+      // For basic users, provide helpful TTS
+      if (!isPremium || voiceMode === 'tts') {
+        const helpMessage = `Don't worry! Take your time with step ${currentStep}. ${recipe.instructions[currentStep - 1]} If you need more help, try asking a specific question.`;
+        speak(helpMessage, mama.voiceId);
+      }
+      return;
+    }
+    
+    // For premium conversational mode, let the agent handle the query
+    if (isPremium && voiceMode === 'conversational') {
+      // The ElevenLabs agent will handle this automatically
+      console.log('[Cook] Conversational query handled by agent:', command);
+    } else {
+      // For basic users, store the question for conversation memory
+      conversationMemory?.addUserQuestion(command);
+      console.log('[Cook] Voice command logged for basic user:', command);
+    }
+  };
+
+  const handleInterrupt = async () => {
     conversationMemory?.handleInterruption();
-    conversation.stopConversation();
+    
+    // Stop both TTS and conversational AI
+    if (isPremium && voiceMode === 'conversational') {
+      await agentService.endConversation();
+    }
   };
 
   return (
@@ -266,20 +335,63 @@ const Cook = () => {
 
         {/* Enhanced Voice Interface */}
         <div className="px-4 mb-6">
-          <EnhancedVoiceInterface
-            mama={mama}
-            isConnected={conversation.isConnected}
-            isSpeaking={isPlaying}
-            isListening={conversation.isConnected && !isPlaying}
-            currentTranscript={conversation.currentTranscript}
-            partialTranscript={conversation.partialTranscript}
-            error={conversation.error}
-            currentStep={currentStep}
-            totalSteps={totalSteps}
-            onStartConversation={handleStartConversation}
-            onStopConversation={conversation.stopConversation}
-            onInterrupt={handleInterrupt}
-          />
+          {isPremium && voiceMode === 'conversational' && hasUsageLeft ? (
+            // Premium Conversational AI Interface
+            <div className="bg-gradient-to-r from-primary/10 to-secondary/10 rounded-xl p-4 border border-primary/20">
+              <div className="flex items-center gap-2 mb-3">
+                <Crown className="w-5 h-5 text-primary" />
+                <span className="text-sm font-medium text-primary">Premium Voice Chat Active</span>
+              </div>
+              
+              <div className="text-center">
+                {agentService.getConversationStatus() === 'connected' ? (
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-center gap-2">
+                      <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                      <span className="text-sm text-foreground">
+                        {agentService.isAgentSpeaking() ? `${mama.name} is speaking...` : 'Listening...'}
+                      </span>
+                    </div>
+                    <Button
+                      onClick={handleInterrupt}
+                      variant="outline"
+                      size="sm"
+                      className="text-xs"
+                    >
+                      End Conversation
+                    </Button>
+                  </div>
+                ) : (
+                  <Button
+                    onClick={handleStartConversation}
+                    className="w-full"
+                  >
+                    Start Conversation with {mama.name}
+                  </Button>
+                )}
+              </div>
+            </div>
+          ) : (
+            // Basic TTS Interface  
+            <div className="bg-muted/50 rounded-xl p-4 border">
+              <div className="text-center">
+                <div className="text-lg font-medium text-foreground mb-2">Voice Commands</div>
+                <div className="text-sm text-muted-foreground mb-4">
+                  Say "next step", "repeat", "previous", or "help"
+                </div>
+                <div className="flex items-center justify-center gap-2">
+                  {isPlaying ? (
+                    <>
+                      <div className="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
+                      <span className="text-sm text-primary">{mama.name} speaking...</span>
+                    </>
+                  ) : (
+                    <span className="text-sm text-muted-foreground">Ready to listen</span>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Voice Status Indicator */}
@@ -299,7 +411,7 @@ const Cook = () => {
           </Button>
 
           <Button
-            onClick={() => setVoiceStatus(voiceStatus === 'idle' ? 'speaking' : 'idle')}
+            onClick={() => speak(recipe.instructions[currentStep - 1], mama.voiceId)}
             className="bg-orange-500 text-white hover:bg-orange-600 text-lg py-6 px-8 min-h-[56px] rounded-xl"
           >
             <Volume2 size={24} className="mr-2" />
