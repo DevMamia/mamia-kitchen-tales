@@ -16,7 +16,7 @@ serve(async (req) => {
     const voiceIds = {
       ELEVENLABS_NONNA_VOICE_ID: Deno.env.get('ELEVENLABS_NONNA_VOICE_ID'),
       ELEVENLABS_ABUELA_VOICE_ID: Deno.env.get('ELEVENLABS_ABUELA_VOICE_ID'),
-      ELEVENLABS_MAE_VOICE_ID: Deno.env.get('ELEVENLABS_MAE_VOICE_ID')
+      ELEVENLABS_YAI_VOICE_ID: Deno.env.get('ELEVENLABS_YAI_VOICE_ID')
     };
 
     return new Response(

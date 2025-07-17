@@ -24,19 +24,10 @@ class CategorizationService {
     if (this.initialized) return;
     
     try {
-      // Fetch categories
-      const { data: categories } = await supabase
-        .from('food_categories')
-        .select('*')
-        .order('sort_order');
-      
-      // Fetch aliases
-      const { data: aliases } = await supabase
-        .from('ingredient_aliases')
-        .select('*');
-      
-      this.categories = categories || [];
-      this.aliases = aliases || [];
+      // Since food_categories and ingredient_aliases tables don't exist in our database,
+      // we'll use default categories for now
+      this.categories = this.getDefaultCategories();
+      this.aliases = [];
       this.initialized = true;
     } catch (error) {
       console.error('Failed to initialize categorization service:', error);
@@ -119,28 +110,26 @@ class CategorizationService {
 
   async createCustomCategory(name: string, icon?: string): Promise<FoodCategory | null> {
     try {
-      const { data: user } = await supabase.auth.getUser();
-      if (!user.user) return null;
-
-      const { data, error } = await supabase
-        .from('food_categories')
-        .insert({
-          name,
-          icon,
-          user_id: user.user.id,
-          sort_order: this.categories.length + 1
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-      
-      this.categories.push(data);
-      return data;
+      // For now, return null since we don't have custom categories in the database
+      console.log('Custom categories not implemented yet');
+      return null;
     } catch (error) {
       console.error('Failed to create custom category:', error);
       return null;
     }
+  }
+
+  private getDefaultCategories(): FoodCategory[] {
+    return [
+      { id: 'produce', name: 'Produce', icon: '🥬', sort_order: 1, user_id: null },
+      { id: 'meat', name: 'Meat & Seafood', icon: '🥩', sort_order: 2, user_id: null },
+      { id: 'dairy', name: 'Dairy & Eggs', icon: '🥛', sort_order: 3, user_id: null },
+      { id: 'pantry', name: 'Pantry', icon: '🥫', sort_order: 4, user_id: null },
+      { id: 'bakery', name: 'Bakery', icon: '🍞', sort_order: 5, user_id: null },
+      { id: 'beverages', name: 'Beverages', icon: '🧃', sort_order: 6, user_id: null },
+      { id: 'frozen', name: 'Frozen', icon: '🧊', sort_order: 7, user_id: null },
+      { id: 'other', name: 'Other', icon: '📦', sort_order: 8, user_id: null }
+    ];
   }
 
   async getDefaultCategory(): Promise<FoodCategory | null> {

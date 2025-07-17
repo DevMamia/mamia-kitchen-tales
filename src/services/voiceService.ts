@@ -30,10 +30,10 @@ export const MAMA_VOICES: Record<string, MamaVoice> = {
     voiceId: 'abuela-voice', // Will be replaced with actual ID from secrets
     accent: 'Mexican'
   },
-  'mae_malai': {
-    id: 'mae_malai',
-    name: 'Mae Malai', 
-    voiceId: 'mae-voice', // Will be replaced with actual ID from secrets
+  'yai_malee': {
+    id: 'yai_malee',
+    name: 'Yai Malee', 
+    voiceId: 'yai-voice', // Will be replaced with actual ID from secrets
     accent: 'Thai'
   }
 };
@@ -56,7 +56,7 @@ const ESSENTIAL_PHRASES: Record<string, Record<string, string>> = {
     timer_done: "¡Se acabó el tiempo, mi amor!",
     taste_check: "¡Pruébalo y dime qué tal!"
   },
-  'mae_malai': {
+  'yai_malee': {
     welcome: "Welcome to my kitchen, sugar!",
     start_cooking: "Let's get cookin' together!",
     next_step: "Now honey, the next step...",
@@ -93,7 +93,7 @@ export class VoiceService {
         this.voiceIds = {
           nonna_lucia: data.ELEVENLABS_NONNA_VOICE_ID,
           abuela_rosa: data.ELEVENLABS_ABUELA_VOICE_ID,
-          mae_malai: data.ELEVENLABS_MAE_VOICE_ID
+          yai_malee: data.ELEVENLABS_YAI_VOICE_ID
         };
         console.log('Voice IDs initialized successfully', this.voiceIds);
       } else {
@@ -359,7 +359,7 @@ export class VoiceService {
       case '2':
         return 'abuela_rosa';
       case '3':
-        return 'mae_malai';
+        return 'yai_malee';
       default:
         // Try to find by voice ID from mamas.ts
         const mama = getMamaById(parseInt(mamaId));

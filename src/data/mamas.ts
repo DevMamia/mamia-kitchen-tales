@@ -44,16 +44,16 @@ export const mamas: Mama[] = [
   },
   {
     id: 3,
-    name: 'Mae Malai',
+    name: 'Yai Malee',
     emoji: '🌿',
     accent: 'Thai',
-    voiceId: 'mae_malai', // Will map to VITE_MAE_VOICE_ID
+    voiceId: 'yai_malee', // Will map to ELEVENLABS_YAI_VOICE_ID
     themeColor: 'hsl(120, 60%, 50%)', // Fresh Thai green
     country: 'Thailand',
     specialties: ['Curry', 'Pad Thai', 'Som Tam'],
     philosophy: 'Balance is everything - sweet, sour, salty, spicy in harmony.',
     signatureDish: 'Green Curry with Thai Basil',
-    cookbookTitle: 'Flavors of Siam',
+    cookbookTitle: 'Yai Malee\'s Traditional Recipes',
     avatar: '/placeholder.svg'
   }
 ];
