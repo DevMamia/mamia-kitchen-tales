@@ -5,9 +5,10 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { ChefHat, Clock, Users, MessageCircle, ChevronDown, Send } from 'lucide-react';
 import { Recipe } from '@/data/recipes';
 import { Mama } from '@/data/mamas';
-import { useTemplateResponses } from '@/hooks/useTemplateResponses';
 import { useVoice } from '@/hooks/useVoice';
+import { useTemplateResponses } from '@/hooks/useTemplateResponses';
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 
 interface PreCookingChatProps {
   recipe: Recipe;
@@ -22,7 +23,7 @@ export const PreCookingChat = ({ recipe, mama, onStartCooking }: PreCookingChatP
   const [isAnswering, setIsAnswering] = useState(false);
   const [hasPlayedGreeting, setHasPlayedGreeting] = useState(false);
   
-  const { getTemplateResponse, getCulturalGreeting } = useTemplateResponses();
+  const { getTemplateResponse } = useTemplateResponses();
   const { speak, isPlaying } = useVoice();
   const { user } = useAuth();
 
@@ -39,9 +40,6 @@ export const PreCookingChat = ({ recipe, mama, onStartCooking }: PreCookingChatP
       const randomGreeting = greetingVariations[Math.floor(Math.random() * greetingVariations.length)];
       const finalGreeting = `${randomGreeting} Tell me when you're ready to start cooking!`;
       
-      console.log('[PreCookingChat] Playing greeting:', finalGreeting);
-      
-      // Play greeting after a short delay
       setTimeout(() => {
         speak(finalGreeting, mama.id.toString()).catch(error => {
           console.error('[PreCookingChat] Failed to play greeting:', error);
@@ -55,10 +53,42 @@ export const PreCookingChat = ({ recipe, mama, onStartCooking }: PreCookingChatP
     if (!question.trim()) return;
     
     setIsAnswering(true);
-    // Use template response for now
-    const response = getTemplateResponse(question, mama.accent, recipe);
-    setAnswer(response);
-    setIsAnswering(false);
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('openai-chat', {
+        body: {
+          question: question.trim(),
+          mamaId: mama.id,
+          recipe: {
+            title: recipe.title,
+            ingredients: recipe.ingredients,
+            steps: recipe.instructions || [],
+            cultural_notes: recipe.description,
+            difficulty: recipe.difficulty,
+            prep_time: 30,
+            cook_time: 45
+          },
+          userContext: user ? {
+            name: user.user_metadata?.username || user.email?.split('@')[0],
+            cooking_level: 'intermediate'
+          } : undefined
+        }
+      });
+
+      if (error) {
+        console.error('OpenAI chat error:', error);
+        const fallbackResponse = getTemplateResponse(question, mama.accent, recipe);
+        setAnswer(fallbackResponse);
+      } else {
+        setAnswer(data.answer || data.fallback);
+      }
+    } catch (error) {
+      console.error('Failed to get AI response:', error);
+      const fallbackResponse = getTemplateResponse(question, mama.accent, recipe);
+      setAnswer(fallbackResponse);
+    } finally {
+      setIsAnswering(false);
+    }
   };
 
   return (
@@ -123,11 +153,7 @@ export const PreCookingChat = ({ recipe, mama, onStartCooking }: PreCookingChatP
       {/* Optional Text Questions */}
       <Collapsible open={isTextChatOpen} onOpenChange={setIsTextChatOpen}>
         <CollapsibleTrigger asChild>
-          <Button
-            variant="outline"
-            className="w-full"
-            size="sm"
-          >
+          <Button variant="outline" className="w-full" size="sm">
             <MessageCircle className="w-4 h-4 mr-2" />
             Text {mama.name}
             <ChevronDown className="w-4 h-4 ml-2" />

@@ -26,6 +26,7 @@ export const useConversation = () => {
   const startConversation = useCallback(async (
     mamaId: string,
     stepText: string,
+    recipe?: any,
     onCommand?: (command: string) => void
   ) => {
     try {
