@@ -21,8 +21,8 @@ export const TextModeDisplay = ({ mamaId, currentText, isActive }: TextModeDispl
         return '👵🏻'; // Italian grandmother
       case 'abuela':
         return '👵🏽'; // Latina grandmother
-      case 'mae':
-        return '👵🏼'; // Southern grandmother
+      case 'yai':
+        return '👵🏼'; // Thai grandmother
       default:
         return '👵';
     }
@@ -34,8 +34,8 @@ export const TextModeDisplay = ({ mamaId, currentText, isActive }: TextModeDispl
         return 'Ciao, tesoro!';
       case 'abuela':
         return '¡Hola, mi amor!';
-      case 'mae':
-        return 'Hey there, sugar!';
+      case 'yai':
+        return 'สวัสดีค่ะ ลูกรัก! (Hello, my dear!)';
       default:
         return 'Hello, dear!';
     }

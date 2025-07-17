@@ -644,7 +644,7 @@ export const recipes: Recipe[] = [
     culturalContext: "Legend says mole poblano was created by nuns at the Convent of Santa Rosa in Puebla to honor a visiting bishop. With over 20 ingredients, it represents the complexity and depth of Mexican cuisine. Each family guards their recipe secrets, passed down through generations."
   },
 
-  // Mae Malai's Recipes
+  // Yai Malee's Recipes
   {
     id: 'pad-krapao',
     title: 'Pad Krapao Gai',
@@ -656,7 +656,7 @@ export const recipes: Recipe[] = [
     contentType: 'MEAT',
     image: '/placeholder.svg',
     mamaId: 3,
-    mamaName: 'Mae Malai',
+    mamaName: 'Yai Malee',
     mamaEmoji: '🌿',
     ingredients: ['500g ground chicken', '4 cloves garlic', '2-3 bird\'s eye chilies', '2 tbsp vegetable oil', '2 tbsp fish sauce', '1 tbsp oyster sauce', '1 tbsp soy sauce', '1 tsp sugar', 'Thai holy basil leaves', 'Fried eggs for serving'],
     instructions: [
@@ -697,7 +697,7 @@ export const recipes: Recipe[] = [
     contentType: 'MEAT',
     image: '/placeholder.svg',
     mamaId: 3,
-    mamaName: 'Mae Malai',
+    mamaName: 'Yai Malee',
     mamaEmoji: '🌿',
     ingredients: [
       '500g chicken thigh, sliced',
@@ -754,7 +754,7 @@ export const recipes: Recipe[] = [
     contentType: 'MEAT',
     image: '/placeholder.svg',
     mamaId: 3,
-    mamaName: 'Mae Malai',
+    mamaName: 'Yai Malee',
     mamaEmoji: '🌿',
     ingredients: [
       '200g rice noodles (5mm wide)',
@@ -823,7 +823,7 @@ export const recipes: Recipe[] = [
     contentType: 'MEAT',
     image: '/placeholder.svg',
     mamaId: 3,
-    mamaName: 'Mae Malai',
+    mamaName: 'Yai Malee',
     mamaEmoji: '🌿',
     ingredients: [
       '600g chicken thighs, bone-in',
@@ -891,7 +891,7 @@ export const recipes: Recipe[] = [
     contentType: 'MEAT',
     image: '/placeholder.svg',
     mamaId: 3,
-    mamaName: 'Mae Malai',
+    mamaName: 'Yai Malee',
     mamaEmoji: '🌿',
     ingredients: [
       '1kg beef chuck roast, cut in chunks',

@@ -84,7 +84,7 @@ const DefaultErrorFallback: React.FC<DefaultErrorFallbackProps> = ({ error, rese
     const messages = [
       { character: '👵🏻', message: "Nonna says: 'Even the best recipes sometimes need a second try!'" },
       { character: '👵🏽', message: "Abuela says: 'No te preocupes, mijo. Let's try again!'" },
-      { character: '👵🏻', message: "Mae says: 'Patience, dear one. Good things take time.'" }
+      { character: '👵🏻', message: "Yai says: 'Patience, dear one. Good things take time.'" }
     ];
     return messages[Math.floor(Math.random() * messages.length)];
   };
