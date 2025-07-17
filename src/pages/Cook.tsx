@@ -122,6 +122,15 @@ const Cook = () => {
     if (conversationPhase === 'cooking' && recipe && mama && !conversation.isConnected) {
       const autoStartVoiceConversation = async () => {
         try {
+          // Convert recipe.instructions to recipe.steps format for backend
+          const recipeForBackend = {
+            ...recipe,
+            steps: recipe.instructions.map((instruction: string, index: number) => ({
+              stepNumber: index + 1,
+              instruction: instruction
+            }))
+          };
+          
           // Start with excitement and first step
           const firstStepText = recipe.instructions[currentStep - 1];
           const greeting = `Ok let's start cooking! ${firstStepText}`;
@@ -129,7 +138,7 @@ const Cook = () => {
           await conversation.startConversation(
             mama.voiceId,
             greeting,
-            recipe,
+            recipeForBackend,
             handleVoiceCommand
           );
         } catch (error) {

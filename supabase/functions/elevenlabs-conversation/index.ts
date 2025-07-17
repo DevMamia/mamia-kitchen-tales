@@ -141,10 +141,14 @@ Keep responses calm, wise, and focused on mindful cooking.`,
   // Add recipe context if provided
   let enhancedPrompt = config.system_prompt;
   if (recipe) {
+    // Handle both steps and instructions format
+    const stepsData = recipe.steps || (recipe.instructions ? recipe.instructions.map((inst: string, idx: number) => ({ instruction: inst, stepNumber: idx + 1 })) : []);
+    const ingredientsData = recipe.ingredients || [];
+    
     enhancedPrompt += `\n\nRECIPE CONTEXT:
 - Recipe: ${recipe.title}
-- Steps: ${recipe.steps.length} total steps
-- Key ingredients: ${recipe.ingredients.slice(0, 5).map((i: any) => i.name).join(', ')}
+- Steps: ${stepsData.length} total steps
+- Key ingredients: ${ingredientsData.slice(0, 5).map((i: any) => i.name || i).join(', ')}
 ${recipe.cultural_notes ? `- Cultural notes: ${recipe.cultural_notes}` : ''}
 
 Focus on guiding through this specific recipe with your expertise.`;

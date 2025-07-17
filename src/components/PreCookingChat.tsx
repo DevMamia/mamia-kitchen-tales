@@ -30,6 +30,7 @@ export const PreCookingChat = ({ recipe, mama, onStartCooking }: PreCookingChatP
   // Auto-play voice greeting when component mounts
   useEffect(() => {
     if (user && !hasPlayedGreeting) {
+      console.log('[PreCookingChat] Starting auto-greeting for user:', user?.email);
       const userName = user?.user_metadata?.display_name || user?.email?.split('@')[0] || 'friend';
       const greetingVariations = [
         `Welcome ${userName}! Today we cook my ${recipe.title}. I can't wait to teach you!`,
@@ -39,6 +40,9 @@ export const PreCookingChat = ({ recipe, mama, onStartCooking }: PreCookingChatP
       
       const randomGreeting = greetingVariations[Math.floor(Math.random() * greetingVariations.length)];
       const finalGreeting = `${randomGreeting} Tell me when you're ready to start cooking!`;
+      
+      console.log('[PreCookingChat] Playing greeting:', finalGreeting);
+      console.log('[PreCookingChat] Using mama ID:', mama.id.toString());
       
       setTimeout(() => {
         speak(finalGreeting, mama.id.toString()).catch(error => {
