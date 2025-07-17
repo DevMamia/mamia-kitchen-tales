@@ -9,7 +9,7 @@ declare global {
 }
 
 interface ConversationConfig {
-  voiceId: string;
+  voiceId?: string; // Made optional since backend handles voice ID resolution
   mamaId: string;
   onTranscript?: (text: string, isFinal: boolean) => void;
   onCommand?: (command: string) => void;
