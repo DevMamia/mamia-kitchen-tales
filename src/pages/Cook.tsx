@@ -401,7 +401,17 @@ const Cook = () => {
       <div className="px-4 mb-6">
         <div className="flex items-center justify-center gap-4">
           <Button
-            onClick={() => setCurrentStep(Math.max(1, currentStep - 1))}
+            onClick={() => {
+              const prevStep = Math.max(1, currentStep - 1);
+              if (prevStep < currentStep) {
+                setCurrentStep(prevStep);
+                setTimerCompleted(false);
+                // Speak the previous step instruction
+                setTimeout(() => {
+                  speak(recipe.instructions[prevStep - 1], mama.voiceId);
+                }, 500);
+              }
+            }}
             disabled={currentStep === 1}
             variant="outline"
             className="text-lg py-6 px-8 min-h-[56px]"
@@ -420,8 +430,15 @@ const Cook = () => {
 
           <Button
             onClick={() => {
-              setCurrentStep(Math.min(totalSteps, currentStep + 1));
-              setTimerCompleted(false);
+              const nextStep = Math.min(totalSteps, currentStep + 1);
+              if (nextStep > currentStep) {
+                setCurrentStep(nextStep);
+                setTimerCompleted(false);
+                // Speak the next step instruction
+                setTimeout(() => {
+                  speak(recipe.instructions[nextStep - 1], mama.voiceId);
+                }, 500);
+              }
             }}
             disabled={currentStep === totalSteps}
             variant="outline"
