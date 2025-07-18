@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -25,13 +26,15 @@ export const PreCookingChat = ({ recipe, mama, onStartCooking }: PreCookingChatP
   const [hasPlayedGreeting, setHasPlayedGreeting] = useState(false);
   
   const { getTemplateResponse, getCulturalGreeting } = useTemplateResponses();
-  const { speak, isPlaying } = useVoice();
+  const { speak, isPlaying, serviceStatus } = useVoice();
   const { user } = useAuth();
   const { isPremium, voiceMode, setVoiceMode, usageCount, maxUsage, hasUsageLeft } = useUserTier();
 
   // Enhanced auto-play voice greeting when component mounts
   useEffect(() => {
-    if (!hasPlayedGreeting) {
+    if (!hasPlayedGreeting && serviceStatus === 'ready') {
+      console.log('[PreCookingChat] Voice service ready, preparing greeting...');
+      
       const userName = user?.user_metadata?.display_name || user?.email?.split('@')[0] || 'friend';
       
       // Mama-specific greetings with personality
@@ -58,16 +61,21 @@ export const PreCookingChat = ({ recipe, mama, onStartCooking }: PreCookingChatP
       const finalGreeting = `${randomGreeting} Tell me when you're ready to start cooking!`;
       
       console.log('[PreCookingChat] Playing enhanced greeting:', finalGreeting);
+      console.log('[PreCookingChat] Using mama voice ID:', mama.voiceId);
       
       // Play greeting after a short delay
       setTimeout(() => {
-        speak(finalGreeting, mama.voiceId).catch(error => {
+        speak(finalGreeting, mama.voiceId).then(() => {
+          console.log('[PreCookingChat] Greeting played successfully');
+        }).catch(error => {
           console.error('[PreCookingChat] Failed to play greeting:', error);
         });
         setHasPlayedGreeting(true);
       }, 1000);
+    } else if (!hasPlayedGreeting) {
+      console.log(`[PreCookingChat] Waiting for voice service, current status: ${serviceStatus}`);
     }
-  }, [speak, mama.voiceId, recipe.title, user, hasPlayedGreeting]);
+  }, [speak, mama.voiceId, recipe.title, user, hasPlayedGreeting, serviceStatus]);
 
   const handleTextQuestion = async () => {
     if (!question.trim()) return;
@@ -92,7 +100,21 @@ export const PreCookingChat = ({ recipe, mama, onStartCooking }: PreCookingChatP
         </p>
         
         {/* Voice Status */}
-        {isPlaying && (
+        {serviceStatus === 'loading' && (
+          <div className="flex items-center justify-center gap-2 text-muted-foreground">
+            <div className="w-2 h-2 bg-muted-foreground rounded-full animate-pulse"></div>
+            <span className="text-sm">Loading voice...</span>
+          </div>
+        )}
+        
+        {serviceStatus === 'error' && (
+          <div className="flex items-center justify-center gap-2 text-destructive">
+            <div className="w-2 h-2 bg-destructive rounded-full"></div>
+            <span className="text-sm">Voice unavailable</span>
+          </div>
+        )}
+        
+        {isPlaying && serviceStatus === 'ready' && (
           <div className="flex items-center justify-center gap-2 text-primary">
             <div className="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
             <span className="text-sm font-medium">{mama.name} speaking...</span>

@@ -1,3 +1,4 @@
+
 // Voice Service for ElevenLabs Integration
 import { getMamaById } from '@/data/mamas';
 import { supabase } from '@/integrations/supabase/client';
@@ -73,20 +74,28 @@ export class VoiceService {
   private isProcessingQueue = false;
   private isCurrentlyPlayingState = false;
   private voiceIds: Record<string, string> = {};
+  private voiceIdsInitialized = false;
   private config: VoiceConfig = {
-    mode: 'full', // Changed to 'full' for better reliability
+    mode: 'full',
     volume: 0.8,
     speed: 1.0,
     enabled: true
   };
 
   private constructor() {
+    console.log('[VoiceService] Initializing voice service...');
     // Initialize voice IDs immediately
     this.initializeVoiceIds();
   }
 
   private async initializeVoiceIds() {
+    if (this.voiceIdsInitialized) {
+      console.log('[VoiceService] Voice IDs already initialized');
+      return;
+    }
+
     try {
+      console.log('[VoiceService] Fetching voice IDs from Supabase...');
       // Get voice IDs from Supabase Edge Function secrets via a helper function
       const { data, error } = await supabase.functions.invoke('get-voice-ids');
       if (data && !error) {
@@ -95,12 +104,27 @@ export class VoiceService {
           abuela_rosa: data.ELEVENLABS_ABUELA_VOICE_ID,
           yai_malee: data.ELEVENLABS_YAI_VOICE_ID
         };
-        console.log('Voice IDs initialized successfully', this.voiceIds);
+        this.voiceIdsInitialized = true;
+        console.log('[VoiceService] Voice IDs initialized successfully:', this.voiceIds);
       } else {
-        console.error('Error fetching voice IDs:', error);
+        console.error('[VoiceService] Error fetching voice IDs:', error);
+        // Set fallback voice IDs for development
+        this.voiceIds = {
+          nonna_lucia: 'nonna-fallback',
+          abuela_rosa: 'abuela-fallback',
+          yai_malee: 'yai-fallback'
+        };
+        this.voiceIdsInitialized = true;
+        console.warn('[VoiceService] Using fallback voice IDs');
       }
     } catch (error) {
-      console.warn('Could not fetch voice IDs, using defaults:', error);
+      console.warn('[VoiceService] Could not fetch voice IDs, using fallbacks:', error);
+      this.voiceIds = {
+        nonna_lucia: 'nonna-fallback',
+        abuela_rosa: 'abuela-fallback',
+        yai_malee: 'yai-fallback'
+      };
+      this.voiceIdsInitialized = true;
     }
   }
 
@@ -113,6 +137,7 @@ export class VoiceService {
 
   public updateConfig(config: Partial<VoiceConfig>): void {
     this.config = { ...this.config, ...config };
+    console.log('[VoiceService] Config updated:', this.config);
   }
 
   public getConfig(): VoiceConfig {
@@ -120,19 +145,22 @@ export class VoiceService {
   }
 
   async speak(text: string, mamaId: string): Promise<void> {
-    if (!this.config.enabled) return;
+    if (!this.config.enabled) {
+      console.log('[VoiceService] Voice disabled, skipping speak request');
+      return;
+    }
 
-    console.log(`[VoiceService] Speaking text: "${text}" for mama: ${mamaId}`);
+    console.log(`[VoiceService] Speak request - Text: "${text.substring(0, 50)}...", MamaId: ${mamaId}`);
 
     // Wait for voice IDs to be initialized if needed
-    if (Object.keys(this.voiceIds).length === 0) {
+    if (!this.voiceIdsInitialized) {
       console.log('[VoiceService] Waiting for voice IDs to initialize...');
       await this.initializeVoiceIds();
     }
 
     // Resolve mama ID (handle both numeric and voice IDs)
     const resolvedMamaId = this.resolveMamaId(mamaId);
-    console.log(`[VoiceService] Resolved mama ID: ${resolvedMamaId}`);
+    console.log(`[VoiceService] Resolved mama ID: ${mamaId} -> ${resolvedMamaId}`);
 
     // In essential mode, try pre-cached phrases first, then fall back to full TTS
     if (this.config.mode === 'essential') {
@@ -152,7 +180,8 @@ export class VoiceService {
     if (actualVoiceId) {
       this.addToQueue(text, actualVoiceId);
     } else {
-      console.warn(`[VoiceService] No voice ID found for ${resolvedMamaId}. Available IDs:`, this.voiceIds);
+      console.error(`[VoiceService] No voice ID found for ${resolvedMamaId}. Available IDs:`, this.voiceIds);
+      console.error(`[VoiceService] Voice service failed - falling back to silent mode`);
     }
   }
 
@@ -204,13 +233,14 @@ export class VoiceService {
 
   private async playEssentialPhrase(phrase: string): Promise<void> {
     // For now, just log the phrase - in production this would play pre-recorded audio
-    console.log(`Playing essential phrase: ${phrase}`);
+    console.log(`[VoiceService] Playing essential phrase: ${phrase}`);
     
     // Simulate audio playback delay
     await new Promise(resolve => setTimeout(resolve, phrase.length * 50));
   }
 
   private addToQueue(text: string, voiceId: string): void {
+    console.log(`[VoiceService] Adding to queue - Text: "${text.substring(0, 30)}...", VoiceId: ${voiceId}`);
     this.audioQueue.push({ text, voiceId });
     if (!this.isProcessingQueue) {
       this.processQueue();
@@ -222,6 +252,7 @@ export class VoiceService {
       return;
     }
 
+    console.log(`[VoiceService] Processing queue with ${this.audioQueue.length} items`);
     this.isProcessingQueue = true;
 
     while (this.audioQueue.length > 0) {
@@ -237,6 +268,7 @@ export class VoiceService {
     }
 
     this.isProcessingQueue = false;
+    console.log('[VoiceService] Queue processing completed');
   }
 
   private async generateAndPlaySpeech(text: string, voiceId: string): Promise<void> {
@@ -245,7 +277,7 @@ export class VoiceService {
       this.stopCurrentAudio();
       this.isCurrentlyPlayingState = true;
       
-      console.log(`[VoiceService] Calling TTS for: "${text.substring(0, 50)}..." with voiceId: ${voiceId}`);
+      console.log(`[VoiceService] Generating speech for: "${text.substring(0, 50)}..." with voiceId: ${voiceId}`);
       
       const { data, error } = await supabase.functions.invoke('text-to-speech', {
         body: {
@@ -286,7 +318,11 @@ export class VoiceService {
         }
 
         this.currentAudio.onloadeddata = () => {
-          console.log(`[VoiceService] Audio loaded and playing: "${text.substring(0, 30)}..."`);
+          console.log(`[VoiceService] Audio loaded and ready to play: "${text.substring(0, 30)}..."`);
+        };
+
+        this.currentAudio.onplay = () => {
+          console.log(`[VoiceService] Audio playback started`);
         };
 
         this.currentAudio.onended = () => {
@@ -329,6 +365,7 @@ export class VoiceService {
 
   public stopCurrentAudio(): void {
     if (this.currentAudio) {
+      console.log('[VoiceService] Stopping current audio');
       this.currentAudio.pause();
       this.currentAudio.currentTime = 0;
       URL.revokeObjectURL(this.currentAudio.src);
@@ -338,6 +375,7 @@ export class VoiceService {
   }
 
   public clearQueue(): void {
+    console.log(`[VoiceService] Clearing queue with ${this.audioQueue.length} items`);
     this.audioQueue = [];
     this.stopCurrentAudio();
     this.isCurrentlyPlayingState = false;
@@ -351,29 +389,49 @@ export class VoiceService {
     return this.audioQueue.length;
   }
 
+  public getVoiceServiceStatus(): 'ready' | 'loading' | 'error' | 'disabled' {
+    if (!this.config.enabled) return 'disabled';
+    if (!this.voiceIdsInitialized) return 'loading';
+    if (Object.keys(this.voiceIds).length === 0) return 'error';
+    return 'ready';
+  }
+
   private resolveMamaId(mamaId: string): string {
+    console.log(`[VoiceService] Resolving mama ID: ${mamaId}`);
+    
     // First check if it's already a valid voice ID string
     const validVoiceIds = ['nonna_lucia', 'abuela_rosa', 'yai_malee'];
     if (validVoiceIds.includes(mamaId)) {
+      console.log(`[VoiceService] Direct voice ID match: ${mamaId}`);
       return mamaId;
     }
 
-    // Handle numeric IDs from Cook page
-    switch (mamaId) {
-      case '1':
+    // Handle numeric IDs (both string and number)
+    const numericId = typeof mamaId === 'string' ? parseInt(mamaId) : mamaId;
+    console.log(`[VoiceService] Parsed numeric ID: ${numericId}`);
+    
+    switch (numericId) {
+      case 1:
+        console.log(`[VoiceService] Numeric ID 1 -> nonna_lucia`);
         return 'nonna_lucia';
-      case '2':
+      case 2:
+        console.log(`[VoiceService] Numeric ID 2 -> abuela_rosa`);
         return 'abuela_rosa';
-      case '3':
+      case 3:
+        console.log(`[VoiceService] Numeric ID 3 -> yai_malee`);
         return 'yai_malee';
       default:
-        // Try to find by numeric ID from mamas.ts
-        const numericId = parseInt(mamaId);
+        // Try to find by mama data lookup
         if (!isNaN(numericId)) {
           const mama = getMamaById(numericId);
-          return mama?.voiceId || mamaId;
+          if (mama?.voiceId) {
+            console.log(`[VoiceService] Found mama by ID ${numericId} -> ${mama.voiceId}`);
+            return mama.voiceId;
+          }
         }
-        // Return the original string if all else fails
+        
+        // Fallback - return the original string
+        console.warn(`[VoiceService] Could not resolve mama ID: ${mamaId}, using as-is`);
         return mamaId;
     }
   }

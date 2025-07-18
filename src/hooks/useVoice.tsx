@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { VoiceService, VoiceConfig } from '@/services/voiceService';
 
@@ -6,12 +7,14 @@ export const useVoice = () => {
   const [config, setConfig] = useState<VoiceConfig>(voiceService.getConfig());
   const [isPlaying, setIsPlaying] = useState(false);
   const [queueLength, setQueueLength] = useState(0);
+  const [serviceStatus, setServiceStatus] = useState<'ready' | 'loading' | 'error' | 'disabled'>('loading');
 
   // Update local state when service state changes
   useEffect(() => {
     const interval = setInterval(() => {
       setIsPlaying(voiceService.isCurrentlyPlaying());
       setQueueLength(voiceService.getQueueLength());
+      setServiceStatus(voiceService.getVoiceServiceStatus());
     }, 100);
 
     return () => clearInterval(interval);
@@ -42,6 +45,7 @@ export const useVoice = () => {
     stopSpeaking,
     clearQueue,
     isPlaying,
-    queueLength
+    queueLength,
+    serviceStatus
   };
 };
