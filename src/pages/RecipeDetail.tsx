@@ -465,7 +465,7 @@ const RecipeDetail = () => {
       <CelebrationEffects 
         trigger={showCelebration} 
         type="heart" 
-        cultural={recipe.culture as 'italian' | 'mexican' | 'thai'} 
+        cultural={mama?.id === 1 ? 'italian' : mama?.id === 2 ? 'mexican' : 'thai'} 
       />
     </div>
   );
