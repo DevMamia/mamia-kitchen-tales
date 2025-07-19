@@ -1,16 +1,11 @@
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { Switch } from '@/components/ui/switch';
-import { ChefHat, Clock, Users, MessageCircle, ChevronDown, Send, Crown } from 'lucide-react';
+import { ChefHat, Sparkles, Play, MessageCircle } from 'lucide-react';
 import { Recipe } from '@/data/recipes';
 import { Mama } from '@/data/mamas';
-import { useTemplateResponses } from '@/hooks/useTemplateResponses';
-import { useVoice } from '@/hooks/useVoice';
-import { useAuth } from '@/contexts/AuthContext';
-import { useUserTier } from '@/hooks/useUserTier';
+import { useEnhancedVoiceService } from '@/hooks/useEnhancedVoiceService';
 
 interface PreCookingChatProps {
   recipe: Recipe;
@@ -19,232 +14,231 @@ interface PreCookingChatProps {
 }
 
 export const PreCookingChat = ({ recipe, mama, onStartCooking }: PreCookingChatProps) => {
-  const [isTextChatOpen, setIsTextChatOpen] = useState(false);
-  const [question, setQuestion] = useState('');
-  const [answer, setAnswer] = useState('');
-  const [isAnswering, setIsAnswering] = useState(false);
   const [hasPlayedGreeting, setHasPlayedGreeting] = useState(false);
+  const [isGreetingReady, setIsGreetingReady] = useState(false);
   
-  const { getTemplateResponse, getCulturalGreeting } = useTemplateResponses();
-  const { speak, setConversationPhase, isPlaying, serviceStatus } = useVoice();
-  const { user } = useAuth();
-  const { isPremium, voiceMode, setVoiceMode, usageCount, maxUsage, hasUsageLeft } = useUserTier();
+  const { 
+    speakGreeting, 
+    speak, 
+    isPlaying, 
+    voiceStatus, 
+    isInitialized 
+  } = useEnhancedVoiceService();
 
-  // Enhanced personalized greeting with direct message mode
+  // Play greeting when component mounts and voice is ready
   useEffect(() => {
-    if (!hasPlayedGreeting && serviceStatus === 'ready') {
-      console.log('[PreCookingChat] Voice service ready, preparing personalized greeting...');
-      
-      // Set conversation phase to pre-cooking
-      setConversationPhase('pre-cooking');
-      
-      const userName = user?.user_metadata?.display_name || user?.email?.split('@')[0] || 'friend';
-      
-      // Create deeply personalized greetings using direct message mode
-      const createPersonalizedGreeting = (mamaVoiceId: string, userName: string, recipeTitle: string) => {
-        switch (mamaVoiceId) {
-          case 'nonna_lucia':
-            return `Ciao ${userName}! Welcome to Nonna's kitchen! Today we cook my beautiful ${recipeTitle} together. I'm so excited to share this special recipe with you, caro mio! Are you ready to start our cooking adventure?`;
-          case 'abuela_rosa':
-            return `¡Hola ${userName}! Bienvenido to Abuela's cocina! Today we're making my special ${recipeTitle}. Ay, I'm so excited to cook with you, mi corazón! This recipe has been in our family for generations. ¿Estás listo to start cooking?`;
-          case 'yai_malee':
-            return `Sawadee ka ${userName}! Welcome to my kitchen, dear one! Today we find balance and harmony with my ${recipeTitle}. I'm so excited to share this peaceful cooking journey with you! Let your heart be calm and ready. Are you prepared to begin?`;
-          default:
-            return `Welcome ${userName}! Today we cook ${recipeTitle} together. I'm excited to guide you through this wonderful recipe! Tell me when you're ready to start cooking.`;
-        }
-      };
-      
-      const personalizedGreeting = createPersonalizedGreeting(mama.voiceId, userName, recipe.title);
-      
-      console.log('[PreCookingChat] Playing personalized greeting with direct message mode:', {
-        mamaId: mama.voiceId,
-        text: personalizedGreeting.substring(0, 100) + '...'
-      });
-      
-      // Use direct message mode for exact personalized greeting
-      setTimeout(() => {
-        speak(personalizedGreeting, mama.voiceId, {
-          isDirectMessage: true,
-          priority: 'high',
-          source: 'instant'
-        }).then(() => {
-          console.log('[PreCookingChat] Personalized greeting played successfully');
-        }).catch(error => {
-          console.error('[PreCookingChat] Failed to play personalized greeting:', error);
-        });
-        setHasPlayedGreeting(true);
-      }, 1000);
-    } else if (!hasPlayedGreeting) {
-      console.log(`[PreCookingChat] Waiting for voice service, current status: ${serviceStatus}`);
-    }
-  }, [speak, setConversationPhase, mama.voiceId, recipe.title, user, hasPlayedGreeting, serviceStatus]);
+    const playInitialGreeting = async () => {
+      if (isInitialized && !hasPlayedGreeting && !isGreetingReady) {
+        console.log('[PreCookingChat] Voice initialized, preparing greeting...');
+        setIsGreetingReady(true);
+        
+        // Small delay to ensure everything is ready
+        setTimeout(async () => {
+          try {
+            console.log(`[PreCookingChat] Playing greeting for ${mama.name} - ${recipe.title}`);
+            await speakGreeting(mama.voiceId, recipe.title);
+            setHasPlayedGreeting(true);
+          } catch (error) {
+            console.error('[PreCookingChat] Failed to play greeting:', error);
+            // Fallback greeting
+            try {
+              await speak(`Welcome to ${mama.name}'s kitchen! Today we're making ${recipe.title}`, mama.voiceId, {
+                priority: 'high',
+                source: 'instant'
+              });
+              setHasPlayedGreeting(true);
+            } catch (fallbackError) {
+              console.error('[PreCookingChat] Fallback greeting also failed:', fallbackError);
+            }
+          }
+        }, 1000);
+      }
+    };
 
-  const handleTextQuestion = async () => {
-    if (!question.trim()) return;
-    
-    setIsAnswering(true);
-    // Use template response for now
-    const response = getTemplateResponse(question, mama.accent, recipe);
-    setAnswer(response);
-    setIsAnswering(false);
-  };
+    playInitialGreeting();
+  }, [isInitialized, hasPlayedGreeting, isGreetingReady, speakGreeting, speak, mama, recipe]);
+
+  const handlePlayGreeting = useCallback(async () => {
+    try {
+      console.log('[PreCookingChat] Manual greeting playback requested');
+      await speakGreeting(mama.voiceId, recipe.title);
+    } catch (error) {
+      console.error('[PreCookingChat] Manual greeting failed:', error);
+    }
+  }, [speakGreeting, mama.voiceId, recipe.title]);
+
+  const handleAskQuestion = useCallback(async (question: string) => {
+    try {
+      console.log(`[PreCookingChat] Asking question: ${question}`);
+      
+      // Generate contextual response based on the question
+      let response = '';
+      const lowerQuestion = question.toLowerCase();
+      
+      if (lowerQuestion.includes('ingredient') || lowerQuestion.includes('need')) {
+        const ingredientCount = recipe.ingredients?.length || 0;
+        response = `For this ${recipe.title}, you'll need ${ingredientCount} main ingredients. Let me tell you about the key ones: ${recipe.ingredients?.slice(0, 3).map(ing => ing.name).join(', ')}.`;
+      } else if (lowerQuestion.includes('time') || lowerQuestion.includes('long')) {
+        response = `This ${recipe.title} takes about ${recipe.cookingTime} total. It's perfect for ${recipe.category === 'QUICK' ? 'a quick meal' : recipe.category === 'WEEKEND' ? 'weekend cooking' : 'everyday cooking'}.`;
+      } else if (lowerQuestion.includes('difficult') || lowerQuestion.includes('hard')) {
+        response = `Don't worry, ${recipe.difficulty === 'EASY' ? "this recipe is very easy, perfect for beginners!" : recipe.difficulty === 'MEDIUM' ? "it's a medium difficulty recipe, but I'll guide you through each step!" : "it's a bit challenging, but together we can make something amazing!"}`;
+      } else {
+        // Generic encouraging response
+        response = `That's a great question about ${recipe.title}! This is one of my favorite recipes to make. The secret is to cook with love and patience. Are you ready to start our cooking journey together?`;
+      }
+      
+      await speak(response, mama.voiceId, {
+        priority: 'high',
+        source: 'instant'
+      });
+    } catch (error) {
+      console.error('[PreCookingChat] Failed to answer question:', error);
+    }
+  }, [speak, mama.voiceId, recipe]);
 
   return (
-    <div className="max-w-md mx-auto p-6 space-y-8">
-      {/* Mama Portrait & Greeting */}
-      <div className="text-center space-y-4">
-        <div className="text-8xl mb-4">{mama.emoji}</div>
-        <h1 className="text-2xl font-heading font-bold text-foreground">
-          {mama.name}
+    <div className="min-h-[calc(100vh-8rem)] bg-gradient-to-b from-orange-50/30 to-background p-6">
+      {/* Header */}
+      <div className="text-center mb-8">
+        <div className="relative mb-4">
+          <div className="text-6xl mb-2">{mama.emoji}</div>
+          <div className="absolute -top-2 -right-8">
+            <Sparkles className="w-6 h-6 text-yellow-500 animate-pulse" />
+          </div>
+        </div>
+        <h1 className="text-3xl font-heading font-bold text-foreground mb-2">
+          {mama.name}'s Kitchen
         </h1>
-        <p className="text-lg text-muted-foreground font-handwritten">
-          {recipe.title}
+        <p className="text-lg text-muted-foreground">
+          Ready to cook {recipe.title} together?
         </p>
-        
-        {/* Voice Status */}
-        {serviceStatus === 'loading' && (
-          <div className="flex items-center justify-center gap-2 text-muted-foreground">
-            <div className="w-2 h-2 bg-muted-foreground rounded-full animate-pulse"></div>
-            <span className="text-sm">Loading voice...</span>
-          </div>
-        )}
-        
-        {serviceStatus === 'error' && (
-          <div className="flex items-center justify-center gap-2 text-destructive">
-            <div className="w-2 h-2 bg-destructive rounded-full"></div>
-            <span className="text-sm">Voice unavailable</span>
-          </div>
-        )}
-        
-        {isPlaying && serviceStatus === 'ready' && (
-          <div className="flex items-center justify-center gap-2 text-primary">
-            <div className="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
-            <span className="text-sm font-medium">{mama.name} speaking...</span>
-          </div>
-        )}
       </div>
 
-      {/* Recipe Info */}
-      <div className="grid grid-cols-3 gap-3">
-        <Card className="p-3 text-center">
-          <Clock className="w-5 h-5 mx-auto mb-1 text-primary" />
-          <div className="text-sm font-bold text-primary">{recipe.cookingTime}</div>
-          <div className="text-xs text-muted-foreground">Time</div>
-        </Card>
-        <Card className="p-3 text-center">
-          <Users className="w-5 h-5 mx-auto mb-1 text-primary" />
-          <div className="text-sm font-bold text-primary">{recipe.servings}</div>
-          <div className="text-xs text-muted-foreground">Serves</div>
-        </Card>
-        <Card className="p-3 text-center">
-          <ChefHat className="w-5 h-5 mx-auto mb-1 text-primary" />
-          <div className="text-sm font-bold text-primary">{recipe.difficulty}</div>
-          <div className="text-xs text-muted-foreground">Level</div>
-        </Card>
-      </div>
-
-      {/* Food Image */}
-      <div className="relative">
-        <img 
-          src={recipe.image} 
-          alt={recipe.title}
-          className="w-full h-48 object-cover rounded-2xl shadow-lg"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent rounded-2xl"></div>
-      </div>
-
-      {/* Premium Voice Mode Toggle */}
-      {isPremium && (
-        <Card className="p-4 border-primary/20 bg-gradient-to-r from-primary/5 to-secondary/5">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <Crown className="w-5 h-5 text-primary" />
-              <span className="text-sm font-medium text-foreground">Premium Voice Experience</span>
+      {/* Recipe Overview Card */}
+      <Card className="p-6 mb-6 bg-gradient-to-r from-orange-50 to-yellow-50 dark:from-orange-900/20 dark:to-yellow-900/20 border-orange-200">
+        <div className="flex items-start gap-4">
+          <img 
+            src={recipe.image} 
+            alt={recipe.title}
+            className="w-20 h-20 rounded-lg object-cover"
+          />
+          <div className="flex-1">
+            <h2 className="text-xl font-heading font-bold text-foreground mb-2">
+              {recipe.title}
+            </h2>
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              <div>
+                <span className="text-muted-foreground">Time:</span>
+                <span className="font-medium ml-2">{recipe.cookingTime}</span>
+              </div>
+              <div>
+                <span className="text-muted-foreground">Difficulty:</span>
+                <span className="font-medium ml-2">{recipe.difficulty}</span>
+              </div>
+              <div>
+                <span className="text-muted-foreground">Serves:</span>
+                <span className="font-medium ml-2">{recipe.servings}</span>
+              </div>
+              <div>
+                <span className="text-muted-foreground">Type:</span>
+                <span className="font-medium ml-2">{recipe.contentType}</span>
+              </div>
             </div>
-            <Switch
-              checked={voiceMode === 'conversational'}
-              onCheckedChange={(checked) => setVoiceMode(checked ? 'conversational' : 'tts')}
-              disabled={!hasUsageLeft}
-            />
           </div>
-          <div className="text-xs text-muted-foreground">
-            {voiceMode === 'conversational' 
-              ? `Voice Chat Mode • ${maxUsage - usageCount} sessions left today`
-              : 'Simple Voice Mode'
-            }
-          </div>
-          {!hasUsageLeft && (
-            <div className="text-xs text-orange-600 mt-1">
-              Daily voice chat limit reached. Upgrade to Family plan for unlimited conversations.
-            </div>
-          )}
+        </div>
+        
+        <p className="text-muted-foreground mt-4 font-handwritten text-lg leading-relaxed">
+          "{recipe.description}"
+        </p>
+      </Card>
+
+      {/* Voice Interaction Status */}
+      <div className="text-center mb-6">
+        <div className="flex items-center justify-center gap-2 mb-4">
+          <div className={`w-3 h-3 rounded-full ${
+            voiceStatus === 'ready' ? 'bg-green-500' :
+            voiceStatus === 'fallback' ? 'bg-yellow-500' :
+            voiceStatus === 'loading' ? 'bg-blue-500 animate-pulse' : 'bg-gray-500'
+          }`}></div>
+          <span className="text-sm text-muted-foreground">
+            {isPlaying ? `${mama.name} is speaking...` :
+             voiceStatus === 'ready' ? `${mama.name} is ready to chat` :
+             voiceStatus === 'fallback' ? 'Using backup voice system' :
+             voiceStatus === 'loading' ? 'Loading voice system...' : 'Voice system unavailable'}
+          </span>
+        </div>
+
+        {!hasPlayedGreeting && isInitialized && (
+          <Button
+            onClick={handlePlayGreeting}
+            variant="outline"
+            size="sm"
+            className="mb-4"
+          >
+            <Play className="w-4 h-4 mr-2" />
+            Play Greeting
+          </Button>
+        )}
+      </div>
+
+      {/* Quick Questions */}
+      <Card className="p-4 mb-6">
+        <h3 className="font-heading font-bold text-foreground mb-3 flex items-center gap-2">
+          <MessageCircle className="w-5 h-5" />
+          Ask {mama.name}
+        </h3>
+        <div className="grid gap-2">
+          <Button
+            variant="ghost"
+            className="justify-start h-auto p-3 text-left font-handwritten"
+            onClick={() => handleAskQuestion("What ingredients do I need?")}
+          >
+            "What ingredients do I need?"
+          </Button>
+          <Button
+            variant="ghost"
+            className="justify-start h-auto p-3 text-left font-handwritten"
+            onClick={() => handleAskQuestion("How long will this take?")}
+          >
+            "How long will this take?"
+          </Button>
+          <Button
+            variant="ghost"
+            className="justify-start h-auto p-3 text-left font-handwritten"
+            onClick={() => handleAskQuestion("Is this recipe difficult?")}
+          >
+            "Is this recipe difficult?"
+          </Button>
+        </div>
+      </Card>
+
+      {/* Cultural Context */}
+      {recipe.culturalContext && (
+        <Card className="p-4 mb-6 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border-amber-200">
+          <h3 className="font-heading font-bold text-amber-800 dark:text-amber-200 mb-2">
+            The Story Behind This Dish
+          </h3>
+          <p className="text-amber-700 dark:text-amber-300 font-handwritten text-lg leading-relaxed">
+            {recipe.culturalContext}
+          </p>
         </Card>
       )}
 
       {/* Start Cooking Button */}
-      <Button
-        onClick={onStartCooking}
-        className="w-full text-lg py-6 rounded-2xl font-heading font-bold"
-        size="lg"
-      >
-        Start Cooking with {mama.name}
-        {isPremium && voiceMode === 'conversational' && hasUsageLeft && (
-          <span className="ml-2 text-sm opacity-75">• Voice Chat</span>
-        )}
-      </Button>
-
-      {/* Optional Text Questions */}
-      <Collapsible open={isTextChatOpen} onOpenChange={setIsTextChatOpen}>
-        <CollapsibleTrigger asChild>
-          <Button
-            variant="outline"
-            className="w-full"
-            size="sm"
-          >
-            <MessageCircle className="w-4 h-4 mr-2" />
-            Text {mama.name}
-            <ChevronDown className="w-4 h-4 ml-2" />
-          </Button>
-        </CollapsibleTrigger>
+      <div className="text-center">
+        <Button
+          onClick={onStartCooking}
+          size="lg"
+          className="bg-orange-500 hover:bg-orange-600 text-white text-xl py-6 px-12 rounded-2xl font-heading font-bold shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105"
+        >
+          <ChefHat className="w-6 h-6 mr-3" />
+          Start Cooking with {mama.name}
+        </Button>
         
-        <CollapsibleContent className="space-y-4 mt-4">
-          <Card className="p-4">
-            <div className="space-y-3">
-              <input
-                type="text"
-                value={question}
-                onChange={(e) => setQuestion(e.target.value)}
-                placeholder={`Ask ${mama.name} about the recipe...`}
-                className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm"
-                onKeyPress={(e) => e.key === 'Enter' && handleTextQuestion()}
-              />
-              
-              <Button 
-                onClick={handleTextQuestion}
-                disabled={!question.trim() || isAnswering}
-                className="w-full"
-                size="sm"
-              >
-                <Send className="w-3 h-3 mr-2" />
-                {isAnswering ? 'Thinking...' : 'Ask'}
-              </Button>
-              
-              {answer && (
-                <div className="mt-3 p-3 bg-muted rounded-lg">
-                  <p className="text-sm text-foreground">{answer}</p>
-                </div>
-              )}
-            </div>
-          </Card>
-        </CollapsibleContent>
-      </Collapsible>
-
-      {/* Cultural Philosophy */}
-      <Card className="p-4 bg-gradient-to-r from-primary/5 to-secondary/5 border-primary/20">
-        <p className="text-sm text-muted-foreground text-center font-handwritten italic">
-          {mama.philosophy}
+        <p className="text-sm text-muted-foreground mt-4 font-handwritten">
+          {mama.name} will guide you through every step with her voice!
         </p>
-      </Card>
+      </div>
     </div>
   );
 };
