@@ -24,7 +24,7 @@ const EnhancedCook = () => {
   const navigate = useNavigate();
   
   // State management
-  const [conversationPhase, setConversationPhas e] = useState<'pre-cooking' | 'cooking' | 'post-cooking'>('pre-cooking');
+  const [conversationPhase, setConversationPhase] = useState<'pre-cooking' | 'cooking' | 'post-cooking'>('pre-cooking');
   const [currentStep, setCurrentStep] = useState(1);
   const [timerExpanded, setTimerExpanded] = useState(false);
   const [timerCompleted, setTimerCompleted] = useState(false);
@@ -42,7 +42,7 @@ const EnhancedCook = () => {
     speakGreeting, 
     speakCookingInstruction, 
     setConversationPhase: setVoicePhase, 
-    isPlaying, 
+    isPlaying: isEnhancedPlaying, 
     voiceStatus: enhancedVoiceStatus,
     isInitialized: voiceInitialized,
     stopSpeaking,
@@ -56,7 +56,10 @@ const EnhancedCook = () => {
     speakCookingInstruction: speakContextualInstruction,
     listeningState,
     showWakeWordPrompt,
-    wakeWordPrompt
+    wakeWordPrompt,
+    isPlaying,
+    queueLength,
+    serviceStatus
   } = useContextAwareVoice();
 
   const { user } = useAuth();
@@ -329,6 +332,10 @@ const EnhancedCook = () => {
   const { recipe, mama } = recipeData;
   const totalSteps = recipe.instructions.length;
 
+  // Create cooking context after recipe data is available
+  const cookingContext = conversationPhase === 'pre-cooking' ? 'pre_cooking' : 
+                         conversationPhase === 'cooking' ? 'active_cooking' : 'completed';
+
   if (conversationPhase === 'pre-cooking') {
     return (
       <div className="min-h-[calc(100vh-8rem)]">
@@ -445,7 +452,16 @@ const EnhancedCook = () => {
 
       {/* Context-Aware Voice Interface */}
       <div className="px-4 mb-6">
-        <ContextAwareVoiceIndicator />
+        <ContextAwareVoiceIndicator 
+          listeningState={listeningState}
+          cookingContext={cookingContext}
+          isPlaying={isPlaying}
+          queueLength={queueLength}
+          serviceStatus={serviceStatus}
+          showWakeWordPrompt={showWakeWordPrompt}
+          wakeWordPrompt={wakeWordPrompt}
+          mamaName={mama.name}
+        />
         
         {showWakeWordPrompt && (
           <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-3 mb-4 text-center">
@@ -461,9 +477,9 @@ const EnhancedCook = () => {
         <SmartVoiceCommandSuggestions 
           currentStep={currentStep}
           totalSteps={totalSteps}
-          mamaId={mama.voiceId}
-          cookingPhase={conversationPhase}
-          onCommandSelect={handleVoiceCommand}
+          mamaName={mama.name}
+          cookingContext={cookingContext}
+          onCommandSuggested={handleVoiceCommand}
         />
       </div>
 
