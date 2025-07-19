@@ -51,26 +51,25 @@ export const useContextAwareVoice = () => {
     return voiceService.speakWithContext(text, options);
   }, [voiceService]);
 
-  // Simplified cooking instruction - MamiaV1 approach (direct text speaking)
-  const speakCookingInstruction = useCallback(async (finalText: string, stepNumber: number) => {
-    console.log(`[useContextAwareVoice] === SPEAKING FINAL TEXT (MamiaV1 approach) ===`);
-    console.log(`[useContextAwareVoice] Step ${stepNumber}:`, finalText.substring(0, 80) + '...');
+  const speakCookingInstruction = useCallback(async (
+    instruction: string,
+    stepNumber: number,
+    tip?: string
+  ) => {
+    console.log(`[useContextAwareVoice] Cooking instruction for step ${stepNumber}:`, instruction.substring(0, 30) + '...');
     
     // Update context to show current step
     updateContext({ currentStep: stepNumber });
     
-    try {
-      console.log('[useContextAwareVoice] 🔊 Speaking final concatenated text...');
-      const result = await speakWithContext(finalText, {
-        priority: 'high',
-        contextual: true
-      });
-      console.log('[useContextAwareVoice] ✅ Final text spoken successfully');
-      return result;
-    } catch (error) {
-      console.error('[useContextAwareVoice] ❌ Failed to speak final text:', error);
-      throw error;
+    let fullInstruction = instruction;
+    if (tip) {
+      fullInstruction += ` Here's a tip: ${tip}`;
     }
+    
+    return speakWithContext(fullInstruction, {
+      priority: 'high',
+      contextual: true
+    });
   }, [speakWithContext, updateContext]);
 
   const encourageUser = useCallback(async () => {
@@ -122,7 +121,7 @@ export const useContextAwareVoice = () => {
     
     // Speech functions
     speakWithContext,
-    speakCookingInstruction, // Now simplified for MamiaV1 approach
+    speakCookingInstruction,
     encourageUser,
     handleUserStruggling,
     
