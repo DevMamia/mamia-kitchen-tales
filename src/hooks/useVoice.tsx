@@ -30,6 +30,26 @@ export const useVoice = () => {
     return voiceService.speak(text, mamaId);
   }, [voiceService]);
 
+  const speakWithTip = useCallback((instruction: string, tip: string | undefined, mamaId: string, timing: 'before' | 'during' | 'after' = 'before') => {
+    let spokenText = instruction;
+    
+    if (tip) {
+      switch (timing) {
+        case 'before':
+          spokenText = `${tip} Now, ${instruction}`;
+          break;
+        case 'during':
+          spokenText = `${instruction} Remember: ${tip}`;
+          break;
+        case 'after':
+          spokenText = `${instruction} And here's a tip: ${tip}`;
+          break;
+      }
+    }
+    
+    return voiceService.speak(spokenText, mamaId);
+  }, [voiceService]);
+
   const stopSpeaking = useCallback(() => {
     voiceService.stopCurrentAudio();
   }, [voiceService]);
@@ -42,6 +62,7 @@ export const useVoice = () => {
     config,
     updateConfig,
     speak,
+    speakWithTip,
     stopSpeaking,
     clearQueue,
     isPlaying,

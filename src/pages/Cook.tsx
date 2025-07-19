@@ -16,6 +16,7 @@ import { useConversationMemory } from '@/hooks/useConversationMemory';
 import { useUserTier } from '@/hooks/useUserTier';
 import { useAuth } from '@/contexts/AuthContext';
 import { ConversationAgentService } from '@/services/conversationAgentService';
+import { TipAnalyzerService, TipPlacement } from '@/services/tipAnalyzerService';
 
 const Cook = () => {
   const { recipeId } = useParams();
@@ -26,6 +27,7 @@ const Cook = () => {
   const [timerExpanded, setTimerExpanded] = useState(false);
   const [timerCompleted, setTimerCompleted] = useState(false);
   const [agentService] = useState(() => new ConversationAgentService());
+  const [optimizedTips, setOptimizedTips] = useState<Record<number, TipPlacement>>({});
 
   const { speak, isPlaying, config } = useVoice();
   const { user } = useAuth();
@@ -38,6 +40,18 @@ const Cook = () => {
   // Initialize conversation memory
   const conversationMemory = recipeData ? useConversationMemory(recipeData.recipe, recipeData.mama) : null;
   
+  // Optimize tip placements when recipe data loads
+  useEffect(() => {
+    if (recipeData?.recipe) {
+      const optimized = TipAnalyzerService.optimizeTipPlacements(
+        recipeData.recipe.stepVoiceTips,
+        recipeData.recipe.instructions
+      );
+      setOptimizedTips(optimized);
+      console.log('[Cook] Optimized tip placements:', optimized);
+    }
+  }, [recipeData]);
+
   // Store current recipe in localStorage when entering cooking mode
   useEffect(() => {
     if (recipeId && recipeData) {
@@ -150,6 +164,14 @@ const Cook = () => {
   // Page 2: Full Cooking Interface
   const currentInstruction = recipe.instructions[currentStep - 1];
   const currentStepTimer = recipe.stepTimers?.[currentStep - 1];
+  
+  // Get the contextually appropriate tip for this step
+  const currentStepTip = optimizedTips[currentStep];
+  
+  // Fallback to general tips if no step-specific tip exists
+  const fallbackTip = recipe.voiceTips && recipe.voiceTips.length > 0 && currentStep >= Math.ceil(totalSteps / 2)
+    ? recipe.voiceTips[(currentStep - Math.ceil(totalSteps / 2)) % recipe.voiceTips.length]
+    : null;
 
   const handleTimerComplete = () => {
     setTimerCompleted(true);
@@ -193,9 +215,17 @@ const Cook = () => {
           agentService.updateCookingContext(currentStep + 1, recipe.instructions[currentStep]);
         }
         
-        // Speak next step instruction
+        // Speak next step instruction with contextual tip
         setTimeout(() => {
-          speak(recipe.instructions[currentStep], mama.voiceId);
+          const nextInstruction = recipe.instructions[currentStep];
+          const nextTip = optimizedTips[currentStep + 1];
+          
+          let spokenText = nextInstruction;
+          if (nextTip && nextTip.timing === 'before') {
+            spokenText = `${nextTip.tip} Now, ${nextInstruction}`;
+          }
+          
+          speak(spokenText, mama.voiceId);
         }, 500);
       }
       return;
@@ -219,16 +249,24 @@ const Cook = () => {
     }
     
     if (lowerCommand.includes('repeat') || lowerCommand.includes('repeat that')) {
-      speak(recipe.instructions[currentStep - 1], mama.voiceId);
+      const repeatText = currentStepTip && currentStepTip.timing === 'before'
+        ? `${currentStepTip.tip} ${recipe.instructions[currentStep - 1]}`
+        : recipe.instructions[currentStep - 1];
+      speak(repeatText, mama.voiceId);
       return;
     }
     
     if (lowerCommand.includes('help') || lowerCommand.includes('confused') || lowerCommand.includes('stuck')) {
       conversationMemory?.markStepStruggling(currentStep);
       
-      // For basic users, provide helpful TTS
+      // For basic users, provide helpful TTS with contextual tip
       if (!isPremium || voiceMode === 'tts') {
-        const helpMessage = `Don't worry! Take your time with step ${currentStep}. ${recipe.instructions[currentStep - 1]} If you need more help, try asking a specific question.`;
+        let helpMessage = `Don't worry! Take your time with step ${currentStep}. ${recipe.instructions[currentStep - 1]}`;
+        
+        if (currentStepTip) {
+          helpMessage += ` Here's a helpful tip: ${currentStepTip.tip}`;
+        }
+        
         speak(helpMessage, mama.voiceId);
       }
       return;
@@ -315,87 +353,94 @@ const Cook = () => {
           )}
         </div>
 
-        {/* Mama's Tips */}
-        {recipe.voiceTips && recipe.voiceTips.length > 0 && currentStep >= Math.ceil(totalSteps / 2) && (
-            <div className="bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 rounded-xl p-4 mx-4 mb-6 border-l-4 border-yellow-400">
+        {/* Mama's Contextual Tips - Now using optimized placement */}
+        {(currentStepTip || fallbackTip) && (
+          <div className="bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 rounded-xl p-4 mx-4 mb-6 border-l-4 border-yellow-400">
             <div className="flex items-start gap-3">
               <div className="text-2xl">{mama?.emoji}</div>
               <div>
                 <h3 className="font-handwritten text-lg text-yellow-800 dark:text-yellow-200 mb-1">
-                  Tip from {mama?.name}
+                  {currentStepTip ? `${mama?.name}'s ${currentStepTip.category} tip` : `Tip from ${mama?.name}`}
                 </h3>
                 <p className="font-handwritten text-yellow-700 dark:text-yellow-300 text-lg leading-relaxed">
-                  "{recipe.voiceTips[(currentStep - Math.ceil(totalSteps / 2)) % recipe.voiceTips.length]}"
+                  "{currentStepTip?.tip || fallbackTip}"
                 </p>
+                {currentStepTip && (
+                  <div className="text-xs text-yellow-600 dark:text-yellow-400 mt-2 opacity-75">
+                    {currentStepTip.timing === 'before' ? '💡 Do this before starting the step' : 
+                     currentStepTip.timing === 'during' ? '⚡ Keep this in mind while cooking' : 
+                     '✅ Remember this for next time'}
+                  </div>
+                )}
               </div>
             </div>
           </div>
         )}
       </div>
 
-        {/* Enhanced Voice Interface */}
-        <div className="px-4 mb-6">
-          {isPremium && voiceMode === 'conversational' && hasUsageLeft ? (
-            // Premium Conversational AI Interface
-            <div className="bg-gradient-to-r from-primary/10 to-secondary/10 rounded-xl p-4 border border-primary/20">
-              <div className="flex items-center gap-2 mb-3">
-                <Crown className="w-5 h-5 text-primary" />
-                <span className="text-sm font-medium text-primary">Premium Voice Chat Active</span>
-              </div>
-              
-              <div className="text-center">
-                {agentService.getConversationStatus() === 'connected' ? (
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-center gap-2">
-                      <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-                      <span className="text-sm text-foreground">
-                        {agentService.isAgentSpeaking() ? `${mama.name} is speaking...` : 'Listening...'}
-                      </span>
-                    </div>
-                    <Button
-                      onClick={handleInterrupt}
-                      variant="outline"
-                      size="sm"
-                      className="text-xs"
-                    >
-                      End Conversation
-                    </Button>
+      {/* Enhanced Voice Interface */}
+      <div className="px-4 mb-6">
+        {isPremium && voiceMode === 'conversational' && hasUsageLeft ? (
+          // Premium Conversational AI Interface
+          <div className="bg-gradient-to-r from-primary/10 to-secondary/10 rounded-xl p-4 border border-primary/20">
+            <div className="flex items-center gap-2 mb-3">
+              <Crown className="w-5 h-5 text-primary" />
+              <span className="text-sm font-medium text-primary">Premium Voice Chat Active</span>
+            </div>
+            
+            <div className="text-center">
+              {agentService.getConversationStatus() === 'connected' ? (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-center gap-2">
+                    <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                    <span className="text-sm text-foreground">
+                      {agentService.isAgentSpeaking() ? `${mama.name} is speaking...` : 'Listening...'}
+                    </span>
                   </div>
-                ) : (
                   <Button
-                    onClick={handleStartConversation}
-                    className="w-full"
+                    onClick={handleInterrupt}
+                    variant="outline"
+                    size="sm"
+                    className="text-xs"
                   >
-                    Start Conversation with {mama.name}
+                    End Conversation
                   </Button>
+                </div>
+              ) : (
+                <Button
+                  onClick={handleStartConversation}
+                  className="w-full"
+                >
+                  Start Conversation with {mama.name}
+                </Button>
+              )}
+            </div>
+          </div>
+        ) : (
+          // Basic TTS Interface  
+          <div className="bg-muted/50 rounded-xl p-4 border">
+            <div className="text-center">
+              <div className="text-lg font-medium text-foreground mb-2">Voice Commands</div>
+              <div className="text-sm text-muted-foreground mb-4">
+                Say "next step", "repeat", "previous", or "help"
+              </div>
+              <div className="flex items-center justify-center gap-2">
+                {isPlaying ? (
+                  <>
+                    <div className="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
+                    <span className="text-sm text-primary">{mama.name} speaking...</span>
+                  </>
+                ) : (
+                  <span className="text-sm text-muted-foreground">Ready to listen</span>
                 )}
               </div>
             </div>
-          ) : (
-            // Basic TTS Interface  
-            <div className="bg-muted/50 rounded-xl p-4 border">
-              <div className="text-center">
-                <div className="text-lg font-medium text-foreground mb-2">Voice Commands</div>
-                <div className="text-sm text-muted-foreground mb-4">
-                  Say "next step", "repeat", "previous", or "help"
-                </div>
-                <div className="flex items-center justify-center gap-2">
-                  {isPlaying ? (
-                    <>
-                      <div className="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
-                      <span className="text-sm text-primary">{mama.name} speaking...</span>
-                    </>
-                  ) : (
-                    <span className="text-sm text-muted-foreground">Ready to listen</span>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
+          </div>
+        )}
+      </div>
 
-        {/* Voice Status Indicator */}
-        <VoiceStatusIndicator className="justify-center" />
+      {/* Voice Status Indicator */}
+      <VoiceStatusIndicator className="justify-center" />
 
       {/* Controls */}
       <div className="px-4 mb-6">
@@ -421,7 +466,12 @@ const Cook = () => {
           </Button>
 
           <Button
-            onClick={() => speak(recipe.instructions[currentStep - 1], mama.voiceId)}
+            onClick={() => {
+              const repeatText = currentStepTip && currentStepTip.timing === 'before'
+                ? `${currentStepTip.tip} ${recipe.instructions[currentStep - 1]}`
+                : recipe.instructions[currentStep - 1];
+              speak(repeatText, mama.voiceId);
+            }}
             className="bg-orange-500 text-white hover:bg-orange-600 text-lg py-6 px-8 min-h-[56px] rounded-xl"
           >
             <Volume2 size={24} className="mr-2" />
@@ -434,9 +484,17 @@ const Cook = () => {
               if (nextStep > currentStep) {
                 setCurrentStep(nextStep);
                 setTimerCompleted(false);
-                // Speak the next step instruction
+                // Speak the next step instruction with contextual tip
                 setTimeout(() => {
-                  speak(recipe.instructions[nextStep - 1], mama.voiceId);
+                  const nextInstruction = recipe.instructions[nextStep - 1];
+                  const nextTip = optimizedTips[nextStep];
+                  
+                  let spokenText = nextInstruction;
+                  if (nextTip && nextTip.timing === 'before') {
+                    spokenText = `${nextTip.tip} Now, ${nextInstruction}`;
+                  }
+                  
+                  speak(spokenText, mama.voiceId);
                 }, 500);
               }
             }}
