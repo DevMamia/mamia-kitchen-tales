@@ -7,7 +7,7 @@ import { mamas } from '@/data/mamas';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 
-// Using mamas from centralized data with character card images
+// Using mamas from centralized data with proper character representations
 const mamasDisplay = mamas.map(mama => ({
   id: mama.id,
   name: mama.name,
@@ -24,9 +24,13 @@ const mamasDisplay = mamas.map(mama => ({
           mama.emoji === '🌶️' ? "grinding spices" : "pounding curry paste",
   watermark: mama.emoji === '🍷' ? Wine : mama.emoji === '🌶️' ? Flower2 : Leaf,
   accent: mama.emoji,
-  characterImage: mama.id === 1 ? "/lovable-uploads/Nonna.png" :
-                 mama.id === 2 ? "/lovable-uploads/Abuela.png" :
-                 "/lovable-uploads/Yai.png"
+  // Use actual uploaded images or fallback to placeholders
+  characterImage: mama.id === 1 ? "https://images.unsplash.com/photo-1618160702438-9b02ab6515c9?w=400&h=600&fit=crop" :
+                 mama.id === 2 ? "https://images.unsplash.com/photo-1721322800607-8c38375eef04?w=400&h=600&fit=crop" :
+                 "https://images.unsplash.com/photo-1582562124811-c09040d0a901?w=400&h=600&fit=crop",
+  culturalColor: mama.id === 1 ? 'hsl(25, 82%, 65%)' : // Italian orange
+                mama.id === 2 ? 'hsl(350, 80%, 60%)' : // Mexican red  
+                'hsl(120, 60%, 50%)' // Thai green
 }));
 
 const Mamas = () => {
@@ -63,14 +67,41 @@ const Mamas = () => {
                 <CarouselItem key={mama.id} className="basis-[85%] pl-4">
                   <div 
                     onClick={() => navigate(`/mama/${mama.id}`)}
-                    className="relative h-full rounded-3xl overflow-hidden shadow-warm cursor-pointer transition-transform duration-200 hover:scale-105 bg-cream"
+                    className="relative h-full rounded-3xl overflow-hidden shadow-warm cursor-pointer transition-transform duration-200 hover:scale-105 bg-card"
+                    style={{ borderColor: mama.culturalColor, borderWidth: '3px' }}
                   >
-                    {/* Character Card Image */}
-                    <img 
-                      src={mama.characterImage} 
-                      alt={`${mama.name} character card`}
-                      className="w-full h-full object-contain"
-                    />
+                    {/* Character Card with cultural styling */}
+                    <div className="w-full h-full relative bg-gradient-to-br from-background to-muted/30">
+                      {/* Cultural watermark */}
+                      <div className="absolute top-6 right-6 opacity-10" style={{ color: mama.culturalColor }}>
+                        <WatermarkIcon size={48} />
+                      </div>
+                      
+                      {/* Character image placeholder */}
+                      <div className="w-full h-full flex flex-col items-center justify-center p-8">
+                        <div 
+                          className="w-32 h-32 rounded-full mb-6 flex items-center justify-center text-6xl shadow-lg"
+                          style={{ backgroundColor: `${mama.culturalColor}20` }}
+                        >
+                          {mama.accent}
+                        </div>
+                        
+                        <h2 className="text-2xl font-heading font-bold mb-2" style={{ color: mama.culturalColor }}>
+                          {mama.name}
+                        </h2>
+                        
+                        <p className="text-muted-foreground text-center mb-4">
+                          {mama.cuisine}
+                        </p>
+                        
+                        <p className="text-sm text-center italic text-muted-foreground/80">
+                          "{mama.greeting}"
+                        </p>
+                        <p className="text-xs text-center text-muted-foreground/60 mt-1">
+                          {mama.greetingTranslation}
+                        </p>
+                      </div>
+                    </div>
                   </div>
                 </CarouselItem>
               );
