@@ -7,7 +7,7 @@ import { mamas } from '@/data/mamas';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 
-// Using mamas from centralized data with character card images
+// Using mamas from centralized data with new character card images
 const mamasDisplay = mamas.map(mama => ({
   id: mama.id,
   name: mama.name,
@@ -24,9 +24,9 @@ const mamasDisplay = mamas.map(mama => ({
           mama.emoji === '🌶️' ? "grinding spices" : "pounding curry paste",
   watermark: mama.emoji === '🍷' ? Wine : mama.emoji === '🌶️' ? Flower2 : Leaf,
   accent: mama.emoji,
-  characterImage: mama.id === 1 ? "/lovable-uploads/f93a6daa-6445-4c83-aaf2-c75c2b4824bc.png" :
-                 mama.id === 2 ? "/lovable-uploads/95d2de88-6de2-4a87-b5e5-deda3096c455.png" :
-                 "/lovable-uploads/35c616ae-06a9-49cb-b3e3-287c89fb124d.png"
+  characterImage: mama.id === 1 ? "/lovable-uploads/Nonna.png" :
+                 mama.id === 2 ? "/lovable-uploads/Abuela.png" :
+                 "/lovable-uploads/Yai.png"
 }));
 
 const Mamas = () => {
@@ -65,7 +65,7 @@ const Mamas = () => {
                     onClick={() => navigate(`/mama/${mama.id}`)}
                     className="relative h-full rounded-3xl overflow-hidden shadow-warm cursor-pointer transition-transform duration-200 hover:scale-105 bg-cream"
                   >
-                    {/* Character Card Image */}
+                    {/* New Classical Character Card Image */}
                     <img 
                       src={mama.characterImage} 
                       alt={`${mama.name} character card`}
