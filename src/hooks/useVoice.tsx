@@ -1,6 +1,6 @@
 
 import { useState, useEffect, useCallback } from 'react';
-import { VoiceService, VoiceConfig } from '@/services/voiceService';
+import { VoiceService, VoiceConfig, ConversationPhase, ResponseSource } from '@/services/voiceService';
 
 export const useVoice = () => {
   const [voiceService] = useState(() => VoiceService.getInstance());
@@ -26,8 +26,25 @@ export const useVoice = () => {
     setConfig(updatedConfig);
   }, [config, voiceService]);
 
-  const speak = useCallback((text: string, mamaId: string) => {
-    return voiceService.speak(text, mamaId);
+  const setConversationPhase = useCallback((phase: ConversationPhase) => {
+    voiceService.setConversationPhase(phase);
+  }, [voiceService]);
+
+  const speak = useCallback((text: string, mamaId: string, options?: {
+    isDirectMessage?: boolean;
+    priority?: 'high' | 'normal' | 'low';
+    source?: ResponseSource;
+  }) => {
+    return voiceService.speak(text, mamaId, options);
+  }, [voiceService]);
+
+  const speakCookingInstruction = useCallback((
+    instruction: string, 
+    mamaId: string, 
+    stepNumber?: number, 
+    tip?: string
+  ) => {
+    return voiceService.speakCookingInstruction(instruction, mamaId, stepNumber, tip);
   }, [voiceService]);
 
   const speakWithTip = useCallback((instruction: string, tip: string | undefined, mamaId: string, timing: 'before' | 'during' | 'after' = 'before') => {
@@ -47,7 +64,7 @@ export const useVoice = () => {
       }
     }
     
-    return voiceService.speak(spokenText, mamaId);
+    return voiceService.speak(spokenText, mamaId, { isDirectMessage: true, priority: 'high' });
   }, [voiceService]);
 
   const stopSpeaking = useCallback(() => {
@@ -61,7 +78,9 @@ export const useVoice = () => {
   return {
     config,
     updateConfig,
+    setConversationPhase,
     speak,
+    speakCookingInstruction,
     speakWithTip,
     stopSpeaking,
     clearQueue,

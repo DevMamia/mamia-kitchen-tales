@@ -40,15 +40,28 @@ export const MAMA_VOICES: Record<string, MamaVoice> = {
   }
 };
 
+export type ConversationPhase = 'pre-cooking' | 'cooking' | 'post-cooking';
+export type ResponseSource = 'instant' | 'cached' | 'ai' | 'fallback';
+
+interface QueuedMessage {
+  text: string;
+  voiceId: string;
+  isDirectMessage?: boolean;
+  priority?: 'high' | 'normal' | 'low';
+  source?: ResponseSource;
+  context?: ConversationPhase;
+}
+
 export class VoiceService {
   private static instance: VoiceService;
   private phraseCache: PhraseCacheService;
   private currentAudio: HTMLAudioElement | null = null;
-  private audioQueue: Array<{ text: string; voiceId: string; isCached?: boolean }> = [];
+  private audioQueue: QueuedMessage[] = [];
   private isProcessingQueue = false;
   private isCurrentlyPlayingState = false;
   private voiceIds: Record<string, string> = {};
   private voiceIdsInitialized = false;
+  private conversationPhase: ConversationPhase = 'pre-cooking';
   private config: VoiceConfig = {
     mode: 'full',
     volume: 0.8,
@@ -58,7 +71,7 @@ export class VoiceService {
   };
 
   private constructor() {
-    console.log('[VoiceService] Initializing enhanced voice service with phrase caching...');
+    console.log('[VoiceService] Initializing enhanced voice service with direct message support...');
     this.phraseCache = new PhraseCacheService();
     this.initializeVoiceIds();
   }
@@ -71,7 +84,6 @@ export class VoiceService {
 
     try {
       console.log('[VoiceService] Fetching voice IDs from Supabase...');
-      // Get voice IDs from Supabase Edge Function secrets via a helper function
       const { data, error } = await supabase.functions.invoke('get-voice-ids');
       if (data && !error) {
         this.voiceIds = {
@@ -86,32 +98,31 @@ export class VoiceService {
           yai_malee: this.voiceIds.yai_malee ? 'SET' : 'MISSING'
         });
         
-        // Special debug for Yai's voice ID
+        // Enhanced debug for Yai's voice ID
         if (!this.voiceIds.yai_malee) {
-          console.error('[VoiceService] YAI MALEE VOICE ID IS MISSING! This will cause voice failures.');
+          console.error('[VoiceService] ❌ YAI MALEE VOICE ID IS MISSING!');
+          console.error('[VoiceService] 🔍 Available data keys:', Object.keys(data || {}));
         } else {
-          console.log('[VoiceService] Yai Malee voice ID found:', this.voiceIds.yai_malee);
+          console.log('[VoiceService] ✅ Yai Malee voice ID confirmed:', this.voiceIds.yai_malee);
         }
       } else {
         console.error('[VoiceService] Error fetching voice IDs:', error);
-        // Set fallback voice IDs for development
-        this.voiceIds = {
-          nonna_lucia: 'nonna-fallback',
-          abuela_rosa: 'abuela-fallback',
-          yai_malee: 'yai-fallback'
-        };
-        this.voiceIdsInitialized = true;
-        console.warn('[VoiceService] Using fallback voice IDs due to fetch error');
+        this.setFallbackVoiceIds();
       }
     } catch (error) {
       console.warn('[VoiceService] Could not fetch voice IDs, using fallbacks:', error);
-      this.voiceIds = {
-        nonna_lucia: 'nonna-fallback',
-        abuela_rosa: 'abuela-fallback',
-        yai_malee: 'yai-fallback'
-      };
-      this.voiceIdsInitialized = true;
+      this.setFallbackVoiceIds();
     }
+  }
+
+  private setFallbackVoiceIds() {
+    this.voiceIds = {
+      nonna_lucia: 'nonna-fallback',
+      abuela_rosa: 'abuela-fallback',
+      yai_malee: 'yai-fallback'
+    };
+    this.voiceIdsInitialized = true;
+    console.warn('[VoiceService] Using fallback voice IDs');
   }
 
   public static getInstance(): VoiceService {
@@ -130,83 +141,188 @@ export class VoiceService {
     return { ...this.config };
   }
 
-  async speak(text: string, mamaId: string): Promise<void> {
+  public setConversationPhase(phase: ConversationPhase): void {
+    console.log(`[VoiceService] Conversation phase changed: ${this.conversationPhase} -> ${phase}`);
+    this.conversationPhase = phase;
+  }
+
+  // Enhanced speak method with direct message support
+  async speak(text: string, mamaId: string, options?: {
+    isDirectMessage?: boolean;
+    priority?: 'high' | 'normal' | 'low';
+    source?: ResponseSource;
+  }): Promise<void> {
     if (!this.config.enabled) {
       console.log('[VoiceService] Voice disabled, skipping speak request');
       return;
     }
 
-    console.log(`[VoiceService] Enhanced speak request - Text: "${text.substring(0, 50)}...", MamaId: ${mamaId}`);
+    const { isDirectMessage = false, priority = 'normal', source = 'cached' } = options || {};
 
-    // Wait for voice IDs to be initialized if needed
+    console.log(`[VoiceService] Enhanced speak request:`, {
+      text: text.substring(0, 50) + (text.length > 50 ? '...' : ''),
+      mamaId,
+      isDirectMessage,
+      priority,
+      source,
+      phase: this.conversationPhase
+    });
+
+    // Wait for voice IDs to be initialized
     if (!this.voiceIdsInitialized) {
       console.log('[VoiceService] Waiting for voice IDs to initialize...');
       await this.initializeVoiceIds();
     }
 
-    // Resolve mama ID (handle both numeric and voice IDs)
     const resolvedMamaId = this.resolveMamaId(mamaId);
-    console.log(`[VoiceService] Resolved mama ID: ${mamaId} -> ${resolvedMamaId}`);
-
-    // Special debug for Yai requests
+    
+    // Enhanced debug for Yai
     if (resolvedMamaId === 'yai_malee') {
-      console.log('[VoiceService] YAI MALEE VOICE REQUEST DETECTED!');
-      console.log('[VoiceService] Yai voice ID available:', this.voiceIds.yai_malee || 'MISSING');
-      console.log('[VoiceService] Voice IDs initialized:', this.voiceIdsInitialized);
+      console.log('[VoiceService] 🔍 YAI MALEE REQUEST DETAILS:');
+      console.log('  - Resolved ID:', resolvedMamaId);
+      console.log('  - Voice ID available:', this.voiceIds.yai_malee || 'MISSING');
+      console.log('  - Is direct message:', isDirectMessage);
+      console.log('  - Phase:', this.conversationPhase);
     }
 
-    // Smart caching logic - try cached phrases first
+    // For direct messages, skip caching and use exact text
+    if (isDirectMessage) {
+      console.log(`[VoiceService] Direct message mode - using exact text`);
+      await this.generateAndQueueAudio(text, resolvedMamaId, false, { priority, source });
+      return;
+    }
+
+    // Smart caching logic for non-direct messages
     if (this.config.useCaching) {
       const cachedPhrase = this.phraseCache.findMatchingPhrase(text, resolvedMamaId);
       if (cachedPhrase) {
         console.log(`[VoiceService] Using cached phrase: ${cachedPhrase.id}`);
         
         if (cachedPhrase.isPreGenerated && cachedPhrase.audioUrl) {
-          // Play pre-generated audio immediately
           await this.playPreGeneratedAudio(cachedPhrase.audioUrl);
           return;
         } else {
-          // Use cached phrase text but generate fresh audio
-          await this.generateAndQueueAudio(cachedPhrase.text, resolvedMamaId, true);
+          await this.generateAndQueueAudio(cachedPhrase.text, resolvedMamaId, true, { priority, source: 'cached' });
           return;
         }
       }
     }
 
-    // In essential mode, try legacy phrases for backward compatibility
-    if (this.config.mode === 'essential') {
-      const legacyPhrase = ENHANCED_CACHED_PHRASES[resolvedMamaId]?.[text];
-      if (legacyPhrase) {
-        console.log(`[VoiceService] Using legacy cached phrase for ${resolvedMamaId}`);
-        await this.generateAndQueueAudio(legacyPhrase.text, resolvedMamaId, true);
-        return;
-      }
-    }
-
-    // Fall back to full TTS mode for any text not in cache
+    // Fall back to full TTS mode
     console.log(`[VoiceService] No cached phrase found, using full TTS`);
-    await this.generateAndQueueAudio(text, resolvedMamaId, false);
+    await this.generateAndQueueAudio(text, resolvedMamaId, false, { priority, source: 'ai' });
   }
 
-  private async generateAndQueueAudio(text: string, mamaId: string, isCached: boolean): Promise<void> {
+  // New method specifically for cooking instructions
+  async speakCookingInstruction(instruction: string, mamaId: string, stepNumber?: number, tip?: string): Promise<void> {
+    console.log(`[VoiceService] Speaking cooking instruction for step ${stepNumber || 'unknown'}`);
+    
+    let spokenText = instruction;
+    
+    // Add contextual intro for cooking phase
+    if (this.conversationPhase === 'cooking' && stepNumber) {
+      const mama = this.getMamaPersonality(mamaId);
+      const stepIntro = this.getStepIntro(mama.accent, stepNumber);
+      spokenText = `${stepIntro} ${instruction}`;
+    }
+    
+    // Add tip if provided
+    if (tip) {
+      const mama = this.getMamaPersonality(mamaId);
+      const tipPhrase = this.formatTip(mama.accent, tip);
+      spokenText += ` ${tipPhrase}`;
+    }
+    
+    await this.speak(spokenText, mamaId, {
+      isDirectMessage: true,
+      priority: 'high',
+      source: 'instant'
+    });
+  }
+
+  private getStepIntro(accent: string, stepNumber: number): string {
+    switch (accent) {
+      case 'Italian':
+        return `Allora, step ${stepNumber}:`;
+      case 'Mexican':
+        return `Bueno, paso ${stepNumber}:`;
+      case 'Thai':
+        return `Now, step ${stepNumber}:`;
+      default:
+        return `Step ${stepNumber}:`;
+    }
+  }
+
+  private formatTip(accent: string, tip: string): string {
+    switch (accent) {
+      case 'Italian':
+        return `Ecco un consiglio: ${tip}`;
+      case 'Mexican':
+        return `Te doy un consejo: ${tip}`;
+      case 'Thai':
+        return `Here's a tip: ${tip}`;
+      default:
+        return `Tip: ${tip}`;
+    }
+  }
+
+  private getMamaPersonality(mamaId: string) {
+    const resolvedId = this.resolveMamaId(mamaId);
+    const mama = getMamaById(resolvedId === 'nonna_lucia' ? 1 : resolvedId === 'abuela_rosa' ? 2 : 3);
+    return mama || { accent: 'Italian' };
+  }
+
+  private async generateAndQueueAudio(
+    text: string, 
+    mamaId: string, 
+    isCached: boolean, 
+    options?: { priority?: string; source?: ResponseSource }
+  ): Promise<void> {
     const actualVoiceId = this.voiceIds[mamaId];
     console.log(`[VoiceService] Generating audio - MamaId: ${mamaId}, VoiceId: ${actualVoiceId}, Cached: ${isCached}`);
     
-    // Special debug for Yai
+    // Enhanced Yai debug
     if (mamaId === 'yai_malee') {
-      console.log('[VoiceService] YAI MALEE AUDIO GENERATION ATTEMPT!');
-      console.log('[VoiceService] Yai voice ID:', actualVoiceId || 'UNDEFINED');
-      console.log('[VoiceService] All voice IDs:', this.voiceIds);
+      console.log('[VoiceService] 🔍 YAI AUDIO GENERATION:');
+      console.log('  - Mama ID:', mamaId);
+      console.log('  - Voice ID:', actualVoiceId || 'UNDEFINED');
+      console.log('  - All voice IDs:', this.voiceIds);
+      console.log('  - Voice IDs initialized:', this.voiceIdsInitialized);
+      
+      if (!actualVoiceId) {
+        console.error('[VoiceService] ❌ YAI VOICE ID MISSING - ATTEMPTING RECOVERY');
+        // Try to reinitialize voice IDs
+        await this.initializeVoiceIds();
+        const retryVoiceId = this.voiceIds[mamaId];
+        console.log('[VoiceService] 🔄 After retry, Yai voice ID:', retryVoiceId || 'STILL MISSING');
+      }
     }
     
-    if (actualVoiceId) {
-      this.addToQueue(text, actualVoiceId, isCached);
+    if (actualVoiceId && actualVoiceId !== 'yai-fallback') {
+      this.addToQueue({
+        text,
+        voiceId: actualVoiceId,
+        isDirectMessage: true,
+        priority: options?.priority as any || 'normal',
+        source: options?.source,
+        context: this.conversationPhase
+      });
     } else {
-      console.error(`[VoiceService] No voice ID found for ${mamaId}. Available IDs:`, this.voiceIds);
+      console.error(`[VoiceService] No valid voice ID for ${mamaId}. Available IDs:`, this.voiceIds);
       if (mamaId === 'yai_malee') {
-        console.error('[VoiceService] YAI MALEE VOICE ID MISSING - THIS IS THE ROOT CAUSE!');
+        console.error('[VoiceService] ❌ YAI VOICE FAILURE - Using browser TTS fallback');
+        this.useBrowserTTSFallback(text);
       }
-      console.error(`[VoiceService] Voice service failed - falling back to silent mode`);
+    }
+  }
+
+  private useBrowserTTSFallback(text: string): void {
+    console.log('[VoiceService] Using browser TTS fallback');
+    if ('speechSynthesis' in window) {
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.rate = this.config.speed;
+      utterance.volume = this.config.volume;
+      window.speechSynthesis.speak(utterance);
     }
   }
 
@@ -287,9 +403,21 @@ export class VoiceService {
     }
   }
 
-  private addToQueue(text: string, voiceId: string, isCached = false): void {
-    console.log(`[VoiceService] Adding to queue - Text: "${text.substring(0, 30)}...", VoiceId: ${voiceId}, Cached: ${isCached}`);
-    this.audioQueue.push({ text, voiceId, isCached });
+  private addToQueue(message: QueuedMessage): void {
+    console.log(`[VoiceService] Adding to priority queue:`, {
+      text: message.text.substring(0, 30) + '...',
+      priority: message.priority,
+      source: message.source,
+      context: message.context
+    });
+    
+    // Priority queue management
+    if (message.priority === 'high') {
+      this.audioQueue.unshift(message);
+    } else {
+      this.audioQueue.push(message);
+    }
+    
     if (!this.isProcessingQueue) {
       this.processQueue();
     }
@@ -304,18 +432,26 @@ export class VoiceService {
     this.isProcessingQueue = true;
 
     while (this.audioQueue.length > 0) {
-      const { text, voiceId, isCached } = this.audioQueue.shift()!;
+      const message = this.audioQueue.shift()!;
       
       try {
-        await this.generateAndPlaySpeech(text, voiceId);
-        // If this was a successful cached phrase, consider pre-generating it
-        if (isCached && this.config.useCaching) {
-          console.log(`[VoiceService] Successfully played cached phrase, could pre-generate for future use`);
-        }
+        console.log(`[VoiceService] Processing message:`, {
+          source: message.source,
+          priority: message.priority,
+          context: message.context,
+          voiceId: message.voiceId
+        });
+        
+        await this.generateAndPlaySpeech(message.text, message.voiceId);
       } catch (error) {
         console.error('[VoiceService] Error processing queue item:', error);
         this.isCurrentlyPlayingState = false;
-        // Continue with next item instead of stopping the queue
+        
+        // Enhanced error recovery for Yai
+        if (message.voiceId?.includes('yai') || message.text.includes('Yai')) {
+          console.error('[VoiceService] 🔄 Yai voice error - attempting browser TTS fallback');
+          this.useBrowserTTSFallback(message.text);
+        }
       }
     }
 
