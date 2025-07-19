@@ -39,10 +39,8 @@ const Cook = () => {
     return recipeId ? getRecipeWithMama(recipeId) : null;
   }, [recipeId]);
   
-  // Initialize conversation memory with memoized data
-  const conversationMemory = useMemo(() => {
-    return recipeData ? useConversationMemory(recipeData.recipe, recipeData.mama) : null;
-  }, [recipeData]);
+  // Initialize conversation memory (call hook directly, not inside useMemo)
+  const conversationMemory = recipeData ? useConversationMemory(recipeData.recipe, recipeData.mama) : null;
   
   // Optimize tip placements when recipe data loads (memoized)
   const memoizedOptimizedTips = useMemo(() => {
