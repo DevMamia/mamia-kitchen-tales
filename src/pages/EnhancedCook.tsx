@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Volume2, ChevronLeft, ChevronRight, Upload, X, Settings, ChefHat, Crown, Camera } from 'lucide-react';
@@ -64,7 +65,7 @@ const EnhancedCook = () => {
     serviceStatus
   } = useContextAwareVoice();
 
-  const { user } } from useAuth();
+  const { user } = useAuth();
   const { isPremium, voiceMode, incrementUsage, hasUsageLeft } = useUserTier();
 
   // Memoize recipe data
@@ -82,16 +83,16 @@ const EnhancedCook = () => {
   );
 
   // MamiaV1 Approach: Simple tip concatenation
-  const buildCookingInstruction = useCallback((instruction: string, tips?: string[]): string => {
+  const buildCookingInstruction = useCallback((instruction: string, stepTips?: string[]): string => {
     console.log('[EnhancedCook] === BUILDING INSTRUCTION (MamiaV1 approach) ===');
     console.log('[EnhancedCook] Instruction:', instruction);
-    console.log('[EnhancedCook] Tips:', tips);
+    console.log('[EnhancedCook] Step tips:', stepTips);
     
     let finalText = instruction;
     
     // Simple concatenation like MamiaV1
-    if (tips && tips.length > 0) {
-      const tip = tips[0]; // Use first tip
+    if (stepTips && stepTips.length > 0) {
+      const tip = stepTips[0]; // Use first tip
       finalText += `. Here's a tip from experience: ${tip}`;
       console.log('[EnhancedCook] ✅ Added tip to instruction');
     } else {
@@ -617,19 +618,6 @@ function getCulturalStoryResponse(accent: string, recipeName: string): string {
       return `Ah, ${recipeName}! In Thailand, we believe that cooking is meditation in motion. My grandmother taught me that each ingredient has its own spirit, and when we cook with mindfulness and respect, the flavors dance together in perfect harmony. This recipe connects us to centuries of Thai wisdom!`;
     default:
       return `This ${recipeName} has such a wonderful story! It's been lovingly prepared by families for generations, each cook adding their own special touch while keeping the tradition alive!`;
-  }
-}
-
-function getPhotoSharingResponse(accent: string): string {
-  switch (accent) {
-    case 'Italian':
-      return "Madonna! Show me your beautiful creation, tesoro! I want to see how magnifico it looks! Maybe we can add a little extra touch to make it even more perfetto!";
-    case 'Mexican':
-      return "¡Órale! Let me see your masterpiece, mijo! I'm so excited to see how beautiful your dish looks! Maybe Abuela has some extra consejos to make it even better!";
-    case 'Thai':
-      return "Wonderful! Please show me your creation, dear! I'd love to see the colors and textures. Perhaps we can add some final touches to make it even more beautiful!";
-    default:
-      return "I'm so excited to see how your dish is coming along! Show me your progress and I'll help you make it even better!";
   }
 }
 
