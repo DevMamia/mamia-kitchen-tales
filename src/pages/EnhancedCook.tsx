@@ -29,7 +29,6 @@ const EnhancedCook = () => {
   const [timerExpanded, setTimerExpanded] = useState(false);
   const [timerCompleted, setTimerCompleted] = useState(false);
   const [photoMode, setPhotoMode] = useState(false);
-  const [optimizedTips, setOptimizedTips] = useState<Record<number, TipPlacement>>({});
   const [hasSpokenCurrentStep, setHasSpokenCurrentStep] = useState(false);
 
   // Add new state for photo mode
@@ -43,7 +42,7 @@ const EnhancedCook = () => {
   const { 
     speak, 
     speakGreeting, 
-    speakCookingInstruction, 
+    speakCookingInstruction: speakEnhancedInstruction, 
     setConversationPhase: setVoicePhase, 
     isPlaying: isEnhancedPlaying, 
     voiceStatus: enhancedVoiceStatus,
@@ -52,11 +51,11 @@ const EnhancedCook = () => {
     clearQueue
   } = useEnhancedVoiceService();
 
-  // Context-aware voice
+  // Context-aware voice (simplified)
   const {
     updateContext: updateVoiceContext,
     speakWithContext,
-    speakCookingInstruction: speakContextualInstruction,
+    speakCookingInstruction, // Now handles final concatenated text
     listeningState,
     showWakeWordPrompt,
     wakeWordPrompt,
@@ -65,7 +64,7 @@ const EnhancedCook = () => {
     serviceStatus
   } = useContextAwareVoice();
 
-  const { user } = useAuth();
+  const { user } } from useAuth();
   const { isPremium, voiceMode, incrementUsage, hasUsageLeft } = useUserTier();
 
   // Memoize recipe data
@@ -81,19 +80,27 @@ const EnhancedCook = () => {
     recipeData?.recipe || dummyRecipe,
     recipeData?.mama || dummyMama
   );
-  
-  // Optimize tip placements
-  const memoizedOptimizedTips = useMemo(() => {
-    if (recipeData?.recipe) {
-      const optimized = TipAnalyzerService.optimizeTipPlacements(
-        recipeData.recipe.stepVoiceTips,
-        recipeData.recipe.instructions
-      );
-      console.log('[EnhancedCook] Optimized tip placements:', optimized);
-      return optimized;
+
+  // MamiaV1 Approach: Simple tip concatenation
+  const buildCookingInstruction = useCallback((instruction: string, tips?: string[]): string => {
+    console.log('[EnhancedCook] === BUILDING INSTRUCTION (MamiaV1 approach) ===');
+    console.log('[EnhancedCook] Instruction:', instruction);
+    console.log('[EnhancedCook] Tips:', tips);
+    
+    let finalText = instruction;
+    
+    // Simple concatenation like MamiaV1
+    if (tips && tips.length > 0) {
+      const tip = tips[0]; // Use first tip
+      finalText += `. Here's a tip from experience: ${tip}`;
+      console.log('[EnhancedCook] ✅ Added tip to instruction');
+    } else {
+      console.log('[EnhancedCook] ℹ️ No tips for this step');
     }
-    return {};
-  }, [recipeData]);
+    
+    console.log('[EnhancedCook] Final text:', finalText.substring(0, 100) + '...');
+    return finalText;
+  }, []);
 
   // Initialize services
   useEffect(() => {
@@ -178,9 +185,11 @@ const EnhancedCook = () => {
           break;
           
         case 'repeat':
+          // MamiaV1 approach - build final text here
           const instruction = recipeData.recipe.instructions[currentStep - 1];
-          const stepTip = optimizedTips[currentStep];
-          await speakContextualInstruction(instruction, currentStep, stepTip?.tip);
+          const stepData = recipeData.recipe.steps?.[currentStep - 1];
+          const finalText = buildCookingInstruction(instruction, stepData?.tips);
+          await speakCookingInstruction(finalText, currentStep);
           break;
           
         case 'emergency_help':
@@ -220,7 +229,7 @@ const EnhancedCook = () => {
       const conversationResponse = await unifiedConversation.handleUserInput(command);
       await speakWithContext(conversationResponse, { contextual: true });
     }
-  }, [currentStep, conversationMemory, optimizedTips, speakContextualInstruction, speakWithContext, unifiedConversation, voiceCommandService, recipeData]);
+  }, [currentStep, conversationMemory, buildCookingInstruction, speakCookingInstruction, speakWithContext, unifiedConversation, voiceCommandService, recipeData]);
 
   const handleTimerComplete = useCallback((stepNumber: number, timerName: string) => {
     console.log(`[EnhancedCook] Timer completed: ${timerName} for step ${stepNumber}`);
@@ -247,58 +256,43 @@ const EnhancedCook = () => {
     setShowPhotoCapture(false);
   }, []);
 
-  // Enhanced voice current step with cooking instruction method - IMPROVED TIMING
+  // MamiaV1 voice current step - SIMPLIFIED
   useEffect(() => {
     if (conversationPhase === 'cooking' && recipeData && !hasSpokenCurrentStep && voiceInitialized) {
       const speakCurrentStep = async () => {
-        console.log(`[EnhancedCook] Speaking enhanced cooking instruction for step ${currentStep}`);
-        const instruction = recipeData.recipe.instructions[currentStep - 1];
-        const currentStepTip = optimizedTips[currentStep];
+        console.log(`[EnhancedCook] Speaking step ${currentStep} using MamiaV1 approach`);
         
-        console.log('[EnhancedCook] Step instruction:', instruction);
-        console.log('[EnhancedCook] Step tip:', currentStepTip);
-        console.log('[EnhancedCook] Voice service status:', { isPlaying, queueLength, serviceStatus });
+        const instruction = recipeData.recipe.instructions[currentStep - 1];
+        const stepData = recipeData.recipe.steps?.[currentStep - 1];
+        
+        console.log('[EnhancedCook] Raw instruction:', instruction);
+        console.log('[EnhancedCook] Step data:', stepData);
         
         try {
-          // Add detailed logging for tip processing
-          if (currentStepTip?.tip) {
-            console.log('[EnhancedCook] Processing step with tip:', {
-              stepNumber: currentStep,
-              instruction: instruction.substring(0, 50) + '...',
-              tip: currentStepTip.tip.substring(0, 50) + '...',
-              timing: currentStepTip.timing,
-              category: currentStepTip.category
-            });
-          } else {
-            console.log('[EnhancedCook] Processing step without tip:', {
-              stepNumber: currentStep,
-              instruction: instruction.substring(0, 50) + '...'
-            });
-          }
+          // Build final text using MamiaV1 approach
+          const finalText = buildCookingInstruction(instruction, stepData?.tips);
           
-          await speakContextualInstruction(instruction, currentStep, currentStepTip?.tip);
+          console.log('[EnhancedCook] 🔊 Speaking final text:', finalText.substring(0, 60) + '...');
+          
+          // Speak the final concatenated text
+          await speakCookingInstruction(finalText, currentStep);
           setHasSpokenCurrentStep(true);
-          console.log('[EnhancedCook] Step instruction completed successfully');
+          console.log('[EnhancedCook] ✅ Step spoken successfully using MamiaV1 approach');
         } catch (error) {
-          console.error('[EnhancedCook] Failed to speak current step:', error);
+          console.error('[EnhancedCook] ❌ Failed to speak step:', error);
         }
       };
 
       // Improved timing - wait for intro to complete, then add natural pause
-      const timer = setTimeout(speakCurrentStep, 1500); // Increased from 800ms to 1500ms
+      const timer = setTimeout(speakCurrentStep, 1500);
       return () => clearTimeout(timer);
     }
-  }, [conversationPhase, currentStep, recipeData, optimizedTips, hasSpokenCurrentStep, voiceInitialized, speakContextualInstruction, isPlaying, queueLength, serviceStatus]);
+  }, [conversationPhase, currentStep, recipeData, hasSpokenCurrentStep, voiceInitialized, speakCookingInstruction, buildCookingInstruction, isPlaying, queueLength, serviceStatus]);
 
   // Reset spoken flag when step changes
   useEffect(() => {
     setHasSpokenCurrentStep(false);
   }, [currentStep]);
-
-  // Update optimized tips state
-  useEffect(() => {
-    setOptimizedTips(memoizedOptimizedTips);
-  }, [memoizedOptimizedTips]);
 
   // Handle no recipe ID
   if (!recipeId) {
@@ -377,10 +371,6 @@ const EnhancedCook = () => {
   // Enhanced cooking interface
   const currentInstruction = recipe.instructions[currentStep - 1];
   const currentStepTimer = recipe.stepTimers?.[currentStep - 1];
-  const currentStepTip = optimizedTips[currentStep];
-  const fallbackTip = recipe.voiceTips && recipe.voiceTips.length > 0 && currentStep >= Math.ceil(totalSteps / 2)
-    ? recipe.voiceTips[(currentStep - Math.ceil(totalSteps / 2)) % recipe.voiceTips.length]
-    : null;
 
   return (
     <div className="min-h-[calc(100vh-8rem)] bg-gradient-to-b from-orange-50/20 to-background">
@@ -451,8 +441,7 @@ const EnhancedCook = () => {
           )}
         </div>
 
-        {/* Hidden Tips Section - Tips are now voice-only for authenticity */}
-        {/* Tips are processed and spoken but not displayed to maintain spontaneous feel */}
+        {/* Tips are now voice-only - hidden from UI for authenticity */}
       </div>
 
       {/* Context-Aware Voice Interface */}
@@ -506,15 +495,17 @@ const EnhancedCook = () => {
 
           <Button
             onClick={async () => {
-              console.log('[EnhancedCook] Manual "Guide Me" button pressed');
+              console.log('[EnhancedCook] Manual "Guide Me" button pressed - using MamiaV1 approach');
+              
               const instruction = recipeData.recipe.instructions[currentStep - 1];
-              const stepTip = optimizedTips[currentStep];
+              const stepData = recipeData.recipe.steps?.[currentStep - 1];
               
               console.log('[EnhancedCook] Manual guide - instruction:', instruction.substring(0, 50) + '...');
-              console.log('[EnhancedCook] Manual guide - tip:', stepTip ? stepTip.tip.substring(0, 50) + '...' : 'none');
+              console.log('[EnhancedCook] Manual guide - step data:', stepData);
               
               try {
-                await speakContextualInstruction(instruction, currentStep, stepTip?.tip);
+                const finalText = buildCookingInstruction(instruction, stepData?.tips);
+                await speakCookingInstruction(finalText, currentStep);
                 console.log('[EnhancedCook] Manual guide completed successfully');
               } catch (error) {
                 console.error('[EnhancedCook] Manual guide failed:', error);

@@ -11,6 +11,11 @@ export interface StepTimer {
   description?: string;
 }
 
+export interface RecipeStep {
+  instruction: string;
+  tips?: string[]; // Simple tips array like MamiaV1
+}
+
 export interface Recipe {
   id: string;
   title: string;
@@ -26,6 +31,8 @@ export interface Recipe {
   mamaEmoji: string;
   ingredients: string[];
   instructions: string[];
+  // Enhanced instructions with tips (new structure)
+  steps?: RecipeStep[];
   servings: number;
   description: string;
   featured?: boolean;
@@ -34,9 +41,6 @@ export interface Recipe {
   voiceIntro?: string;
   voiceTips?: string[];
   voiceEnabled?: boolean;
-  // Enhanced tip structure
-  displayTips?: string[]; // 1-2 key tips shown at top of instructions
-  stepVoiceTips?: { [stepNumber: number]: string }; // Step-specific voice guidance
   // Additional fields
   subsNote?: string;
   // Cooking context
@@ -74,15 +78,41 @@ export const recipes: Recipe[] = [
       'Toss pasta with sauce and pasta water',
       'Garnish with fresh parsley'
     ],
+    // New simplified structure
+    steps: [
+      { 
+        instruction: 'Heat olive oil in large pan',
+        tips: []
+      },
+      { 
+        instruction: 'Add sliced garlic and chillies, cook until fragrant',
+        tips: ["Make sure your garlic doesn't burn - burned garlic is bitter, no good!"]
+      },
+      { 
+        instruction: 'Add crushed tomatoes and season with salt',
+        tips: []
+      },
+      { 
+        instruction: 'Simmer sauce while pasta cooks',
+        tips: ["Listen for the sizzle when you add the chili - that's when you know it's ready!"]
+      },
+      { 
+        instruction: 'Cook penne until al dente',
+        tips: ["Don't put too much salt in the pasta water - the pasta will absorb it"]
+      },
+      { 
+        instruction: 'Toss pasta with sauce and pasta water',
+        tips: []
+      },
+      { 
+        instruction: 'Garnish with fresh parsley',
+        tips: []
+      }
+    ],
     servings: 4,
     description: 'Spicy tomato pasta with garlic and chillies',
     recipeOfWeek: true,
     voiceIntro: "Ciao! Today we make my beautiful Penne all'Arrabbiata. Very simple but you must do with passion!",
-    stepVoiceTips: {
-      1: "Make sure your garlic doesn't burn - burned garlic is bitter, no good!",
-      3: "Don't put too much salt in the pasta water - the pasta will absorb it",
-      4: "Listen for the sizzle when you add the chili - that's when you know it's ready!"
-    },
     voiceTips: [
       "Make sure your garlic doesn't burn - burned garlic is bitter, no good!",
       "Use real San Marzano tomatoes if you can find them, they make all the difference",
@@ -123,14 +153,40 @@ export const recipes: Recipe[] = [
       'Simmer covered for 20 minutes until chicken is tender',
       'Adjust seasoning and serve hot'
     ],
+    // New simplified structure
+    steps: [
+      { 
+        instruction: 'Season chicken pieces with salt and pepper',
+        tips: ["Pat the chicken very dry before seasoning - this gives you beautiful crispy skin when you brown it"]
+      },
+      { 
+        instruction: 'Heat oil in large skillet, brown chicken on all sides',
+        tips: ["Don't move the chicken too much when browning - let it develop that golden color, tesoro"]
+      },
+      { 
+        instruction: 'Remove chicken, sauté onions and peppers until soft',
+        tips: []
+      },
+      { 
+        instruction: 'Add wine to deglaze pan',
+        tips: ["Add a little wine if you have - makes everything more delicious, just like nonna used to do!"]
+      },
+      { 
+        instruction: 'Return chicken to pan with tomatoes and herbs',
+        tips: []
+      },
+      { 
+        instruction: 'Simmer covered for 20 minutes until chicken is tender',
+        tips: []
+      },
+      { 
+        instruction: 'Adjust seasoning and serve hot',
+        tips: []
+      }
+    ],
     servings: 4,
     description: 'Traditional Italian hunter\'s chicken with vegetables',
     voiceIntro: "Ciao mia cara! Today we cook my beautiful Chicken Cacciatore. Is like cooking with love for your famiglia!",
-    stepVoiceTips: {
-      1: "Pat the chicken very dry before seasoning - this gives you beautiful crispy skin when you brown it",
-      2: "Don't move the chicken too much when browning - let it develop that golden color, tesoro",
-      5: "Add a little wine if you have - makes everything more delicious, just like nonna used to do!"
-    },
     voiceTips: [
       "Pat the chicken very dry before browning - this gives you beautiful crispy skin",
       "Don't move the chicken too much when browning - let it develop that golden color",
@@ -167,15 +223,40 @@ export const recipes: Recipe[] = [
       'Remove from heat, quickly toss with egg mixture and pasta water',
       'Serve immediately with extra Pecorino and black pepper'
     ],
+    // New simplified structure
+    steps: [
+      { 
+        instruction: 'Bring large pot of salted water to boil for pasta',
+        tips: []
+      },
+      { 
+        instruction: 'Cook guanciale in large skillet over medium heat until crispy and golden',
+        tips: ["No oil needed - guanciale has its own beautiful fat that will render out slowly"]
+      },
+      { 
+        instruction: 'Meanwhile, whisk egg yolks with grated Pecorino and plenty of black pepper',
+        tips: ["Use only Pecorino Romano cheese, not Parmesan - this is the Roman way"]
+      },
+      { 
+        instruction: 'Cook pasta until just shy of al dente, reserve 1 cup pasta cooking water',
+        tips: ["Save that pasta water - it's liquid gold for making the sauce creamy"]
+      },
+      { 
+        instruction: 'Add drained hot pasta to skillet with guanciale and fat',
+        tips: []
+      },
+      { 
+        instruction: 'Remove from heat, quickly toss with egg mixture and pasta water',
+        tips: ["Take the pan off the heat when mixing eggs - they must not scramble"]
+      },
+      { 
+        instruction: 'Serve immediately with extra Pecorino and black pepper',
+        tips: ["No cream! Real Carbonara never has cream - this is very important!"]
+      }
+    ],
     servings: 4,
     description: 'Rome\'s iconic pasta dish with eggs, cheese, and guanciale - no cream!',
     voiceIntro: "Ah, Carbonara! The pride of Roma. Listen carefully - no cream, no peas, no nonsense. Just perfection!",
-    stepVoiceTips: {
-      3: "Save that pasta water - it's liquid gold for making the sauce creamy",
-      4: "Use only Pecorino Romano cheese, not Parmesan - this is the Roman way",
-      6: "Take the pan off the heat when mixing eggs - they must not scramble",
-      7: "No cream! Real Carbonara never has cream - this is very important!"
-    },
     voiceTips: [
       "No cream! Real Carbonara never has cream - this is very important!",
       "Take the pan off the heat when mixing eggs - they must not scramble",
@@ -233,13 +314,6 @@ export const recipes: Recipe[] = [
     servings: 8,
     description: 'Traditional Emilian lasagna with rich ragù Bolognese and creamy béchamel',
     voiceIntro: "Bene, mia cara! Today we make lasagna from my nonna's recipe. This takes time but is worth every minute!",
-    stepVoiceTips: {
-      1: "Use San Marzano tomatoes in your ragù - they're sweeter, more delicate",
-      2: "Don't make your béchamel too thick - it should coat the spoon like cream",
-      4: "Save some pasta water when cooking sheets - helps if they stick together",
-      6: "Cover with foil if the top browns too quickly - we want golden, not burnt",
-      7: "Let the lasagna rest after baking - I know it's hard but it cuts better this way"
-    },
     voiceTips: [
       "Make your ragù the day before - it gets better with time, like good wine!",
       "Don't make your béchamel too thick - it should coat the spoon like cream",
@@ -295,13 +369,6 @@ export const recipes: Recipe[] = [
     servings: 4,
     description: 'Milanese braised veal shanks with aromatic vegetables and bright gremolata',
     voiceIntro: "Ah, Osso Buco! This is Sunday dinner, special occasion food. We cook with patience and amore!",
-    stepVoiceTips: {
-      1: "Tie the shanks with kitchen string so they don't fall apart during cooking",
-      2: "Don't rush the browning - each side needs 4-5 minutes for beautiful color",
-      4: "If you can't find veal, beef shanks work too, just cook a little longer",
-      6: "The marrow is the treasure - use a small spoon to get every bit!",
-      7: "Make gremolata fresh - don't prepare it too early or the lemon loses its punch"
-    },
     voiceTips: [
       "Ask your butcher to cut the shanks 2 inches thick - this is molto importante!",
       "Tie the shanks with kitchen string so they don't fall apart during cooking",
@@ -340,11 +407,6 @@ export const recipes: Recipe[] = [
     servings: 2,
     description: 'Simple and delicious melted cheese in warm tortillas',
     voiceIntro: "¡Órale! Let's make some delicious quesadillas, mi amor. Simple but so, so good when done right!",
-    stepVoiceTips: {
-      2: "Don't put too much filling or it will spill everywhere - less is more!",
-      3: "Let the tortilla get golden brown before flipping - patience, mija!",
-      4: "Always serve immediately while the cheese is still melty and perfect"
-    },
     voiceTips: [
       "Don't put too much filling or it will spill everywhere - less is more!",
       "Let the tortilla get golden brown before flipping - patience, mija!",
@@ -389,12 +451,6 @@ export const recipes: Recipe[] = [
     servings: 6,
     description: 'Smoky shredded chicken in chipotle tomato sauce - perfect for tacos',
     voiceIntro: "¡Ay, qué rico! Chicken Tinga is one of my favorites. Perfect for tacos, tostadas, anything you want!",
-    stepVoiceTips: {
-      2: "Save some cooking liquid - if it gets too dry, add a little back in",
-      4: "Don't shred the chicken too fine - you want some texture, not chicken fluff!",
-      5: "Let the chipotle sauce reduce well - this concentrates all those beautiful smoky flavors",
-      6: "This tastes even better the next day - make extra for leftovers!"
-    },
     voiceTips: [
       "Don't shred the chicken too fine - you want some texture, not chicken fluff!",
       "Let the chipotle sauce reduce well - this concentrates all those beautiful smoky flavors",
@@ -446,13 +502,6 @@ export const recipes: Recipe[] = [
     servings: 4,
     description: 'Corn tortillas filled with chicken and smothered in bright green tomatillo salsa',
     voiceIntro: "¡Mira! Enchiladas Verdes are pure comfort food. The green sauce is everything - bright, fresh, with just the right kick!",
-    stepVoiceTips: {
-      1: "Don't skip charring the tomatillos - this adds so much depth to your salsa verde",
-      4: "Warm your tortillas well so they don't crack when rolling - nobody wants broken enchiladas!",
-      5: "Don't roll them too tight - the filling needs room to expand when heated",
-      6: "Use Mexican crema if you can find it - it's richer than sour cream",
-      7: "Fresh cheese like queso fresco is traditional, but Monterey Jack melts beautifully too"
-    },
     voiceTips: [
       "Don't skip charring the tomatillos - this adds so much depth to your salsa verde",
       "Warm your tortillas well so they don't crack when rolling - nobody wants broken enchiladas!",
@@ -510,14 +559,6 @@ export const recipes: Recipe[] = [
     servings: 8,
     description: 'Traditional Mexican soup with pork, hominy, and red chile broth - perfect for celebrations',
     voiceIntro: "¡Ay, Pozole! This is celebration food, weekend food. Takes time but fills the heart and belly with happiness!",
-    stepVoiceTips: {
-      2: "Toast your chiles until they puff but don't let them burn - bitter chiles ruin everything!",
-      3: "Skim the foam from the pork broth - this keeps your pozole clear and clean",
-      5: "Don't add the hominy too early - it can get mushy if overcooked",
-      6: "If you can't find dried chiles, use chipotle in adobo but reduce the quantity",
-      7: "Let people garnish their own bowls - everyone likes different amounts of everything",
-      8: "Save some chile broth separately - some people like their pozole extra spicy!"
-    },
     voiceTips: [
       "Toast your chiles until they puff but don't let them burn - bitter chiles ruin everything!",
       "Skim the foam from the pork broth - this keeps your pozole clear and clean",
@@ -579,15 +620,6 @@ export const recipes: Recipe[] = [
     servings: 10,
     description: 'Mexico\'s national dish - complex sauce with chocolate, chiles, and spices over turkey',
     voiceIntro: "¡Órale! Mole Poblano - the crown jewel of Mexican cuisine. This is not quick food, this is love food that takes time and patience.",
-    stepVoiceTips: {
-      1: "Toast each chile type separately - they all have different timing and you don't want any burnt",
-      4: "Save some turkey or chicken broth - you'll need it for consistency adjustments",
-      5: "If your mole gets too thick, thin with warm chicken broth, not water",
-      6: "Keep stirring when adding chocolate - it can seize if not mixed properly",
-      7: "Don't let the chocolate overpower - mole should be complex, not a chocolate sauce",
-      8: "Strain your mole if you want it completely smooth - traditional but optional",
-      9: "Make this a day ahead - mole improves overnight like a good relationship!"
-    },
     voiceTips: [
       "Toast each chile type separately - they all have different timing and you don't want any burnt",
       "Don't let the chocolate overpower - mole should be complex, not a chocolate sauce",
@@ -630,11 +662,6 @@ export const recipes: Recipe[] = [
     servings: 2,
     description: 'Spicy Thai stir-fry with holy basil - comfort food at its finest',
     voiceIntro: "Sawasdee kha! Today we make Pad Krapao - Thai comfort food that is spicy, aromatic, and so satisfying. Very popular street food!",
-    stepVoiceTips: {
-      2: "Don't be shy with the chilies - this dish should have some heat!",
-      3: "Cook the ground meat on high heat so it gets nice and crispy in places",
-      5: "Use Thai holy basil if you can find it - it has a different flavor than sweet basil"
-    },
     voiceTips: [
       "Use Thai holy basil if you can find it - it has a different flavor than sweet basil",
       "Don't be shy with the chilies - this dish should have some heat!",
@@ -678,12 +705,6 @@ export const recipes: Recipe[] = [
     servings: 4,
     description: 'Creamy coconut curry with chicken, eggplant, and aromatic herbs',
     voiceIntro: "Kha! Green curry is my specialty - creamy, spicy, and full of wonderful aromatics. The secret is in the paste!",
-    stepVoiceTips: {
-      1: "Make your own curry paste if you have time - the flavor is so much better!",
-      2: "Don't add all coconut milk at once - add gradually for better texture",
-      4: "Thai eggplant is traditional but regular eggplant works fine too",
-      6: "Taste and adjust - some curry pastes vary in saltiness"
-    },
     voiceTips: [
       "Make your own curry paste if you have time - the flavor is so much better!",
       "Don't add all the coconut milk at once - add gradually for better texture",
@@ -739,14 +760,6 @@ export const recipes: Recipe[] = [
     servings: 2,
     description: 'Thailand\'s national dish - sweet, sour, and salty stir-fried noodles',
     voiceIntro: "Sawasdee! Pad Thai is Thailand's most famous dish. Balance is everything - sweet, sour, salty, and just a little spicy!",
-    stepVoiceTips: {
-      1: "Soak your rice noodles in warm water until just flexible - don't overcook them in water!",
-      2: "Have all ingredients prepped before you start - Pad Thai cooks very fast",
-      5: "Push ingredients to one side of wok when adding eggs - this way they set properly",
-      6: "Add tamarind paste gradually - some brands are more sour than others",
-      7: "If you can't find tamarind, substitute with lime juice and a tiny bit of vinegar",
-      8: "Bean sprouts should stay crunchy - add them at the very end"
-    },
     voiceTips: [
       "Soak your rice noodles in warm water until just flexible - don't overcook them in water!",
       "Have all ingredients prepped before you start - Pad Thai cooks very fast",
@@ -803,14 +816,6 @@ export const recipes: Recipe[] = [
     servings: 4,
     description: 'Northern Thai coconut curry noodle soup with crispy noodles on top',
     voiceIntro: "Sawasdee kha! Khao Soi is northern Thailand's treasure - rich coconut curry soup with crispy noodles on top. So comforting!",
-    stepVoiceTips: {
-      1: "Fry some noodles until crispy for topping - this adds wonderful texture contrast",
-      3: "Don't let the coconut milk boil vigorously - it will separate and look broken",
-      4: "Red curry paste works if you can't find Khao Soi paste, but add extra spices",
-      5: "Chicken thighs are better than breast - they stay tender and juicy",
-      7: "Pickle mustard greens are traditional but cabbage works as substitute",
-      8: "Serve with lime, shallots, and pickled mustard greens on the side"
-    },
     voiceTips: [
       "Fry some noodles until crispy for topping - this adds wonderful texture contrast",
       "Don't let the coconut milk boil vigorously - it will separate and look broken",
@@ -865,14 +870,6 @@ export const recipes: Recipe[] = [
     servings: 6,
     description: 'Rich, fragrant Persian-influenced curry with tender beef and potatoes',
     voiceIntro: "Sawasdee! Massaman is the gentle curry - rich, fragrant, with Persian influences. Perfect for special occasions!",
-    stepVoiceTips: {
-      2: "Beef chuck roast is perfect for this - it becomes incredibly tender when slow-cooked",
-      3: "Toast your peanuts lightly before adding - brings out more flavor",
-      4: "Don't rush the cooking - low and slow makes the beef melt in your mouth",
-      5: "Potatoes should be tender but not falling apart - add them later in cooking",
-      6: "Tamarind paste adds the perfect sour note - don't skip it!",
-      7: "If curry gets too thick, add more coconut milk or beef broth"
-    },
     voiceTips: [
       "Beef chuck roast is perfect for this - it becomes incredibly tender when slow-cooked",
       "Toast your peanuts lightly before adding - brings out more flavor",
