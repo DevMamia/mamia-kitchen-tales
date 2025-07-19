@@ -7,7 +7,6 @@ import { Badge } from '@/components/ui/badge';
 import { getRecipeOfWeek, getFeaturedRecipes, getRecipesByCategory, Recipe } from '@/data/recipes';
 import { getMamaById } from '@/data/mamas';
 import RecipeCardStack from '@/components/RecipeCardStack';
-import LoadingSkeleton from '@/components/LoadingSkeleton';
 import CulturalEmptyState from '@/components/CulturalEmptyState';
 import { CelebrationEffects } from '@/components/CelebrationEffects';
 import PageTransition from '@/components/PageTransition';
@@ -16,21 +15,12 @@ import { useToast } from '@/hooks/use-toast';
 const Recipes = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [stackRecipes, setStackRecipes] = useState<Recipe[]>([]);
   const [likedRecipes, setLikedRecipes] = useState<Set<string>>(new Set());
   const [celebrationTrigger, setCelebrationTrigger] = useState(false);
   const [celebrationType, setCelebrationType] = useState<'heart' | 'confetti' | 'cultural'>('heart');
   const [culturalTheme, setCulturalTheme] = useState<'italian' | 'mexican' | 'thai' | undefined>(undefined);
-
-  useEffect(() => {
-    // Simulate loading time
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-    }, 1000);
-  }, []);
 
   useEffect(() => {
     let recipesToShow: Recipe[] = [];
@@ -93,7 +83,7 @@ const Recipes = () => {
   const recipeOfWeek = getRecipeOfWeek();
   const recipeOfWeekMama = recipeOfWeek ? getMamaById(recipeOfWeek.mamaId) : null;
 
-  // Cultural styling helper - simplified
+  // Cultural styling helper
   const getCulturalAccent = (mamaId: number) => {
     switch (mamaId) {
       case 1: return 'hsl(25, 82%, 65%)'; // Italian orange
@@ -103,38 +93,25 @@ const Recipes = () => {
     }
   };
 
-  if (loading) {
-    return (
-      <PageTransition>
-        <div className="h-full flex flex-col">
-          <LoadingSkeleton variant="hero" />
-          <div className="flex-1 flex items-center justify-center">
-            <LoadingSkeleton variant="cooking" />
-          </div>
-        </div>
-      </PageTransition>
-    );
-  }
-
   return (
     <PageTransition>
       <div className="h-full flex flex-col space-y-6">
-        {/* HERO: Tinder Card Stack - As per wireframe, this goes first */}
+        {/* Main Title */}
+        <h1 className="font-heading font-bold text-3xl text-foreground text-center">
+          Discover Recipes
+        </h1>
+
+        {/* HERO: Tinder Card Stack */}
         {!searchQuery && stackRecipes.length > 0 && (
-          <div className="space-y-4">
-            <h2 className="font-heading font-bold text-2xl text-foreground text-center">
-              Discover Recipes
-            </h2>
-            <RecipeCardStack
-              recipes={stackRecipes}
-              onLike={handleLikeRecipe}
-              onDislike={handleDislikeRecipe}
-              onTap={handleRecipeClick}
-            />
-          </div>
+          <RecipeCardStack
+            recipes={stackRecipes}
+            onLike={handleLikeRecipe}
+            onDislike={handleDislikeRecipe}
+            onTap={handleRecipeClick}
+          />
         )}
 
-        {/* Search Bar - Simplified copy as requested */}
+        {/* Search Bar */}
         <div className="relative">
           <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
           <Input
@@ -189,7 +166,7 @@ const Recipes = () => {
           </div>
         )}
 
-        {/* Recipe of the Week - Simplified design, moved to bottom */}
+        {/* Recipe of the Week - Bottom when not searching */}
         {!searchQuery && recipeOfWeek && recipeOfWeekMama && (
           <div className="mt-8">
             <div 
