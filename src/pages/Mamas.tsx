@@ -7,7 +7,7 @@ import { mamas } from '@/data/mamas';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 
-// Enhanced mamas display with cultural design elements
+// Using mamas from centralized data with character card images
 const mamasDisplay = mamas.map(mama => ({
   id: mama.id,
   name: mama.name,
@@ -24,27 +24,9 @@ const mamasDisplay = mamas.map(mama => ({
           mama.emoji === '🌶️' ? "grinding spices" : "pounding curry paste",
   watermark: mama.emoji === '🍷' ? Wine : mama.emoji === '🌶️' ? Flower2 : Leaf,
   accent: mama.emoji,
-  characterImage: mama.id === 1 ? "/lovable-uploads/Nonna.png" :
-                 mama.id === 2 ? "/lovable-uploads/Abuela.png" :
-                 "/lovable-uploads/Yai.png",
-  // Cultural styling
-  culturalTheme: mama.id === 1 ? 'italian' : mama.id === 2 ? 'mexican' : 'thai',
-  culturalColors: mama.id === 1 ? {
-    primary: 'hsl(25, 82%, 65%)',
-    secondary: 'hsl(45, 85%, 60%)',
-    accent: 'hsl(14, 60%, 35%)',
-    pattern: 'bg-italian-pattern'
-  } : mama.id === 2 ? {
-    primary: 'hsl(350, 80%, 60%)',
-    secondary: 'hsl(18, 90%, 55%)',
-    accent: 'hsl(40, 85%, 50%)',
-    pattern: 'bg-mexican-pattern'
-  } : {
-    primary: 'hsl(120, 60%, 50%)',
-    secondary: 'hsl(50, 90%, 55%)',
-    accent: 'hsl(140, 30%, 45%)',
-    pattern: 'bg-thai-pattern'
-  }
+  characterImage: mama.id === 1 ? "/lovable-uploads/f93a6daa-6445-4c83-aaf2-c75c2b4824bc.png" :
+                 mama.id === 2 ? "/lovable-uploads/95d2de88-6de2-4a87-b5e5-deda3096c455.png" :
+                 "/lovable-uploads/35c616ae-06a9-49cb-b3e3-287c89fb124d.png"
 }));
 
 const Mamas = () => {
@@ -81,47 +63,14 @@ const Mamas = () => {
                 <CarouselItem key={mama.id} className="basis-[85%] pl-4">
                   <div 
                     onClick={() => navigate(`/mama/${mama.id}`)}
-                    className="relative h-full rounded-3xl overflow-hidden shadow-warm cursor-pointer transition-all duration-300 hover:scale-105 group"
-                    style={{
-                      background: `linear-gradient(135deg, ${mama.culturalColors.primary}15, ${mama.culturalColors.secondary}10)`,
-                      border: `2px solid ${mama.culturalColors.primary}20`
-                    }}
+                    className="relative h-full rounded-3xl overflow-hidden shadow-warm cursor-pointer transition-transform duration-200 hover:scale-105 bg-cream"
                   >
-                    {/* Cultural pattern overlay */}
-                    <div className={`absolute inset-0 opacity-20 ${mama.culturalColors.pattern}`}></div>
-                    
-                    {/* Character Card Image with enhanced styling */}
-                    <div className="relative w-full h-full">
-                      <img 
-                        src={mama.characterImage} 
-                        alt={`${mama.name} character card`}
-                        className="w-full h-full object-contain transition-transform duration-300 group-hover:scale-105"
-                      />
-                      
-                      {/* Cultural accent elements */}
-                      <div 
-                        className="absolute top-4 left-4 w-3 h-3 rounded-full opacity-60 animate-pulse"
-                        style={{ backgroundColor: mama.culturalColors.primary }}
-                      ></div>
-                      <div 
-                        className="absolute top-4 right-4 w-2 h-2 rounded-full opacity-40"
-                        style={{ backgroundColor: mama.culturalColors.secondary }}
-                      ></div>
-                      <div 
-                        className="absolute bottom-4 left-4 w-2 h-2 rounded-full opacity-30"
-                        style={{ backgroundColor: mama.culturalColors.accent }}
-                      ></div>
-                      
-                      {/* Enhanced watermark with cultural styling */}
-                      <div 
-                        className="absolute bottom-6 right-6 opacity-10 group-hover:opacity-20 transition-opacity duration-300"
-                        style={{ color: mama.culturalColors.primary }}
-                      >
-                        <WatermarkIcon size={48} />
-                      </div>
-                      
-                      {/* Name badge removed as requested */}
-                    </div>
+                    {/* Character Card Image */}
+                    <img 
+                      src={mama.characterImage} 
+                      alt={`${mama.name} character card`}
+                      className="w-full h-full object-contain"
+                    />
                   </div>
                 </CarouselItem>
               );
@@ -129,21 +78,14 @@ const Mamas = () => {
           </CarouselContent>
         </Carousel>
 
-        {/* Enhanced progress dots with cultural theming */}
-        <div className="flex justify-center gap-3 mt-6">
-          {mamasDisplay.map((mama, index) => (
+        {/* Progress dots */}
+        <div className="flex justify-center gap-2 mt-4">
+          {mamasDisplay.map((_, index) => (
             <button
               key={index}
-              className={`transition-all duration-300 rounded-full ${
-                index === current 
-                  ? 'w-8 h-3 shadow-lg' 
-                  : 'w-3 h-3 hover:scale-110'
+              className={`w-2 h-2 rounded-full transition-all duration-200 ${
+                index === current ? 'bg-primary w-6' : 'bg-muted-foreground/30'
               }`}
-              style={{
-                backgroundColor: index === current 
-                  ? mama.culturalColors.primary 
-                  : `${mama.culturalColors.primary}40`
-              }}
               onClick={() => api?.scrollTo(index)}
             />
           ))}
