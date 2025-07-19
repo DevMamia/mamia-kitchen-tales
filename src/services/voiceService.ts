@@ -41,7 +41,7 @@ export const MAMA_VOICES: Record<string, MamaVoice> = {
 };
 
 export type ConversationPhase = 'pre-cooking' | 'cooking' | 'post-cooking';
-export type ResponseSource = 'instant' | 'cached' | 'ai' | 'fallback';
+export type ResponseSource = 'instant' | 'cached' | 'ai' | 'fallback' | 'browser-tts';
 
 interface QueuedMessage {
   text: string;
