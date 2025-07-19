@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Heart, Clock, Star, Crown } from 'lucide-react';
+import { Search, Heart, Clock, Sparkles, Utensils, Fish, Leaf, Home } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
@@ -25,12 +25,12 @@ const Recipes = () => {
   const [culturalTheme, setCulturalTheme] = useState<'italian' | 'mexican' | 'thai' | undefined>(undefined);
 
   const categories = [
-    { id: 'All', label: 'All Recipes', emoji: '✨' },
-    { id: 'Meat', label: 'Meat', emoji: '🥩' },
-    { id: 'Fish', label: 'Fish', emoji: '🐟' },
-    { id: 'Vegetarian', label: 'Vegetarian', emoji: '🥬' },
-    { id: 'Quick', label: 'Quick Meals', emoji: '⚡' },
-    { id: 'Weekend', label: 'Weekend', emoji: '🏠' },
+    { id: 'All', label: 'All Recipes', icon: Sparkles },
+    { id: 'Meat', label: 'Meat', icon: Utensils },
+    { id: 'Fish', label: 'Fish', icon: Fish },
+    { id: 'Vegetarian', label: 'Vegetarian', icon: Leaf },
+    { id: 'Quick', label: 'Quick Meals', icon: Clock },
+    { id: 'Weekend', label: 'Weekend', icon: Home },
   ];
 
   useEffect(() => {
@@ -126,41 +126,32 @@ const Recipes = () => {
   return (
     <PageTransition>
       <div className="h-full flex flex-col">
-        {/* Simplified Recipe of the Week Hero */}
+        {/* Simplified Recipe of the Week with Photo */}
         {recipeOfWeek && !searchQuery && (
-          <div className="mb-6 relative rounded-lg bg-card border border-border shadow-sm">
-            <div className="p-4">
-              <div className="flex items-start gap-3">
-                <div className="flex-shrink-0">
-                  <div className="w-2 h-2 rounded-full bg-primary mb-1"></div>
-                  <Crown size={18} className="text-primary" />
+          <div className="mb-6 relative rounded-lg bg-card border border-border shadow-sm overflow-hidden">
+            <div 
+              onClick={() => handleRecipeClick(recipeOfWeek)}
+              className="cursor-pointer"
+            >
+              <div className="flex">
+                {/* Recipe Photo Placeholder */}
+                <div className="w-24 h-24 bg-muted flex-shrink-0 flex items-center justify-center">
+                  <div className="w-16 h-16 bg-muted-foreground/20 rounded-lg flex items-center justify-center">
+                    <Utensils size={20} className="text-muted-foreground" />
+                  </div>
                 </div>
-                <div className="flex-1">
+                
+                {/* Recipe Info */}
+                <div className="flex-1 p-4">
                   <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
                     Recipe of the Week
                   </p>
-                  <h3 className="font-heading font-bold text-xl text-foreground mb-1">
+                  <h3 className="font-heading font-bold text-lg text-foreground mb-1">
                     {recipeOfWeek.title}
                   </h3>
-                  <p className="text-sm text-muted-foreground mb-3">
+                  <p className="text-sm text-muted-foreground">
                     by {recipeOfWeek.mamaName}
                   </p>
-                  <div className="flex items-center gap-4 text-sm text-muted-foreground mb-3">
-                    <div className="flex items-center gap-1">
-                      <Clock size={14} />
-                      <span>{recipeOfWeek.cookingTime}</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Heart size={14} />
-                      <span>{recipeOfWeek.difficulty}</span>
-                    </div>
-                  </div>
-                  <button 
-                    onClick={() => handleRecipeClick(recipeOfWeek)}
-                    className="text-sm font-medium text-primary hover:text-primary/80 transition-colors"
-                  >
-                    Cook This Week's Special →
-                  </button>
                 </div>
               </div>
             </div>
@@ -174,11 +165,11 @@ const Recipes = () => {
             placeholder="Search recipes, ingredients..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 border-border focus:border-primary/50 transition-colors"
+            className="pl-10 bg-card border-border focus:border-border focus:ring-1 focus:ring-border"
           />
         </div>
 
-        {/* Simplified Category Carousel */}
+        {/* Simplified Category Carousel with Icons */}
         {!searchQuery && (
           <div className="mb-6 relative">
             <Carousel
@@ -190,21 +181,26 @@ const Recipes = () => {
               className="w-full"
             >
               <CarouselContent className="-ml-2 md:-ml-4">
-                {categories.map((category) => (
-                  <CarouselItem key={category.id} className="pl-2 md:pl-4 basis-auto">
-                    <div
-                      className={`cursor-pointer px-4 py-3 rounded-lg transition-all duration-200 border min-w-[100px] text-center ${
-                        selectedCategory === category.id
-                          ? 'bg-primary text-primary-foreground border-primary shadow-sm'
-                          : 'bg-card hover:bg-muted/50 border-border hover:border-primary/30'
-                      }`}
-                      onClick={() => setSelectedCategory(category.id)}
-                    >
-                      <div className="text-lg mb-1">{category.emoji}</div>
-                      <div className="font-medium text-xs">{category.label}</div>
-                    </div>
-                  </CarouselItem>
-                ))}
+                {categories.map((category) => {
+                  const IconComponent = category.icon;
+                  return (
+                    <CarouselItem key={category.id} className="pl-2 md:pl-4 basis-auto">
+                      <div
+                        className={`cursor-pointer px-4 py-3 rounded-lg transition-all duration-200 border min-w-[100px] text-center ${
+                          selectedCategory === category.id
+                            ? 'bg-card text-foreground border-border shadow-sm'
+                            : 'bg-background hover:bg-card border-border/50 hover:border-border'
+                        }`}
+                        onClick={() => setSelectedCategory(category.id)}
+                      >
+                        <div className="mb-1 flex justify-center">
+                          <IconComponent size={16} className="text-muted-foreground" />
+                        </div>
+                        <div className="font-medium text-xs text-foreground">{category.label}</div>
+                      </div>
+                    </CarouselItem>
+                  );
+                })}
               </CarouselContent>
               <CarouselPrevious className="hidden md:flex" />
               <CarouselNext className="hidden md:flex" />
@@ -232,7 +228,7 @@ const Recipes = () => {
                     <div 
                       key={recipe.id}
                       onClick={() => handleRecipeClick(recipe)}
-                      className="bg-card rounded-lg p-4 shadow-sm hover:shadow-md cursor-pointer transition-all duration-200 border border-border hover:border-primary/30"
+                      className="bg-card rounded-lg p-4 shadow-sm hover:shadow-md cursor-pointer transition-all duration-200 border border-border hover:border-border"
                     >
                       <h4 className="font-heading font-bold text-lg text-foreground mb-1">{recipe.title}</h4>
                       <p className="text-muted-foreground text-sm mb-2">by {recipe.mamaName}</p>
@@ -262,8 +258,15 @@ const Recipes = () => {
               {stackRecipes.length > 0 ? (
                 <div>
                    <h3 className="font-heading font-bold text-xl text-foreground mb-4 flex items-center gap-2">
-                     <span className="text-lg">
-                       {categories.find(cat => cat.id === selectedCategory)?.emoji || '✨'}
+                     <span className="flex items-center justify-center">
+                       {(() => {
+                         const category = categories.find(cat => cat.id === selectedCategory);
+                         if (category) {
+                           const IconComponent = category.icon;
+                           return <IconComponent size={18} className="text-muted-foreground" />;
+                         }
+                         return <Sparkles size={18} className="text-muted-foreground" />;
+                       })()}
                      </span>
                      {selectedCategory === 'All' ? 'Featured' : selectedCategory} Recipes
                      <span className="text-sm text-muted-foreground font-normal">
