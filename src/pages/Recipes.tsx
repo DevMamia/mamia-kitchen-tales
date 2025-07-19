@@ -25,11 +25,11 @@ const Recipes = () => {
   const [culturalTheme, setCulturalTheme] = useState<'italian' | 'mexican' | 'thai' | undefined>(undefined);
 
   const categories = [
-    { id: 'All', label: 'All', emoji: '✨' },
+    { id: 'All', label: 'All Recipes', emoji: '✨' },
     { id: 'Meat', label: 'Meat', emoji: '🥩' },
     { id: 'Fish', label: 'Fish', emoji: '🐟' },
     { id: 'Vegetarian', label: 'Vegetarian', emoji: '🥬' },
-    { id: 'Quick', label: 'Quick', emoji: '⚡' },
+    { id: 'Quick', label: 'Quick Meals', emoji: '⚡' },
     { id: 'Weekend', label: 'Weekend', emoji: '🏠' },
   ];
 
@@ -126,54 +126,59 @@ const Recipes = () => {
   return (
     <PageTransition>
       <div className="h-full flex flex-col">
-        {/* Compact Recipe of the Week Hero */}
+        {/* Simplified Recipe of the Week Hero */}
         {recipeOfWeek && !searchQuery && (
-          <div className="mb-6 relative overflow-hidden rounded-xl bg-slate-900 shadow-xl">
-            <div className="absolute inset-0 bg-gradient-to-r from-slate-900/90 to-slate-800/90"></div>
-            <div className="p-3 text-white relative">
-              <div className="absolute top-3 right-3 opacity-20">
-                <Star size={40} className="text-white" />
-              </div>
-              <div className="relative">
-                <div className="flex items-center gap-2 mb-1">
-                  <Crown size={16} className="text-yellow-300" />
-                  <span className="text-xs font-bold tracking-wider opacity-90">RECIPE OF THE WEEK</span>
+          <div className="mb-6 relative rounded-lg bg-card border border-border shadow-sm">
+            <div className="p-4">
+              <div className="flex items-start gap-3">
+                <div className="flex-shrink-0">
+                  <div className="w-2 h-2 rounded-full bg-primary mb-1"></div>
+                  <Crown size={18} className="text-primary" />
                 </div>
-                <h3 className="font-heading font-bold text-lg mb-1">{recipeOfWeek.title}</h3>
-                <p className="text-xs opacity-90 mb-2">by {recipeOfWeek.mamaName}</p>
-                <div className="flex items-center gap-3 text-xs">
-                  <div className="flex items-center gap-1">
-                    <Clock size={14} />
-                    <span>{recipeOfWeek.cookingTime}</span>
+                <div className="flex-1">
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
+                    Recipe of the Week
+                  </p>
+                  <h3 className="font-heading font-bold text-xl text-foreground mb-1">
+                    {recipeOfWeek.title}
+                  </h3>
+                  <p className="text-sm text-muted-foreground mb-3">
+                    by {recipeOfWeek.mamaName}
+                  </p>
+                  <div className="flex items-center gap-4 text-sm text-muted-foreground mb-3">
+                    <div className="flex items-center gap-1">
+                      <Clock size={14} />
+                      <span>{recipeOfWeek.cookingTime}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Heart size={14} />
+                      <span>{recipeOfWeek.difficulty}</span>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-1">
-                    <Heart size={14} />
-                    <span>{recipeOfWeek.difficulty}</span>
-                  </div>
+                  <button 
+                    onClick={() => handleRecipeClick(recipeOfWeek)}
+                    className="text-sm font-medium text-primary hover:text-primary/80 transition-colors"
+                  >
+                    Cook This Week's Special →
+                  </button>
                 </div>
-                <button 
-                  onClick={() => handleRecipeClick(recipeOfWeek)}
-                  className="mt-3 bg-white/20 backdrop-blur-sm px-3 py-1.5 rounded-lg text-xs font-heading font-medium hover:bg-white/30 transition-all duration-200"
-                >
-                  Cook This Week's Special
-                </button>
               </div>
             </div>
           </div>
         )}
 
-        {/* Search Bar */}
-        <div className="relative mb-4">
+        {/* Simplified Search Bar */}
+        <div className="relative mb-6">
           <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search recipes, ingredients, or cooking guides..."
+            placeholder="Search recipes, ingredients..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 bg-background/80 backdrop-blur-sm border-primary/20 focus:border-primary rounded-xl"
+            className="pl-10 border-border focus:border-primary/50 transition-colors"
           />
         </div>
 
-        {/* Category Carousel - Only show when not searching */}
+        {/* Simplified Category Carousel */}
         {!searchQuery && (
           <div className="mb-6 relative">
             <Carousel
@@ -188,15 +193,15 @@ const Recipes = () => {
                 {categories.map((category) => (
                   <CarouselItem key={category.id} className="pl-2 md:pl-4 basis-auto">
                     <div
-                      className={`cursor-pointer p-4 rounded-2xl transition-all duration-300 hover-scale min-w-[120px] text-center ${
+                      className={`cursor-pointer px-4 py-3 rounded-lg transition-all duration-200 border min-w-[100px] text-center ${
                         selectedCategory === category.id
-                          ? 'bg-primary text-primary-foreground shadow-lg scale-105'
-                          : 'bg-card hover:bg-muted border border-border'
+                          ? 'bg-primary text-primary-foreground border-primary shadow-sm'
+                          : 'bg-card hover:bg-muted/50 border-border hover:border-primary/30'
                       }`}
                       onClick={() => setSelectedCategory(category.id)}
                     >
-                      <div className="text-2xl mb-2">{category.emoji}</div>
-                      <div className="font-medium text-sm">{category.label}</div>
+                      <div className="text-lg mb-1">{category.emoji}</div>
+                      <div className="font-medium text-xs">{category.label}</div>
                     </div>
                   </CarouselItem>
                 ))}
@@ -213,25 +218,25 @@ const Recipes = () => {
             /* Search Results Mode */
             <div>
               <div className="mb-4">
-                <h3 className="font-heading font-bold text-xl text-slate-800 mb-2">
+                <h3 className="font-heading font-bold text-xl text-foreground mb-2">
                   Search Results
                 </h3>
-                <p className="text-slate-600">
+                <p className="text-muted-foreground">
                   {stackRecipes.length} result{stackRecipes.length !== 1 ? 's' : ''} for "{searchQuery}"
                 </p>
               </div>
               
               {stackRecipes.length > 0 ? (
-                <div className="grid gap-4">
+                <div className="grid gap-3">
                   {stackRecipes.map((recipe) => (
                     <div 
                       key={recipe.id}
                       onClick={() => handleRecipeClick(recipe)}
-                      className="bg-white rounded-xl p-4 shadow-md hover:shadow-lg cursor-pointer transition-all duration-200 border border-slate-100"
+                      className="bg-card rounded-lg p-4 shadow-sm hover:shadow-md cursor-pointer transition-all duration-200 border border-border hover:border-primary/30"
                     >
-                      <h4 className="font-heading font-bold text-lg text-slate-800 mb-1">{recipe.title}</h4>
-                      <p className="text-slate-600 text-sm mb-2">by {recipe.mamaName}</p>
-                      <div className="flex items-center gap-4 text-sm text-slate-500">
+                      <h4 className="font-heading font-bold text-lg text-foreground mb-1">{recipe.title}</h4>
+                      <p className="text-muted-foreground text-sm mb-2">by {recipe.mamaName}</p>
+                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
                         <div className="flex items-center gap-1">
                           <Clock size={14} />
                           <span>{recipe.cookingTime}</span>
@@ -256,12 +261,12 @@ const Recipes = () => {
             <div>
               {stackRecipes.length > 0 ? (
                 <div>
-                   <h3 className="font-heading font-bold text-xl text-slate-800 mb-4 flex items-center gap-2">
-                     <span className="text-xl">
+                   <h3 className="font-heading font-bold text-xl text-foreground mb-4 flex items-center gap-2">
+                     <span className="text-lg">
                        {categories.find(cat => cat.id === selectedCategory)?.emoji || '✨'}
                      </span>
                      {selectedCategory === 'All' ? 'Featured' : selectedCategory} Recipes
-                     <span className="text-sm text-slate-500 font-normal">
+                     <span className="text-sm text-muted-foreground font-normal">
                        ({stackRecipes.length})
                      </span>
                    </h3>
