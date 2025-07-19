@@ -39,8 +39,15 @@ const Cook = () => {
     return recipeId ? getRecipeWithMama(recipeId) : null;
   }, [recipeId]);
   
-  // Initialize conversation memory (call hook directly, not inside useMemo)
-  const conversationMemory = recipeData ? useConversationMemory(recipeData.recipe, recipeData.mama) : null;
+  // Always call useConversationMemory hook - pass dummy values when no recipe data
+  // This ensures consistent hook call order on every render
+  const dummyRecipe = { id: '', title: '', instructions: [], stepVoiceTips: {}, voiceTips: [], stepTimers: [] } as any;
+  const dummyMama = { id: 0, name: '', emoji: '', accent: '', voiceId: '' } as any;
+  
+  const conversationMemory = useConversationMemory(
+    recipeData?.recipe || dummyRecipe,
+    recipeData?.mama || dummyMama
+  );
   
   // Optimize tip placements when recipe data loads (memoized)
   const memoizedOptimizedTips = useMemo(() => {
