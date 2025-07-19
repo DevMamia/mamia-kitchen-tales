@@ -226,7 +226,9 @@ export const PhotoApprovalModal = ({
       {/* Celebration Effects */}
       {showCelebration && (
         <CelebrationEffects
-          achievements={achievementsUnlocked}
+          trigger={showCelebration}
+          type="completion"
+          cultural="italian"
           onComplete={() => setShowCelebration(false)}
         />
       )}

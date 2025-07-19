@@ -216,7 +216,9 @@ export const AchievementNotificationModal = ({
       {/* Celebration Effects */}
       {showCelebration && (
         <CelebrationEffects
-          achievements={[currentAchievement]}
+          trigger={showCelebration}
+          type="completion"
+          cultural="italian"
           onComplete={() => setShowCelebration(false)}
         />
       )}
