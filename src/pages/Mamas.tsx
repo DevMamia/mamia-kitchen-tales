@@ -24,10 +24,8 @@ const mamasDisplay = mamas.map(mama => ({
           mama.emoji === '🌶️' ? "grinding spices" : "pounding curry paste",
   watermark: mama.emoji === '🍷' ? Wine : mama.emoji === '🌶️' ? Flower2 : Leaf,
   accent: mama.emoji,
-  // Use actual uploaded images or fallback to placeholders
-  characterImage: mama.id === 1 ? "https://images.unsplash.com/photo-1618160702438-9b02ab6515c9?w=400&h=600&fit=crop" :
-                 mama.id === 2 ? "https://images.unsplash.com/photo-1721322800607-8c38375eef04?w=400&h=600&fit=crop" :
-                 "https://images.unsplash.com/photo-1582562124811-c09040d0a901?w=400&h=600&fit=crop",
+  // Use actual uploaded character images
+  characterImage: mama.avatar,
   culturalColor: mama.id === 1 ? 'hsl(25, 82%, 65%)' : // Italian orange
                 mama.id === 2 ? 'hsl(350, 80%, 60%)' : // Mexican red  
                 'hsl(120, 60%, 50%)' // Thai green
@@ -77,13 +75,17 @@ const Mamas = () => {
                         <WatermarkIcon size={48} />
                       </div>
                       
-                      {/* Character image placeholder */}
+                      {/* Character image */}
                       <div className="w-full h-full flex flex-col items-center justify-center p-8">
                         <div 
-                          className="w-32 h-32 rounded-full mb-6 flex items-center justify-center text-6xl shadow-lg"
-                          style={{ backgroundColor: `${mama.culturalColor}20` }}
+                          className="w-32 h-32 rounded-full mb-6 overflow-hidden shadow-lg border-4"
+                          style={{ borderColor: mama.culturalColor }}
                         >
-                          {mama.accent}
+                          <img 
+                            src={mama.characterImage} 
+                            alt={mama.name}
+                            className="w-full h-full object-cover"
+                          />
                         </div>
                         
                         <h2 className="text-2xl font-heading font-bold mb-2" style={{ color: mama.culturalColor }}>

@@ -26,7 +26,7 @@ export const mamas: Mama[] = [
     philosophy: 'Cooking is an act of love, passed down through generations.',
     signatureDish: 'Carbonara della Nonna',
     cookbookTitle: 'Nonna\'s Kitchen Secrets',
-    avatar: '/placeholder.svg'
+    avatar: '/lovable-uploads/Nonna.png'
   },
   {
     id: 2,
@@ -40,7 +40,7 @@ export const mamas: Mama[] = [
     philosophy: 'Each spice tells a story, each dish carries our history.',
     signatureDish: 'Mole Negro Oaxaqueño',
     cookbookTitle: 'Sabores de Mi Tierra',
-    avatar: '/placeholder.svg'
+    avatar: '/lovable-uploads/Abuela.png'
   },
   {
     id: 3,
@@ -54,7 +54,7 @@ export const mamas: Mama[] = [
     philosophy: 'Balance is everything - sweet, sour, salty, spicy in harmony.',
     signatureDish: 'Green Curry with Thai Basil',
     cookbookTitle: 'Yai Malee\'s Traditional Recipes',
-    avatar: '/placeholder.svg'
+    avatar: '/lovable-uploads/Yai.png'
   }
 ];
 

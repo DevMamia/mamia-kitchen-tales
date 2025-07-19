@@ -21,7 +21,7 @@ export const Header = () => {
       <div className="flex items-center justify-between h-20 px-4">
         <div className="flex items-center gap-3">
           <img 
-            src="/lovable-uploads/35c616ae-06a9-49cb-b3e3-287c89fb124d.png" 
+            src="/lovable-uploads/LogoPrem.PNG" 
             alt="MAMIA Logo" 
             className="w-12 h-12 object-contain"
           />
