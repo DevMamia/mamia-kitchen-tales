@@ -7,32 +7,32 @@
 /* MAMIA Design System - Warm Cooking App Colors */
 @layer base {
   :root {
-    --background: 43 23% 96%;  /* Soft cream #FFF8DC */
+    --background: 39 100% 97%;  /* Bright cream #FFFCF0 */
     --foreground: 14 26% 15%;  /* Rich brown #3E2723 */
 
-    --card: 43 23% 98%;
+    --card: 39 100% 98%;
     --card-foreground: 14 26% 15%;
 
-    --popover: 43 23% 96%;
+    --popover: 39 100% 97%;
     --popover-foreground: 14 26% 15%;
 
     --primary: 11 75% 55%;     /* Warm terracotta #E35336 */
-    --primary-foreground: 43 23% 96%;
+    --primary-foreground: 39 100% 97%;
 
-    --secondary: 43 15% 90%;
+    --secondary: 39 15% 90%;
     --secondary-foreground: 14 26% 15%;
 
-    --muted: 43 15% 92%;
+    --muted: 39 15% 92%;
     --muted-foreground: 14 16% 46%;
 
-    --accent: 43 15% 88%;
+    --accent: 39 15% 88%;
     --accent-foreground: 14 26% 15%;
 
     --destructive: 0 100% 27%;  /* Deep red #8B0000 */
-    --destructive-foreground: 43 23% 96%;
+    --destructive-foreground: 39 100% 97%;
 
-    --border: 43 20% 85%;
-    --input: 43 20% 85%;
+    --border: 39 20% 85%;
+    --input: 39 20% 85%;
     --ring: 11 75% 55%;
 
     --radius: 0.75rem;
@@ -56,7 +56,7 @@
     --thai-gold: 50 90% 55%;          /* Thai gold #FFD700 */
 
     /* Dynamic backgrounds */
-    --marble-texture: linear-gradient(45deg, hsl(43 23% 96%) 0%, hsl(43 23% 98%) 50%, hsl(43 23% 94%) 100%);
+    --marble-texture: linear-gradient(45deg, hsl(39 100% 97%) 0%, hsl(39 100% 98%) 50%, hsl(39 100% 94%) 100%);
     --tile-pattern: repeating-conic-gradient(hsl(18 90% 55%) 0deg 90deg, hsl(40 85% 50%) 90deg 180deg);
     --silk-texture: radial-gradient(ellipse at center, hsl(140 30% 45%) 0%, hsl(60 40% 50%) 70%, hsl(50 90% 55%) 100%);
 
@@ -73,13 +73,13 @@
     --pattern-checkered: linear-gradient(90deg, transparent 48%, rgba(139, 69, 19, 0.015) 48%, rgba(139, 69, 19, 0.015) 52%, transparent 52%),
                          linear-gradient(0deg, transparent 48%, rgba(139, 69, 19, 0.015) 48%, rgba(139, 69, 19, 0.015) 52%, transparent 52%);
 
-    --sidebar-background: 43 23% 96%;
+    --sidebar-background: 39 100% 97%;
     --sidebar-foreground: 14 26% 15%;
     --sidebar-primary: 11 75% 55%;
-    --sidebar-primary-foreground: 43 23% 96%;
-    --sidebar-accent: 43 15% 88%;
+    --sidebar-primary-foreground: 39 100% 97%;
+    --sidebar-accent: 39 15% 88%;
     --sidebar-accent-foreground: 14 26% 15%;
-    --sidebar-border: 43 20% 85%;
+    --sidebar-border: 39 20% 85%;
     --sidebar-ring: 11 75% 55%;
   }
 }
