@@ -78,10 +78,6 @@ export const recipes: Recipe[] = [
     description: 'Spicy tomato pasta with garlic and chillies',
     recipeOfWeek: true,
     voiceIntro: "Ciao! Today we make my beautiful Penne all'Arrabbiata. Very simple but you must do with passion!",
-    displayTips: [
-      "Use real San Marzano tomatoes if you can find them, they make all the difference",
-      "Don't let the garlic burn - it becomes bitter!"
-    ],
     stepVoiceTips: {
       1: "Make sure your garlic doesn't burn - burned garlic is bitter, no good!",
       3: "Don't put too much salt in the pasta water - the pasta will absorb it",
@@ -130,14 +126,10 @@ export const recipes: Recipe[] = [
     servings: 4,
     description: 'Traditional Italian hunter\'s chicken with vegetables',
     voiceIntro: "Ciao mia cara! Today we cook my beautiful Chicken Cacciatore. Is like cooking with love for your famiglia!",
-    displayTips: [
-      "Pat the chicken very dry before browning for crispy skin",
-      "Don't move the chicken too much when browning"
-    ],
     stepVoiceTips: {
-      2: "Pat the chicken very dry before browning - this gives you beautiful crispy skin",
-      3: "Don't move the chicken too much when browning - let it develop that golden color",
-      5: "Add a little wine if you have - makes everything more delicious!"
+      1: "Pat the chicken very dry before seasoning - this gives you beautiful crispy skin when you brown it",
+      2: "Don't move the chicken too much when browning - let it develop that golden color, tesoro",
+      5: "Add a little wine if you have - makes everything more delicious, just like nonna used to do!"
     },
     voiceTips: [
       "Pat the chicken very dry before browning - this gives you beautiful crispy skin",
@@ -178,10 +170,6 @@ export const recipes: Recipe[] = [
     servings: 4,
     description: 'Rome\'s iconic pasta dish with eggs, cheese, and guanciale - no cream!',
     voiceIntro: "Ah, Carbonara! The pride of Roma. Listen carefully - no cream, no peas, no nonsense. Just perfection!",
-    displayTips: [
-      "No cream! Real Carbonara never has cream",
-      "Take the pan off heat when mixing eggs - they must not scramble"
-    ],
     stepVoiceTips: {
       3: "Save that pasta water - it's liquid gold for making the sauce creamy",
       4: "Use only Pecorino Romano cheese, not Parmesan - this is the Roman way",
@@ -245,10 +233,6 @@ export const recipes: Recipe[] = [
     servings: 8,
     description: 'Traditional Emilian lasagna with rich ragù Bolognese and creamy béchamel',
     voiceIntro: "Bene, mia cara! Today we make lasagna from my nonna's recipe. This takes time but is worth every minute!",
-    displayTips: [
-      "Make your ragù the day before - it gets better with time",
-      "Let the lasagna rest after baking for easier cutting"
-    ],
     stepVoiceTips: {
       1: "Use San Marzano tomatoes in your ragù - they're sweeter, more delicate",
       2: "Don't make your béchamel too thick - it should coat the spoon like cream",
@@ -311,10 +295,6 @@ export const recipes: Recipe[] = [
     servings: 4,
     description: 'Milanese braised veal shanks with aromatic vegetables and bright gremolata',
     voiceIntro: "Ah, Osso Buco! This is Sunday dinner, special occasion food. We cook with patience and amore!",
-    displayTips: [
-      "Ask your butcher to cut the shanks 2 inches thick",
-      "Don't rush the browning - take your time for beautiful color"
-    ],
     stepVoiceTips: {
       1: "Tie the shanks with kitchen string so they don't fall apart during cooking",
       2: "Don't rush the browning - each side needs 4-5 minutes for beautiful color",
@@ -360,10 +340,6 @@ export const recipes: Recipe[] = [
     servings: 2,
     description: 'Simple and delicious melted cheese in warm tortillas',
     voiceIntro: "¡Órale! Let's make some delicious quesadillas, mi amor. Simple but so, so good when done right!",
-    displayTips: [
-      "Don't overfill - the filling will spill out",
-      "Let the tortilla get golden brown before flipping"
-    ],
     stepVoiceTips: {
       2: "Don't put too much filling or it will spill everywhere - less is more!",
       3: "Let the tortilla get golden brown before flipping - patience, mija!",
@@ -413,10 +389,6 @@ export const recipes: Recipe[] = [
     servings: 6,
     description: 'Smoky shredded chicken in chipotle tomato sauce - perfect for tacos',
     voiceIntro: "¡Ay, qué rico! Chicken Tinga is one of my favorites. Perfect for tacos, tostadas, anything you want!",
-    displayTips: [
-      "Don't shred the chicken too fine - you want texture",
-      "This tastes even better the next day!"
-    ],
     stepVoiceTips: {
       2: "Save some cooking liquid - if it gets too dry, add a little back in",
       4: "Don't shred the chicken too fine - you want some texture, not chicken fluff!",
@@ -474,10 +446,6 @@ export const recipes: Recipe[] = [
     servings: 4,
     description: 'Corn tortillas filled with chicken and smothered in bright green tomatillo salsa',
     voiceIntro: "¡Mira! Enchiladas Verdes are pure comfort food. The green sauce is everything - bright, fresh, with just the right kick!",
-    displayTips: [
-      "Don't skip charring the tomatillos - this adds depth to your salsa",
-      "Warm your tortillas well so they don't crack when rolling"
-    ],
     stepVoiceTips: {
       1: "Don't skip charring the tomatillos - this adds so much depth to your salsa verde",
       4: "Warm your tortillas well so they don't crack when rolling - nobody wants broken enchiladas!",
@@ -542,10 +510,6 @@ export const recipes: Recipe[] = [
     servings: 8,
     description: 'Traditional Mexican soup with pork, hominy, and red chile broth - perfect for celebrations',
     voiceIntro: "¡Ay, Pozole! This is celebration food, weekend food. Takes time but fills the heart and belly with happiness!",
-    displayTips: [
-      "Toast your chiles until they puff but don't burn them",
-      "Skim the foam from the pork broth for clear pozole"
-    ],
     stepVoiceTips: {
       2: "Toast your chiles until they puff but don't let them burn - bitter chiles ruin everything!",
       3: "Skim the foam from the pork broth - this keeps your pozole clear and clean",
@@ -615,10 +579,6 @@ export const recipes: Recipe[] = [
     servings: 10,
     description: 'Mexico\'s national dish - complex sauce with chocolate, chiles, and spices over turkey',
     voiceIntro: "¡Órale! Mole Poblano - the crown jewel of Mexican cuisine. This is not quick food, this is love food that takes time and patience.",
-    displayTips: [
-      "Toast each chile type separately - they have different timing",
-      "Make this a day ahead - mole improves overnight!"
-    ],
     stepVoiceTips: {
       1: "Toast each chile type separately - they all have different timing and you don't want any burnt",
       4: "Save some turkey or chicken broth - you'll need it for consistency adjustments",
@@ -670,10 +630,6 @@ export const recipes: Recipe[] = [
     servings: 2,
     description: 'Spicy Thai stir-fry with holy basil - comfort food at its finest',
     voiceIntro: "Sawasdee kha! Today we make Pad Krapao - Thai comfort food that is spicy, aromatic, and so satisfying. Very popular street food!",
-    displayTips: [
-      "Use Thai holy basil if you can find it - different from sweet basil",
-      "Don't be shy with the chilies - this dish should have heat!"
-    ],
     stepVoiceTips: {
       2: "Don't be shy with the chilies - this dish should have some heat!",
       3: "Cook the ground meat on high heat so it gets nice and crispy in places",
@@ -722,15 +678,11 @@ export const recipes: Recipe[] = [
     servings: 4,
     description: 'Creamy coconut curry with chicken, eggplant, and aromatic herbs',
     voiceIntro: "Kha! Green curry is my specialty - creamy, spicy, and full of wonderful aromatics. The secret is in the paste!",
-    displayTips: [
-      "Don't add all coconut milk at once - add gradually",
-      "Taste and adjust - curry pastes vary in saltiness"
-    ],
     stepVoiceTips: {
       1: "Make your own curry paste if you have time - the flavor is so much better!",
-      2: "Don't add all the coconut milk at once - add gradually for better texture",
+      2: "Don't add all coconut milk at once - add gradually for better texture",
       4: "Thai eggplant is traditional but regular eggplant works fine too",
-      6: "Taste and adjust - some curry pastes are saltier than others"
+      6: "Taste and adjust - some curry pastes vary in saltiness"
     },
     voiceTips: [
       "Make your own curry paste if you have time - the flavor is so much better!",
@@ -787,10 +739,6 @@ export const recipes: Recipe[] = [
     servings: 2,
     description: 'Thailand\'s national dish - sweet, sour, and salty stir-fried noodles',
     voiceIntro: "Sawasdee! Pad Thai is Thailand's most famous dish. Balance is everything - sweet, sour, salty, and just a little spicy!",
-    displayTips: [
-      "Have all ingredients prepped before you start - cooks very fast",
-      "Soak noodles in warm water until just flexible, don't overcook"
-    ],
     stepVoiceTips: {
       1: "Soak your rice noodles in warm water until just flexible - don't overcook them in water!",
       2: "Have all ingredients prepped before you start - Pad Thai cooks very fast",
@@ -855,10 +803,6 @@ export const recipes: Recipe[] = [
     servings: 4,
     description: 'Northern Thai coconut curry noodle soup with crispy noodles on top',
     voiceIntro: "Sawasdee kha! Khao Soi is northern Thailand's treasure - rich coconut curry soup with crispy noodles on top. So comforting!",
-    displayTips: [
-      "Fry some noodles until crispy for topping - adds texture",
-      "Don't let coconut milk boil vigorously - it will separate"
-    ],
     stepVoiceTips: {
       1: "Fry some noodles until crispy for topping - this adds wonderful texture contrast",
       3: "Don't let the coconut milk boil vigorously - it will separate and look broken",
@@ -921,10 +865,6 @@ export const recipes: Recipe[] = [
     servings: 6,
     description: 'Rich, fragrant Persian-influenced curry with tender beef and potatoes',
     voiceIntro: "Sawasdee! Massaman is the gentle curry - rich, fragrant, with Persian influences. Perfect for special occasions!",
-    displayTips: [
-      "Don't rush the cooking - low and slow makes tender beef",
-      "Beef chuck roast becomes incredibly tender when slow-cooked"
-    ],
     stepVoiceTips: {
       2: "Beef chuck roast is perfect for this - it becomes incredibly tender when slow-cooked",
       3: "Toast your peanuts lightly before adding - brings out more flavor",

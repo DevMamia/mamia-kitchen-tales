@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { ContextAwareVoiceService, VoiceListeningState, CookingContext } from '@/services/contextAwareVoiceService';
 
@@ -51,40 +50,111 @@ export const useContextAwareVoice = () => {
     return voiceService.speakWithContext(text, options);
   }, [voiceService]);
 
+  // Enhanced tip validation and processing
+  const validateTipForStep = useCallback((tip: string, instruction: string, stepNumber: number): boolean => {
+    console.log(`[useContextAwareVoice] Validating tip for step ${stepNumber}:`, {
+      tip: tip.substring(0, 50) + '...',
+      instruction: instruction.substring(0, 50) + '...'
+    });
+
+    // Basic validation - tip should be relevant to the step
+    const tipWords = tip.toLowerCase().split(' ');
+    const instructionWords = instruction.toLowerCase().split(' ');
+    
+    // Check for common cooking keywords overlap
+    const commonWords = tipWords.filter(word => 
+      instructionWords.includes(word) && 
+      word.length > 3 && // Skip short words
+      !['with', 'from', 'that', 'this', 'will', 'your'].includes(word)
+    );
+
+    const isValid = commonWords.length > 0 || tip.length < 50; // Short tips are usually generic and safe
+    
+    console.log(`[useContextAwareVoice] Tip validation result:`, {
+      stepNumber,
+      isValid,
+      commonWords,
+      reason: isValid ? 'Valid tip-instruction alignment' : 'No contextual overlap found'
+    });
+
+    return isValid;
+  }, []);
+
   const speakCookingInstruction = useCallback(async (
     instruction: string,
     stepNumber: number,
     tip?: string
   ) => {
-    console.log(`[useContextAwareVoice] Cooking instruction for step ${stepNumber}:`, {
-      instruction: instruction.substring(0, 50) + '...',
+    console.log(`[useContextAwareVoice] === COOKING INSTRUCTION PROCESSING ===`);
+    console.log(`[useContextAwareVoice] Step ${stepNumber} instruction:`, {
+      instruction: instruction.substring(0, 60) + '...',
       hasTip: !!tip,
-      tip: tip ? tip.substring(0, 50) + '...' : 'none'
+      tipPreview: tip ? tip.substring(0, 40) + '...' : 'none'
     });
     
     // Update context to show current step
     updateContext({ currentStep: stepNumber });
     
     let fullInstruction = instruction;
+    let processingNotes = [];
+
     if (tip) {
-      console.log('[useContextAwareVoice] Adding tip to instruction:', tip);
-      fullInstruction += ` Here's a tip: ${tip}`;
+      // Validate tip before adding
+      const isValidTip = validateTipForStep(tip, instruction, stepNumber);
+      
+      if (isValidTip) {
+        console.log('[useContextAwareVoice] ✅ Adding validated tip to instruction');
+        fullInstruction += `. Here's a tip from experience: ${tip}`;
+        processingNotes.push('tip_added');
+      } else {
+        console.warn('[useContextAwareVoice] ⚠️ Tip validation failed - skipping tip for safety');
+        processingNotes.push('tip_skipped_validation_failed');
+      }
+    } else {
+      processingNotes.push('no_tip_provided');
     }
     
-    console.log('[useContextAwareVoice] Final instruction text:', fullInstruction.substring(0, 100) + '...');
+    console.log('[useContextAwareVoice] Final instruction processing:', {
+      stepNumber,
+      finalLength: fullInstruction.length,
+      processingNotes,
+      preview: fullInstruction.substring(0, 80) + '...'
+    });
     
     try {
+      console.log('[useContextAwareVoice] 🔊 Attempting to speak instruction...');
       const result = await speakWithContext(fullInstruction, {
         priority: 'high',
         contextual: true
       });
-      console.log('[useContextAwareVoice] Instruction spoken successfully');
+      console.log('[useContextAwareVoice] ✅ Instruction spoken successfully');
       return result;
     } catch (error) {
-      console.error('[useContextAwareVoice] Failed to speak instruction:', error);
+      console.error('[useContextAwareVoice] ❌ Failed to speak instruction:', {
+        error: error.message,
+        stepNumber,
+        instructionLength: fullInstruction.length
+      });
+      
+      // Fallback: try speaking without tip if tip was the problem
+      if (tip && processingNotes.includes('tip_added')) {
+        console.log('[useContextAwareVoice] 🔄 Retrying without tip as fallback...');
+        try {
+          const fallbackResult = await speakWithContext(instruction, {
+            priority: 'high',
+            contextual: true
+          });
+          console.log('[useContextAwareVoice] ✅ Fallback instruction (without tip) spoken successfully');
+          return fallbackResult;
+        } catch (fallbackError) {
+          console.error('[useContextAwareVoice] ❌ Fallback also failed:', fallbackError);
+          throw fallbackError;
+        }
+      }
+      
       throw error;
     }
-  }, [speakWithContext, updateContext]);
+  }, [speakWithContext, updateContext, validateTipForStep]);
 
   const encourageUser = useCallback(async () => {
     console.log('[useContextAwareVoice] Providing encouragement');

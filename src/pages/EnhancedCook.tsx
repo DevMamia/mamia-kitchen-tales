@@ -451,29 +451,8 @@ const EnhancedCook = () => {
           )}
         </div>
 
-        {/* Enhanced Tips Display */}
-        {(currentStepTip || fallbackTip) && (
-          <div className="bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 rounded-xl p-4 mx-4 mb-6 border-l-4 border-yellow-400">
-            <div className="flex items-start gap-3">
-              <div className="text-2xl">{mama?.emoji}</div>
-              <div>
-                <h3 className="font-handwritten text-lg text-yellow-800 dark:text-yellow-200 mb-1">
-                  {currentStepTip ? `${mama?.name}'s ${currentStepTip.category} tip` : `Wisdom from ${mama?.name}`}
-                </h3>
-                <p className="font-handwritten text-yellow-700 dark:text-yellow-300 text-lg leading-relaxed">
-                  "{currentStepTip?.tip || fallbackTip}"
-                </p>
-                {currentStepTip && (
-                  <div className="text-xs text-yellow-600 dark:text-yellow-400 mt-2 opacity-75">
-                    {currentStepTip.timing === 'before' ? '💡 Do this before starting the step' : 
-                     currentStepTip.timing === 'during' ? '⚡ Keep this in mind while cooking' : 
-                     '✅ Remember this for future cooking'}
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
+        {/* Hidden Tips Section - Tips are now voice-only for authenticity */}
+        {/* Tips are processed and spoken but not displayed to maintain spontaneous feel */}
       </div>
 
       {/* Context-Aware Voice Interface */}
@@ -527,9 +506,19 @@ const EnhancedCook = () => {
 
           <Button
             onClick={async () => {
+              console.log('[EnhancedCook] Manual "Guide Me" button pressed');
               const instruction = recipeData.recipe.instructions[currentStep - 1];
               const stepTip = optimizedTips[currentStep];
-              await speakContextualInstruction(instruction, currentStep, stepTip?.tip);
+              
+              console.log('[EnhancedCook] Manual guide - instruction:', instruction.substring(0, 50) + '...');
+              console.log('[EnhancedCook] Manual guide - tip:', stepTip ? stepTip.tip.substring(0, 50) + '...' : 'none');
+              
+              try {
+                await speakContextualInstruction(instruction, currentStep, stepTip?.tip);
+                console.log('[EnhancedCook] Manual guide completed successfully');
+              } catch (error) {
+                console.error('[EnhancedCook] Manual guide failed:', error);
+              }
             }}
             className="bg-orange-500 text-white hover:bg-orange-600 text-lg py-6 px-8 min-h-[56px] rounded-xl"
           >
