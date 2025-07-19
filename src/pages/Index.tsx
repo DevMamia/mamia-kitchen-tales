@@ -4,7 +4,7 @@ import { Carousel, CarouselContent, CarouselItem, CarouselApi } from "@/componen
 import Autoplay from 'embla-carousel-autoplay';
 import { useWindowSize } from '@uidotdev/usehooks';
 import { Layout } from '@/components/Layout';
-import { RecipeCard } from '@/components/RecipeCard';
+import RecipeCard from '@/components/RecipeCard';
 import { CharacterCard } from '@/components/CharacterCard';
 import { mamas } from '@/data/mamas';
 import { recipes } from '@/data/recipes';
