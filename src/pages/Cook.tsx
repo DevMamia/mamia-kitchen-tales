@@ -55,7 +55,7 @@ const Cook = () => {
       return optimized;
     }
     return {};
-  }, [recipeData?.recipe]);
+  }, [recipeData]);
 
   // Update optimized tips state when memoized value changes
   useEffect(() => {
