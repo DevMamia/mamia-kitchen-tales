@@ -21,6 +21,8 @@ import { TipAnalyzerService, TipPlacement } from '@/services/tipAnalyzerService'
 const Cook = () => {
   const { recipeId } = useParams();
   const navigate = useNavigate();
+  
+  // ALL HOOKS MUST BE CALLED FIRST - BEFORE ANY CONDITIONAL LOGIC
   const [conversationPhase, setConversationPhase] = useState<'pre-cooking' | 'cooking'>('pre-cooking');
   const [currentStep, setCurrentStep] = useState(1);
   const [voiceStatus, setVoiceStatus] = useState<'speaking' | 'listening' | 'processing' | 'idle'>('idle');
@@ -61,6 +63,167 @@ const Cook = () => {
     }
     return {};
   }, [recipeData]);
+
+  // ALL useCallback hooks must also be called consistently
+  const handleStartCooking = useCallback(async () => {
+    if (!recipeData) return;
+    
+    console.log('[Cook] Starting cooking mode with enhanced voice flow');
+    setConversationPhase('cooking');
+    setVoicePhase('cooking'); // Set voice service phase
+    conversationMemory?.startCookingPhase(currentStep);
+    
+    // Initialize agent service for premium users with conversational mode
+    if (isPremium && voiceMode === 'conversational' && hasUsageLeft) {
+      agentService.initialize(elevenlabsConversation);
+      incrementUsage();
+    }
+    
+    // Enhanced welcome message with direct message mode
+    const welcomeMessage = "Perfetto! Let's begin our cooking journey together!";
+    console.log(`[Cook] Speaking cooking welcome for ${recipeData.mama.name}: ${welcomeMessage}`);
+    await speak(welcomeMessage, recipeData.mama.voiceId, {
+      isDirectMessage: true,
+      priority: 'high',
+      source: 'instant'
+    });
+    
+    // The useEffect will handle speaking the first step with enhanced context
+  }, [conversationMemory, currentStep, isPremium, voiceMode, hasUsageLeft, agentService, elevenlabsConversation, incrementUsage, speak, setVoicePhase, recipeData]);
+
+  const handleTimerComplete = useCallback(() => {
+    setTimerCompleted(true);
+    // Could add notification sound here
+  }, []);
+
+  const handleStartConversation = useCallback(async () => {
+    if (!recipeData) return;
+    
+    // For premium users with conversational mode
+    if (isPremium && voiceMode === 'conversational' && hasUsageLeft) {
+      const userName = user?.user_metadata?.display_name || user?.email?.split('@')[0] || 'friend';
+      const agentConfig = {
+        mama: recipeData.mama,
+        recipe: recipeData.recipe,
+        currentStep,
+        userContext: {
+          name: userName,
+          cookingLevel: 'intermediate', // Could be fetched from user profile
+        }
+      };
+      
+      // Use a placeholder agent ID - in production this would be fetched from ElevenLabs
+      const agentId = 'agent-' + recipeData.mama.voiceId;
+      await agentService.startConversation(agentConfig, agentId);
+    }
+  }, [recipeData, isPremium, voiceMode, hasUsageLeft, user, currentStep, agentService]);
+
+  const handleVoiceCommand = useCallback((command: string) => {
+    if (!recipeData) return;
+    
+    const lowerCommand = command.toLowerCase();
+    const stepTip = optimizedTips[currentStep]; // Calculate inside callback
+    const totalSteps = recipeData.recipe.instructions.length;
+    
+    // Universal voice commands for both tiers
+    if (lowerCommand.includes('next') || lowerCommand.includes('next step')) {
+      if (currentStep < totalSteps) {
+        conversationMemory?.markStepComplete(currentStep);
+        setCurrentStep(currentStep + 1);
+        setTimerCompleted(false);
+        // The useEffect will handle speaking the next step with enhanced context
+      }
+      return;
+    }
+    
+    if (lowerCommand.includes('back') || lowerCommand.includes('previous') || lowerCommand.includes('go back')) {
+      if (currentStep > 1) {
+        setCurrentStep(currentStep - 1);
+        setTimerCompleted(false);
+        // The useEffect will handle speaking the previous step
+      }
+      return;
+    }
+    
+    if (lowerCommand.includes('repeat') || lowerCommand.includes('repeat that')) {
+      const instruction = recipeData.recipe.instructions[currentStep - 1];
+      
+      // Use enhanced cooking instruction method
+      speakCookingInstruction(instruction, recipeData.mama.voiceId, currentStep, stepTip?.tip);
+      return;
+    }
+    
+    if (lowerCommand.includes('help') || lowerCommand.includes('confused') || lowerCommand.includes('stuck')) {
+      conversationMemory?.markStepStruggling(currentStep);
+      
+      // For basic users, provide helpful response with enhanced context
+      if (!isPremium || voiceMode === 'tts') {
+        let helpMessage = `Don't worry! Take your time with step ${currentStep}. Let me repeat: ${recipeData.recipe.instructions[currentStep - 1]}`;
+        
+        if (stepTip) {
+          helpMessage += ` Here's my special tip: ${stepTip.tip}`;
+        }
+        
+        speak(helpMessage, recipeData.mama.voiceId, {
+          isDirectMessage: true,
+          priority: 'high',
+          source: 'instant'
+        });
+      }
+      return;
+    }
+    
+    // For premium conversational mode, let the agent handle the query
+    if (isPremium && voiceMode === 'conversational') {
+      // The ElevenLabs agent will handle this automatically
+      console.log('[Cook] Conversational query handled by agent:', command);
+    } else {
+      // For basic users, store the question for conversation memory
+      conversationMemory?.addUserQuestion(command);
+      console.log('[Cook] Voice command logged for basic user:', command);
+    }
+  }, [currentStep, conversationMemory, setCurrentStep, setTimerCompleted, optimizedTips, speakCookingInstruction, speak, isPremium, voiceMode, recipeData]);
+
+  const handleInterrupt = useCallback(async () => {
+    conversationMemory?.handleInterruption();
+    
+    // Stop both TTS and conversational AI
+    if (isPremium && voiceMode === 'conversational') {
+      await agentService.endConversation();
+    }
+  }, [conversationMemory, isPremium, voiceMode, agentService]);
+
+  const handleNavigatePrevious = useCallback(() => {
+    if (!recipeData) return;
+    const prevStep = Math.max(1, currentStep - 1);
+    if (prevStep < currentStep) {
+      setCurrentStep(prevStep);
+      setTimerCompleted(false);
+      // The useEffect will handle speaking the previous step with enhanced context
+    }
+  }, [currentStep, recipeData]);
+
+  const handleNavigateNext = useCallback(() => {
+    if (!recipeData) return;
+    const totalSteps = recipeData.recipe.instructions.length;
+    const nextStep = Math.min(totalSteps, currentStep + 1);
+    if (nextStep > currentStep) {
+      setCurrentStep(nextStep);
+      setTimerCompleted(false);
+      // The useEffect will handle speaking the next step with enhanced context
+    }
+  }, [currentStep, recipeData]);
+
+  const handleRepeat = useCallback(() => {
+    if (!recipeData) return;
+    const instruction = recipeData.recipe.instructions[currentStep - 1];
+    const stepTip = optimizedTips[currentStep];
+    
+    console.log(`[Cook] Repeat button - Step ${currentStep}, has tip:`, !!stepTip);
+    
+    // Use enhanced cooking instruction method for repeats
+    speakCookingInstruction(instruction, recipeData.mama.voiceId, currentStep, stepTip?.tip);
+  }, [recipeData, currentStep, optimizedTips, speakCookingInstruction]);
 
   // Update optimized tips state when memoized value changes
   useEffect(() => {
@@ -103,7 +266,27 @@ const Cook = () => {
   useEffect(() => {
     setHasSpokenCurrentStep(false);
   }, [currentStep]);
-  
+
+  // Keep screen awake in cooking mode
+  useEffect(() => {
+    let wakeLock: any = null;
+
+    if (conversationPhase === 'cooking' && 'wakeLock' in navigator) {
+      navigator.wakeLock.request('screen').then((lock) => {
+        wakeLock = lock;
+      }).catch(() => {
+        // Wake lock failed, but continue anyway
+      });
+    }
+
+    return () => {
+      if (wakeLock) {
+        wakeLock.release();
+      }
+    };
+  }, [conversationPhase]);
+
+  // NOW HANDLE CONDITIONAL RENDERING AFTER ALL HOOKS
   if (!recipeId) {
     return (
       <div className="min-h-[calc(100vh-8rem)] p-6">
@@ -157,49 +340,6 @@ const Cook = () => {
   const { recipe, mama } = recipeData;
   const totalSteps = recipe.instructions.length;
 
-  // Keep screen awake in cooking mode
-  useEffect(() => {
-    let wakeLock: any = null;
-
-    if (conversationPhase === 'cooking' && 'wakeLock' in navigator) {
-      navigator.wakeLock.request('screen').then((lock) => {
-        wakeLock = lock;
-      }).catch(() => {
-        // Wake lock failed, but continue anyway
-      });
-    }
-
-    return () => {
-      if (wakeLock) {
-        wakeLock.release();
-      }
-    };
-  }, [conversationPhase]);
-
-  const handleStartCooking = useCallback(async () => {
-    console.log('[Cook] Starting cooking mode with enhanced voice flow');
-    setConversationPhase('cooking');
-    setVoicePhase('cooking'); // Set voice service phase
-    conversationMemory?.startCookingPhase(currentStep);
-    
-    // Initialize agent service for premium users with conversational mode
-    if (isPremium && voiceMode === 'conversational' && hasUsageLeft) {
-      agentService.initialize(elevenlabsConversation);
-      incrementUsage();
-    }
-    
-    // Enhanced welcome message with direct message mode
-    const welcomeMessage = "Perfetto! Let's begin our cooking journey together!";
-    console.log(`[Cook] Speaking cooking welcome for ${mama.name}: ${welcomeMessage}`);
-    await speak(welcomeMessage, mama.voiceId, {
-      isDirectMessage: true,
-      priority: 'high',
-      source: 'instant'
-    });
-    
-    // The useEffect will handle speaking the first step with enhanced context
-  }, [conversationMemory, currentStep, isPremium, voiceMode, hasUsageLeft, agentService, elevenlabsConversation, incrementUsage, speak, setVoicePhase, mama.voiceId]);
-
   if (conversationPhase === 'pre-cooking') {
     // Phase 1: Pre-Cooking Chat Interface
     return (
@@ -225,132 +365,6 @@ const Cook = () => {
     ? recipe.voiceTips[(currentStep - Math.ceil(totalSteps / 2)) % recipe.voiceTips.length]
     : null;
 
-  const handleTimerComplete = useCallback(() => {
-    setTimerCompleted(true);
-    // Could add notification sound here
-  }, []);
-
-  const handleStartConversation = useCallback(async () => {
-    if (!recipe || !mama) return;
-    
-    // For premium users with conversational mode
-    if (isPremium && voiceMode === 'conversational' && hasUsageLeft) {
-      const userName = user?.user_metadata?.display_name || user?.email?.split('@')[0] || 'friend';
-      const agentConfig = {
-        mama,
-        recipe,
-        currentStep,
-        userContext: {
-          name: userName,
-          cookingLevel: 'intermediate', // Could be fetched from user profile
-        }
-      };
-      
-      // Use a placeholder agent ID - in production this would be fetched from ElevenLabs
-      const agentId = 'agent-' + mama.voiceId;
-      await agentService.startConversation(agentConfig, agentId);
-    }
-  }, [recipe, mama, isPremium, voiceMode, hasUsageLeft, user, currentStep, agentService]);
-
-  const handleVoiceCommand = useCallback((command: string) => {
-    const lowerCommand = command.toLowerCase();
-    const stepTip = optimizedTips[currentStep]; // Calculate inside callback
-    
-    // Universal voice commands for both tiers
-    if (lowerCommand.includes('next') || lowerCommand.includes('next step')) {
-      if (currentStep < totalSteps) {
-        conversationMemory?.markStepComplete(currentStep);
-        setCurrentStep(currentStep + 1);
-        setTimerCompleted(false);
-        // The useEffect will handle speaking the next step with enhanced context
-      }
-      return;
-    }
-    
-    if (lowerCommand.includes('back') || lowerCommand.includes('previous') || lowerCommand.includes('go back')) {
-      if (currentStep > 1) {
-        setCurrentStep(currentStep - 1);
-        setTimerCompleted(false);
-        // The useEffect will handle speaking the previous step
-      }
-      return;
-    }
-    
-    if (lowerCommand.includes('repeat') || lowerCommand.includes('repeat that')) {
-      const instruction = recipe.instructions[currentStep - 1];
-      
-      // Use enhanced cooking instruction method
-      speakCookingInstruction(instruction, mama.voiceId, currentStep, stepTip?.tip);
-      return;
-    }
-    
-    if (lowerCommand.includes('help') || lowerCommand.includes('confused') || lowerCommand.includes('stuck')) {
-      conversationMemory?.markStepStruggling(currentStep);
-      
-      // For basic users, provide helpful response with enhanced context
-      if (!isPremium || voiceMode === 'tts') {
-        let helpMessage = `Don't worry! Take your time with step ${currentStep}. Let me repeat: ${recipe.instructions[currentStep - 1]}`;
-        
-        if (stepTip) {
-          helpMessage += ` Here's my special tip: ${stepTip.tip}`;
-        }
-        
-        speak(helpMessage, mama.voiceId, {
-          isDirectMessage: true,
-          priority: 'high',
-          source: 'instant'
-        });
-      }
-      return;
-    }
-    
-    // For premium conversational mode, let the agent handle the query
-    if (isPremium && voiceMode === 'conversational') {
-      // The ElevenLabs agent will handle this automatically
-      console.log('[Cook] Conversational query handled by agent:', command);
-    } else {
-      // For basic users, store the question for conversation memory
-      conversationMemory?.addUserQuestion(command);
-      console.log('[Cook] Voice command logged for basic user:', command);
-    }
-  }, [currentStep, totalSteps, conversationMemory, setCurrentStep, setTimerCompleted, recipe, optimizedTips, speakCookingInstruction, speak, mama.voiceId, isPremium, voiceMode]);
-
-  const handleInterrupt = useCallback(async () => {
-    conversationMemory?.handleInterruption();
-    
-    // Stop both TTS and conversational AI
-    if (isPremium && voiceMode === 'conversational') {
-      await agentService.endConversation();
-    }
-  }, [conversationMemory, isPremium, voiceMode, agentService]);
-
-  const handleNavigatePrevious = useCallback(() => {
-    const prevStep = Math.max(1, currentStep - 1);
-    if (prevStep < currentStep) {
-      setCurrentStep(prevStep);
-      setTimerCompleted(false);
-      // The useEffect will handle speaking the previous step with enhanced context
-    }
-  }, [currentStep]);
-
-  const handleNavigateNext = useCallback(() => {
-    const nextStep = Math.min(totalSteps, currentStep + 1);
-    if (nextStep > currentStep) {
-      setCurrentStep(nextStep);
-      setTimerCompleted(false);
-      // The useEffect will handle speaking the next step with enhanced context
-    }
-  }, [currentStep, totalSteps]);
-
-  const handleRepeat = useCallback(() => {
-    const instruction = recipe.instructions[currentStep - 1];
-    const stepTip = optimizedTips[currentStep];
-    
-    console.log(`[Cook] Repeat button - Step ${currentStep}, has tip:`, !!stepTip);
-    
-    // Use enhanced cooking instruction method for repeats
-    speakCookingInstruction(instruction, mama.voiceId, currentStep, stepTip?.tip);
-  }, [recipe.instructions, currentStep, optimizedTips, speakCookingInstruction, mama.voiceId]);
 
   return (
     <div className="min-h-[calc(100vh-8rem)] bg-gradient-to-b from-orange-50/20 to-background">
