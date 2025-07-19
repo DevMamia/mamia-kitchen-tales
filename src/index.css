@@ -4,83 +4,84 @@
 @tailwind components;
 @tailwind utilities;
 
-/* MAMIA Design System - Warm Cooking App Colors */
+/* MAMIA Design System - Classical Cookbook Colors */
 @layer base {
   :root {
-    --background: 43 23% 96%;  /* Soft cream #FFF8DC */
-    --foreground: 14 26% 15%;  /* Rich brown #3E2723 */
+    /* Classical base palette - warm cream and muted tones */
+    --background: 43 15% 96%;  /* Soft parchment cream #FAF8F3 */
+    --foreground: 25 20% 20%;  /* Rich cocoa brown #423629 */
 
-    --card: 43 23% 98%;
-    --card-foreground: 14 26% 15%;
+    --card: 43 20% 98%;        /* Lighter cream for cards */
+    --card-foreground: 25 20% 20%;
 
-    --popover: 43 23% 96%;
-    --popover-foreground: 14 26% 15%;
+    --popover: 43 15% 96%;
+    --popover-foreground: 25 20% 20%;
 
-    --primary: 11 75% 55%;     /* Warm terracotta #E35336 */
-    --primary-foreground: 43 23% 96%;
+    --primary: 15 35% 55%;     /* Muted terracotta #B8886B */
+    --primary-foreground: 43 20% 98%;
 
-    --secondary: 43 15% 90%;
-    --secondary-foreground: 14 26% 15%;
+    --secondary: 43 12% 88%;   /* Warm neutral */
+    --secondary-foreground: 25 20% 20%;
 
-    --muted: 43 15% 92%;
-    --muted-foreground: 14 16% 46%;
+    --muted: 43 12% 90%;       /* Light neutral */
+    --muted-foreground: 25 15% 40%;
 
-    --accent: 43 15% 88%;
-    --accent-foreground: 14 26% 15%;
+    --accent: 43 12% 85%;      /* Subtle accent */
+    --accent-foreground: 25 20% 20%;
 
-    --destructive: 0 100% 27%;  /* Deep red #8B0000 */
-    --destructive-foreground: 43 23% 96%;
+    --destructive: 0 60% 45%;  /* Muted red #B85450 */
+    --destructive-foreground: 43 20% 98%;
 
-    --border: 43 20% 85%;
-    --input: 43 20% 85%;
-    --ring: 11 75% 55%;
+    --border: 43 15% 82%;      /* Soft border */
+    --input: 43 15% 82%;
+    --ring: 15 35% 55%;
 
-    --radius: 0.75rem;
+    --radius: 0.5rem;
 
-    /* Logo and Header Colors */
-    --logo-cream: 37 87% 84%;         /* Cream background #FBDFB3 from logo */
-    --logo-brown: 24 62% 24%;         /* Brown frame #643617 from logo */
-    --logo-brown-accent: 35 65% 56%;  /* Medium brown accent #D49856 */
-
-    /* Cultural accent colors with gradients */
-    --italian-accent: 0 75% 45%;      /* Rich red #CC3333 */
-    --italian-secondary: 14 60% 35%;  /* Warm brown #8B4513 */
-    --italian-gold: 45 85% 60%;       /* Tuscan gold #D4AF37 */
+    /* Cultural accent colors - muted and sophisticated */
+    --italian-accent: 15 45% 65%;     /* Muted terracotta from Nonna card */
+    --italian-secondary: 25 30% 45%;  /* Warm brown */
+    --italian-gold: 40 40% 70%;       /* Soft gold */
     
-    --mexican-accent: 18 90% 55%;     /* Vibrant orange #FF6B35 */
-    --mexican-secondary: 40 85% 50%;  /* Warm yellow #FFB347 */
-    --mexican-pink: 320 70% 65%;      /* Mexican pink #E91E63 */
+    --mexican-accent: 10 40% 70%;     /* Soft coral from Abuela card */
+    --mexican-secondary: 20 30% 65%;  /* Warm peach */
+    --mexican-pink: 350 30% 75%;      /* Dusty rose */
     
-    --thai-accent: 140 30% 45%;       /* Forest green #4A7C59 */
-    --thai-secondary: 60 40% 50%;     /* Lime green #9ACD32 */
-    --thai-gold: 50 90% 55%;          /* Thai gold #FFD700 */
+    --thai-accent: 95 25% 60%;        /* Gentle sage from Yai card */
+    --thai-secondary: 85 20% 55%;     /* Soft olive */
+    --thai-gold: 50 35% 75%;          /* Muted gold */
 
-    /* Dynamic backgrounds */
-    --marble-texture: linear-gradient(45deg, hsl(43 23% 96%) 0%, hsl(43 23% 98%) 50%, hsl(43 23% 94%) 100%);
-    --tile-pattern: repeating-conic-gradient(hsl(18 90% 55%) 0deg 90deg, hsl(40 85% 50%) 90deg 180deg);
-    --silk-texture: radial-gradient(ellipse at center, hsl(140 30% 45%) 0%, hsl(60 40% 50%) 70%, hsl(50 90% 55%) 100%);
+    /* Textured background patterns - very subtle */
+    --paper-texture: 
+      radial-gradient(circle at 20% 50%, rgba(139, 69, 19, 0.02) 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, rgba(139, 69, 19, 0.015) 0%, transparent 50%),
+      radial-gradient(circle at 40% 80%, rgba(139, 69, 19, 0.01) 0%, transparent 50%);
+    
+    --linen-texture: 
+      repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(139, 69, 19, 0.008) 2px, rgba(139, 69, 19, 0.008) 4px),
+      repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(139, 69, 19, 0.005) 2px, rgba(139, 69, 19, 0.005) 4px);
 
-    /* Cultural Background Patterns */
-    --pattern-basil: radial-gradient(circle at 10% 20%, rgba(46, 125, 50, 0.03) 0%, transparent 30%),
-                     radial-gradient(circle at 90% 80%, rgba(46, 125, 50, 0.02) 0%, transparent 25%);
+    /* Cultural background patterns - very subtle */
+    --pattern-italian: 
+      radial-gradient(circle at 10% 20%, rgba(184, 136, 107, 0.015) 0%, transparent 30%),
+      radial-gradient(circle at 90% 80%, rgba(184, 136, 107, 0.01) 0%, transparent 25%);
     
-    --pattern-papel: linear-gradient(45deg, transparent 40%, rgba(255, 87, 34, 0.02) 40%, rgba(255, 87, 34, 0.02) 60%, transparent 60%),
-                     linear-gradient(-45deg, transparent 40%, rgba(255, 193, 7, 0.015) 40%, rgba(255, 193, 7, 0.015) 60%, transparent 60%);
+    --pattern-mexican: 
+      radial-gradient(circle at 30% 30%, rgba(213, 142, 124, 0.02) 0%, transparent 40%),
+      radial-gradient(circle at 70% 70%, rgba(213, 142, 124, 0.01) 0%, transparent 35%);
     
-    --pattern-lotus: radial-gradient(ellipse at 30% 30%, rgba(255, 215, 0, 0.025) 0%, transparent 40%),
-                     radial-gradient(ellipse at 70% 70%, rgba(255, 215, 0, 0.015) 0%, transparent 35%);
-    
-    --pattern-checkered: linear-gradient(90deg, transparent 48%, rgba(139, 69, 19, 0.015) 48%, rgba(139, 69, 19, 0.015) 52%, transparent 52%),
-                         linear-gradient(0deg, transparent 48%, rgba(139, 69, 19, 0.015) 48%, rgba(139, 69, 19, 0.015) 52%, transparent 52%);
+    --pattern-thai: 
+      radial-gradient(circle at 25% 75%, rgba(148, 163, 125, 0.015) 0%, transparent 40%),
+      radial-gradient(circle at 75% 25%, rgba(148, 163, 125, 0.01) 0%, transparent 35%);
 
-    --sidebar-background: 43 23% 96%;
-    --sidebar-foreground: 14 26% 15%;
-    --sidebar-primary: 11 75% 55%;
-    --sidebar-primary-foreground: 43 23% 96%;
-    --sidebar-accent: 43 15% 88%;
-    --sidebar-accent-foreground: 14 26% 15%;
-    --sidebar-border: 43 20% 85%;
-    --sidebar-ring: 11 75% 55%;
+    --sidebar-background: 43 15% 96%;
+    --sidebar-foreground: 25 20% 20%;
+    --sidebar-primary: 15 35% 55%;
+    --sidebar-primary-foreground: 43 20% 98%;
+    --sidebar-accent: 43 12% 85%;
+    --sidebar-accent-foreground: 25 20% 20%;
+    --sidebar-border: 43 15% 82%;
+    --sidebar-ring: 15 35% 55%;
   }
 }
 
@@ -91,14 +92,20 @@
 
   body {
     @apply bg-background text-foreground font-sans;
-    background-image: 
-      radial-gradient(circle at 1px 1px, rgba(62, 39, 35, 0.08) 1px, transparent 0);
-    background-size: 20px 20px;
-    font-family: system-ui, -apple-system, sans-serif;
+    background-image: var(--paper-texture), var(--linen-texture);
+    background-size: 200px 200px, 40px 40px;
+    background-attachment: fixed;
+    font-family: 'Nunito', system-ui, sans-serif;
   }
 
   .font-heading {
-    font-family: 'Nunito', system-ui, sans-serif;
+    font-family: 'Playfair Display', serif;
+  }
+
+  /* Classical typography improvements */
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading;
+    letter-spacing: -0.02em;
   }
 
   /* Scrollbar utilities */
@@ -178,58 +185,13 @@
   }
 
   @keyframes waveform-listening {
-    0%, 100% { height: 8px; background-color: hsl(220 90% 60%); }
-    50% { height: 16px; background-color: hsl(220 90% 70%); }
+    0%, 100% { height: 8px; background-color: hsl(var(--primary)); }
+    50% { height: 16px; background-color: hsl(var(--primary)); }
   }
 
   @keyframes waveform-processing {
-    0%, 100% { transform: scale(1); background-color: hsl(18 90% 55%); }
-    50% { transform: scale(1.2); background-color: hsl(18 90% 65%); }
-  }
-
-  /* Parallax cultural backgrounds */
-  .parallax-italian {
-    background: var(--marble-texture);
-    background-attachment: fixed;
-  }
-
-  .parallax-mexican {
-    background: var(--tile-pattern);
-    background-size: 40px 40px;
-  }
-
-  .parallax-thai {
-    background: var(--silk-texture);
-    background-attachment: fixed;
-  }
-
-  /* Masonry layout */
-  .masonry-grid {
-    column-count: 3;
-    column-gap: 1rem;
-    break-inside: avoid;
-  }
-
-  @media (max-width: 768px) {
-    .masonry-grid {
-      column-count: 2;
-    }
-  }
-
-  @media (max-width: 480px) {
-    .masonry-grid {
-      column-count: 1;
-    }
-  }
-
-  /* Cooking streak progress */
-  @keyframes streak-glow {
-    0%, 100% { box-shadow: 0 0 5px hsl(18 90% 55%); }
-    50% { box-shadow: 0 0 20px hsl(18 90% 55%), 0 0 30px hsl(18 90% 65%); }
-  }
-
-  .streak-glow {
-    animation: streak-glow 2s ease-in-out infinite;
+    0%, 100% { transform: scale(1); background-color: hsl(var(--mexican-accent)); }
+    50% { transform: scale(1.2); background-color: hsl(var(--mexican-accent)); }
   }
 
   /* Cooking animations */
@@ -243,11 +205,11 @@
   @keyframes steam-rise {
     0% { 
       transform: translateY(0) scale(1); 
-      opacity: 0.8; 
+      opacity: 0.6; 
     }
     50% { 
       transform: translateY(-20px) scale(1.1); 
-      opacity: 0.6; 
+      opacity: 0.4; 
     }
     100% { 
       transform: translateY(-40px) scale(1.2); 
@@ -266,11 +228,11 @@
   @keyframes cultural-notes {
     0% { 
       transform: translateY(0) rotate(0deg) scale(1); 
-      opacity: 0.7; 
+      opacity: 0.5; 
     }
     50% { 
       transform: translateY(-30px) rotate(180deg) scale(0.8); 
-      opacity: 0.5; 
+      opacity: 0.3; 
     }
     100% { 
       transform: translateY(-60px) rotate(360deg) scale(0.6); 
@@ -299,7 +261,7 @@
     position: fixed;
     width: 10px;
     height: 10px;
-    background: hsl(18 90% 55%);
+    background: hsl(var(--primary));
     animation: confetti-fall 3s linear infinite;
   }
 
@@ -312,7 +274,7 @@
 }
 
 @layer utilities {
-  /* Cultural colors */
+  /* Classical cultural colors */
   .text-italian { color: hsl(var(--italian-accent)); }
   .text-italian-gold { color: hsl(var(--italian-gold)); }
   .text-mexican { color: hsl(var(--mexican-accent)); }
@@ -321,33 +283,75 @@
   .text-thai-gold { color: hsl(var(--thai-gold)); }
   
   .bg-italian { background-color: hsl(var(--italian-accent)); }
-  .bg-italian-gradient { background: linear-gradient(135deg, hsl(var(--italian-accent)), hsl(var(--italian-gold))); }
+  .bg-italian-subtle { background-color: hsl(var(--italian-accent) / 0.1); }
   .bg-mexican { background-color: hsl(var(--mexican-accent)); }
-  .bg-mexican-gradient { background: linear-gradient(135deg, hsl(var(--mexican-accent)), hsl(var(--mexican-pink))); }
+  .bg-mexican-subtle { background-color: hsl(var(--mexican-accent) / 0.1); }
   .bg-thai { background-color: hsl(var(--thai-accent)); }
-  .bg-thai-gradient { background: linear-gradient(135deg, hsl(var(--thai-accent)), hsl(var(--thai-gold))); }
+  .bg-thai-subtle { background-color: hsl(var(--thai-accent) / 0.1); }
 
-  /* Enhanced shadows */
-  .shadow-warm {
-    box-shadow: 0 4px 6px -1px rgba(227, 83, 54, 0.1), 0 2px 4px -1px rgba(227, 83, 54, 0.06);
+  /* Classical gradients - much more subtle */
+  .bg-italian-gradient { 
+    background: linear-gradient(135deg, 
+      hsl(var(--italian-accent) / 0.1), 
+      hsl(var(--italian-gold) / 0.05)
+    ); 
+  }
+  .bg-mexican-gradient { 
+    background: linear-gradient(135deg, 
+      hsl(var(--mexican-accent) / 0.1), 
+      hsl(var(--mexican-pink) / 0.05)
+    ); 
+  }
+  .bg-thai-gradient { 
+    background: linear-gradient(135deg, 
+      hsl(var(--thai-accent) / 0.1), 
+      hsl(var(--thai-gold) / 0.05)
+    ); 
+  }
+
+  /* Classical shadows - subtle and realistic */
+  .shadow-classical {
+    box-shadow: 0 2px 8px rgba(66, 54, 41, 0.08), 0 1px 3px rgba(66, 54, 41, 0.06);
   }
 
   .shadow-paper {
     box-shadow: 
-      0 1px 3px rgba(62, 39, 35, 0.12),
-      0 1px 2px rgba(62, 39, 35, 0.08);
+      0 1px 3px rgba(66, 54, 41, 0.1),
+      0 1px 2px rgba(66, 54, 41, 0.06);
   }
 
-  .shadow-cultural {
+  .shadow-cookbook {
     box-shadow: 
-      0 10px 25px -5px rgba(227, 83, 54, 0.1),
-      0 8px 10px -6px rgba(227, 83, 54, 0.1);
+      0 4px 6px -1px rgba(66, 54, 41, 0.08),
+      0 2px 4px -1px rgba(66, 54, 41, 0.06);
   }
 
-  .shadow-3d {
-    box-shadow: 
-      0 25px 50px -12px rgba(0, 0, 0, 0.25),
-      0 0 0 1px rgba(255, 255, 255, 0.1);
+  /* Cultural Background Patterns - very subtle */
+  .bg-italian-pattern { 
+    background-image: var(--pattern-italian);
+  }
+  .bg-mexican-pattern { 
+    background-image: var(--pattern-mexican);
+  }
+  .bg-thai-pattern { 
+    background-image: var(--pattern-thai);
+  }
+
+  /* Classical borders */
+  .border-classical {
+    border: 1px solid hsl(var(--border));
+  }
+  
+  .border-italian-subtle {
+    border: 1px solid hsl(var(--italian-accent) / 0.2);
+  }
+  
+  .border-mexican-subtle {
+    border: 1px solid hsl(var(--mexican-accent) / 0.2);
+  }
+  
+  .border-thai-subtle {
+    border: 1px solid hsl(var(--thai-accent) / 0.2);
   }
 
   /* 3D transforms */
@@ -364,94 +368,10 @@
   .card-stack-2 { transform: translateY(8px) scale(0.96) rotate(1deg); z-index: 2; }
   .card-stack-3 { transform: translateY(16px) scale(0.92) rotate(-1deg); z-index: 1; }
 
-  /* Cultural Background Patterns */
-  .bg-italian-pattern { 
-    background: var(--pattern-basil), var(--pattern-checkered);
-  }
-  .bg-mexican-pattern { 
-    background: var(--pattern-papel);
-  }
-  .bg-thai-pattern { 
-    background: var(--pattern-lotus);
-  }
-
-  /* Cultural Borders */
-  .border-italian {
-    border: 2px solid;
-    border-image: linear-gradient(45deg, 
-      hsl(var(--italian-accent)), 
-      rgba(139, 69, 19, 0.6),
-      hsl(var(--italian-accent))
-    ) 1;
-  }
-  
-  .border-mexican {
-    border: 3px solid;
-    border-image: repeating-linear-gradient(45deg,
-      hsl(var(--mexican-accent)) 0px,
-      hsl(var(--mexican-accent)) 10px,
-      rgba(255, 193, 7, 0.8) 10px,
-      rgba(255, 193, 7, 0.8) 20px
-    ) 1;
-  }
-  
-  .border-thai {
-    border: 2px solid;
-    border-image: linear-gradient(45deg,
-      hsl(var(--thai-accent)),
-      rgba(255, 215, 0, 0.6),
-      hsl(var(--thai-accent))
-    ) 1;
-  }
-
   /* Accessibility Enhancements */
   .focus-visible:focus-visible {
     outline: 2px solid hsl(var(--primary));
     outline-offset: 2px;
-  }
-
-  /* High contrast mode */
-  .high-contrast {
-    --background: 0 0% 100%;
-    --foreground: 0 0% 0%;
-    --primary: 240 100% 50%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 0 0% 90%;
-    --secondary-foreground: 0 0% 0%;
-    --muted: 0 0% 85%;
-    --muted-foreground: 0 0% 20%;
-    --accent: 0 0% 80%;
-    --accent-foreground: 0 0% 0%;
-    --border: 0 0% 60%;
-    --input: 0 0% 60%;
-  }
-
-  .high-contrast img {
-    filter: contrast(1.2) brightness(1.1);
-  }
-
-  .high-contrast .bg-pattern {
-    display: none;
-  }
-
-  /* Reduced motion preferences */
-  .reduce-motion,
-  .reduce-motion * {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
-  }
-
-  /* Enhanced focus indicators */
-  button:focus-visible,
-  input:focus-visible,
-  textarea:focus-visible,
-  select:focus-visible,
-  [tabindex]:focus-visible {
-    outline: 2px solid hsl(var(--primary));
-    outline-offset: 2px;
-    border-radius: 4px;
   }
 
   /* Screen reader only content */

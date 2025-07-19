@@ -67,15 +67,16 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
+				// Classical cultural colors
 				italian: 'hsl(var(--italian-accent))',
-				'italian-marble': '#8B4513',
-				'italian-marble-warm': '#A0522D',
+				'italian-gold': 'hsl(var(--italian-gold))',
+				'italian-subtle': 'hsl(var(--italian-accent) / 0.1)',
 				mexican: 'hsl(var(--mexican-accent))',
-				'mexican-tile': '#D2691E',
-				'mexican-tile-warm': '#FF8C00',
+				'mexican-pink': 'hsl(var(--mexican-pink))',
+				'mexican-subtle': 'hsl(var(--mexican-accent) / 0.1)',
 				thai: 'hsl(var(--thai-accent))',
-				'thai-silk': '#228B22',
-				'thai-silk-warm': '#32CD32'
+				'thai-gold': 'hsl(var(--thai-gold))',
+				'thai-subtle': 'hsl(var(--thai-accent) / 0.1)',
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
@@ -83,9 +84,11 @@ export default {
 				sm: 'calc(var(--radius) - 4px)'
 			},
 			fontFamily: {
-				'heading': ['Nunito', 'system-ui', 'sans-serif'],
+				'heading': ['Playfair Display', 'serif'],
 				'handwritten': ['Kalam', 'cursive'],
-				'cinzel': ['Cormorant SC', 'serif']
+				'italian': ['Playfair Display', 'serif'],
+				'mexican': ['Fraunces', 'serif'],
+				'thai': ['Dancing Script', 'cursive']
 			},
 			keyframes: {
 				'accordion-down': {
@@ -124,6 +127,11 @@ export default {
 				'accordion-up': 'accordion-up 0.2s ease-out',
 				'fade-in': 'fade-in 0.3s ease-out',
 				'slide-in': 'slide-in 0.3s ease-out'
+			},
+			boxShadow: {
+				'classical': '0 2px 8px rgba(66, 54, 41, 0.08), 0 1px 3px rgba(66, 54, 41, 0.06)',
+				'paper': '0 1px 3px rgba(66, 54, 41, 0.1), 0 1px 2px rgba(66, 54, 41, 0.06)',
+				'cookbook': '0 4px 6px -1px rgba(66, 54, 41, 0.08), 0 2px 4px -1px rgba(66, 54, 41, 0.06)'
 			}
 		}
 	},
