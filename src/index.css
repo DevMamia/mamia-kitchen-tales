@@ -7,62 +7,65 @@
 /* MAMIA Design System - Warm Cooking App Colors */
 @layer base {
   :root {
-    --background: 43 23% 96%;  /* Soft cream #FFF8DC */
+    --background: 37 20% 97%;  /* Lighter version of header cream */
     --foreground: 14 26% 15%;  /* Rich brown #3E2723 */
 
-    --card: 43 23% 98%;
+    --card: 37 20% 98%;
     --card-foreground: 14 26% 15%;
 
-    --popover: 43 23% 96%;
+    --popover: 37 20% 97%;
     --popover-foreground: 14 26% 15%;
 
     --primary: 11 75% 55%;     /* Warm terracotta #E35336 */
-    --primary-foreground: 43 23% 96%;
+    --primary-foreground: 37 20% 97%;
 
-    --secondary: 43 15% 90%;
+    --secondary: 37 15% 90%;
     --secondary-foreground: 14 26% 15%;
 
-    --muted: 43 15% 92%;
+    --muted: 37 15% 92%;
     --muted-foreground: 14 16% 46%;
 
-    --accent: 43 15% 88%;
+    --accent: 37 15% 88%;
     --accent-foreground: 14 26% 15%;
 
     --destructive: 0 100% 27%;  /* Deep red #8B0000 */
-    --destructive-foreground: 43 23% 96%;
+    --destructive-foreground: 37 20% 97%;
 
-    --border: 43 20% 85%;
-    --input: 43 20% 85%;
+    --border: 37 20% 85%;
+    --input: 37 20% 85%;
     --ring: 11 75% 55%;
 
     --radius: 0.75rem;
 
-    /* Logo and Header Colors */
+    /* Logo and Header Colors - Keep current */
     --logo-cream: 37 87% 84%;         /* Cream background #FBDFB3 from logo */
     --logo-brown: 24 62% 24%;         /* Brown frame #643617 from logo */
     --logo-brown-accent: 35 65% 56%;  /* Medium brown accent #D49856 */
 
-    /* Cultural accent colors with gradients */
-    --italian-accent: 0 75% 45%;      /* Rich red #CC3333 */
+    /* Enhanced Cultural accent colors with gradients */
+    --italian-accent: 25 82% 65%;     /* Warm Italian orange */
     --italian-secondary: 14 60% 35%;  /* Warm brown #8B4513 */
     --italian-gold: 45 85% 60%;       /* Tuscan gold #D4AF37 */
+    --italian-marble: 28 25% 50%;     /* Marble gray-brown */
     
-    --mexican-accent: 18 90% 55%;     /* Vibrant orange #FF6B35 */
+    --mexican-accent: 350 80% 60%;    /* Vibrant Mexican red */
     --mexican-secondary: 40 85% 50%;  /* Warm yellow #FFB347 */
     --mexican-pink: 320 70% 65%;      /* Mexican pink #E91E63 */
+    --mexican-orange: 18 90% 55%;     /* Festive orange */
     
-    --thai-accent: 140 30% 45%;       /* Forest green #4A7C59 */
+    --thai-accent: 120 60% 50%;       /* Fresh Thai green */
     --thai-secondary: 60 40% 50%;     /* Lime green #9ACD32 */
     --thai-gold: 50 90% 55%;          /* Thai gold #FFD700 */
+    --thai-sage: 140 30% 45%;         /* Sage green */
 
     /* Dynamic backgrounds */
-    --marble-texture: linear-gradient(45deg, hsl(43 23% 96%) 0%, hsl(43 23% 98%) 50%, hsl(43 23% 94%) 100%);
+    --marble-texture: linear-gradient(45deg, hsl(37 20% 97%) 0%, hsl(37 20% 98%) 50%, hsl(37 20% 96%) 100%);
     --tile-pattern: repeating-conic-gradient(hsl(18 90% 55%) 0deg 90deg, hsl(40 85% 50%) 90deg 180deg);
     --silk-texture: radial-gradient(ellipse at center, hsl(140 30% 45%) 0%, hsl(60 40% 50%) 70%, hsl(50 90% 55%) 100%);
 
     /* Cultural Background Patterns */
-    --pattern-basil: radial-gradient(circle at 10% 20%, rgba(46, 125, 50, 0.03) 0%, transparent 30%),
-                     radial-gradient(circle at 90% 80%, rgba(46, 125, 50, 0.02) 0%, transparent 25%);
+    --pattern-basil: radial-gradient(circle at 10% 20%, rgba(139, 69, 19, 0.03) 0%, transparent 30%),
+                     radial-gradient(circle at 90% 80%, rgba(139, 69, 19, 0.02) 0%, transparent 25%);
     
     --pattern-papel: linear-gradient(45deg, transparent 40%, rgba(255, 87, 34, 0.02) 40%, rgba(255, 87, 34, 0.02) 60%, transparent 60%),
                      linear-gradient(-45deg, transparent 40%, rgba(255, 193, 7, 0.015) 40%, rgba(255, 193, 7, 0.015) 60%, transparent 60%);
@@ -73,13 +76,13 @@
     --pattern-checkered: linear-gradient(90deg, transparent 48%, rgba(139, 69, 19, 0.015) 48%, rgba(139, 69, 19, 0.015) 52%, transparent 52%),
                          linear-gradient(0deg, transparent 48%, rgba(139, 69, 19, 0.015) 48%, rgba(139, 69, 19, 0.015) 52%, transparent 52%);
 
-    --sidebar-background: 43 23% 96%;
+    --sidebar-background: 37 20% 97%;
     --sidebar-foreground: 14 26% 15%;
     --sidebar-primary: 11 75% 55%;
-    --sidebar-primary-foreground: 43 23% 96%;
-    --sidebar-accent: 43 15% 88%;
+    --sidebar-primary-foreground: 37 20% 97%;
+    --sidebar-accent: 37 15% 88%;
     --sidebar-accent-foreground: 14 26% 15%;
-    --sidebar-border: 43 20% 85%;
+    --sidebar-border: 37 20% 85%;
     --sidebar-ring: 11 75% 55%;
   }
 }
