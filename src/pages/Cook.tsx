@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Volume2, ChevronLeft, ChevronRight, Upload, X, Settings, ChefHat, Crown } from 'lucide-react';
@@ -28,8 +27,9 @@ const Cook = () => {
   const [timerCompleted, setTimerCompleted] = useState(false);
   const [agentService] = useState(() => new ConversationAgentService());
   const [optimizedTips, setOptimizedTips] = useState<Record<number, TipPlacement>>({});
+  const [hasSpokenCurrentStep, setHasSpokenCurrentStep] = useState(false);
 
-  const { speak, isPlaying, config } = useVoice();
+  const { speak, speakWithTip, isPlaying, config } = useVoice();
   const { user } = useAuth();
   const { isPremium, voiceMode, incrementUsage, hasUsageLeft } = useUserTier();
   const elevenlabsConversation = useConversation();
@@ -58,8 +58,36 @@ const Cook = () => {
       localStorage.setItem('lastCookingRecipe', recipeId);
     }
   }, [recipeId, recipeData]);
+
+  // Voice current step when cooking phase starts or step changes
+  useEffect(() => {
+    if (conversationPhase === 'cooking' && recipeData && !hasSpokenCurrentStep) {
+      const speakCurrentStep = async () => {
+        const instruction = recipeData.recipe.instructions[currentStep - 1];
+        const currentStepTip = optimizedTips[currentStep];
+        
+        if (currentStepTip && currentStepTip.timing === 'before') {
+          // Speak tip with instruction using the enhanced voice method
+          await speakWithTip(instruction, currentStepTip.tip, recipeData.mama.voiceId, 'before');
+        } else {
+          // Just speak the instruction
+          await speak(instruction, recipeData.mama.voiceId);
+        }
+        
+        setHasSpokenCurrentStep(true);
+      };
+
+      // Add small delay to avoid overlapping with other voice prompts
+      const timer = setTimeout(speakCurrentStep, 800);
+      return () => clearTimeout(timer);
+    }
+  }, [conversationPhase, currentStep, optimizedTips, recipeData, hasSpokenCurrentStep, speak, speakWithTip]);
+
+  // Reset spoken flag when step changes
+  useEffect(() => {
+    setHasSpokenCurrentStep(false);
+  }, [currentStep]);
   
-  // If no recipe ID provided, show recipe selection
   if (!recipeId) {
     return (
       <div className="min-h-[calc(100vh-8rem)] p-6">
@@ -142,10 +170,11 @@ const Cook = () => {
       incrementUsage();
     }
     
-    // Play soft landing TTS for all users
-    const instruction = recipe.instructions[0];
-    const softLanding = `Ok let's begin! ${instruction}`;
-    await speak(softLanding, mama.voiceId);
+    // Initial welcome message
+    const welcomeMessage = "Ok let's begin cooking together!";
+    await speak(welcomeMessage, mama.voiceId);
+    
+    // The useEffect will handle speaking the first step with its tip
   };
 
   if (conversationPhase === 'pre-cooking') {
@@ -209,24 +238,7 @@ const Cook = () => {
         conversationMemory?.markStepComplete(currentStep);
         setCurrentStep(currentStep + 1);
         setTimerCompleted(false);
-        
-        // Update agent context for premium users
-        if (isPremium && voiceMode === 'conversational') {
-          agentService.updateCookingContext(currentStep + 1, recipe.instructions[currentStep]);
-        }
-        
-        // Speak next step instruction with contextual tip
-        setTimeout(() => {
-          const nextInstruction = recipe.instructions[currentStep];
-          const nextTip = optimizedTips[currentStep + 1];
-          
-          let spokenText = nextInstruction;
-          if (nextTip && nextTip.timing === 'before') {
-            spokenText = `${nextTip.tip} Now, ${nextInstruction}`;
-          }
-          
-          speak(spokenText, mama.voiceId);
-        }, 500);
+        // The useEffect will handle speaking the next step with its tip
       }
       return;
     }
@@ -235,24 +247,20 @@ const Cook = () => {
       if (currentStep > 1) {
         setCurrentStep(currentStep - 1);
         setTimerCompleted(false);
-        
-        // Update agent context and speak previous step
-        if (isPremium && voiceMode === 'conversational') {
-          agentService.updateCookingContext(currentStep - 1, recipe.instructions[currentStep - 2]);
-        }
-        
-        setTimeout(() => {
-          speak(recipe.instructions[currentStep - 2], mama.voiceId);
-        }, 500);
+        // The useEffect will handle speaking the previous step
       }
       return;
     }
     
     if (lowerCommand.includes('repeat') || lowerCommand.includes('repeat that')) {
-      const repeatText = currentStepTip && currentStepTip.timing === 'before'
-        ? `${currentStepTip.tip} ${recipe.instructions[currentStep - 1]}`
-        : recipe.instructions[currentStep - 1];
-      speak(repeatText, mama.voiceId);
+      const instruction = recipe.instructions[currentStep - 1];
+      const stepTip = optimizedTips[currentStep];
+      
+      if (stepTip && stepTip.timing === 'before') {
+        speakWithTip(instruction, stepTip.tip, mama.voiceId, 'before');
+      } else {
+        speak(instruction, mama.voiceId);
+      }
       return;
     }
     
@@ -451,10 +459,7 @@ const Cook = () => {
               if (prevStep < currentStep) {
                 setCurrentStep(prevStep);
                 setTimerCompleted(false);
-                // Speak the previous step instruction
-                setTimeout(() => {
-                  speak(recipe.instructions[prevStep - 1], mama.voiceId);
-                }, 500);
+                // The useEffect will handle speaking the previous step
               }
             }}
             disabled={currentStep === 1}
@@ -467,10 +472,14 @@ const Cook = () => {
 
           <Button
             onClick={() => {
-              const repeatText = currentStepTip && currentStepTip.timing === 'before'
-                ? `${currentStepTip.tip} ${recipe.instructions[currentStep - 1]}`
-                : recipe.instructions[currentStep - 1];
-              speak(repeatText, mama.voiceId);
+              const instruction = recipe.instructions[currentStep - 1];
+              const stepTip = optimizedTips[currentStep];
+              
+              if (stepTip && stepTip.timing === 'before') {
+                speakWithTip(instruction, stepTip.tip, mama.voiceId, 'before');
+              } else {
+                speak(instruction, mama.voiceId);
+              }
             }}
             className="bg-orange-500 text-white hover:bg-orange-600 text-lg py-6 px-8 min-h-[56px] rounded-xl"
           >
@@ -484,18 +493,7 @@ const Cook = () => {
               if (nextStep > currentStep) {
                 setCurrentStep(nextStep);
                 setTimerCompleted(false);
-                // Speak the next step instruction with contextual tip
-                setTimeout(() => {
-                  const nextInstruction = recipe.instructions[nextStep - 1];
-                  const nextTip = optimizedTips[nextStep];
-                  
-                  let spokenText = nextInstruction;
-                  if (nextTip && nextTip.timing === 'before') {
-                    spokenText = `${nextTip.tip} Now, ${nextInstruction}`;
-                  }
-                  
-                  speak(spokenText, mama.voiceId);
-                }, 500);
+                // The useEffect will handle speaking the next step with its tip
               }
             }}
             disabled={currentStep === totalSteps}
