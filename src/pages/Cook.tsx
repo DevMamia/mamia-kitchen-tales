@@ -254,6 +254,7 @@ const Cook = () => {
 
   const handleVoiceCommand = useCallback((command: string) => {
     const lowerCommand = command.toLowerCase();
+    const stepTip = optimizedTips[currentStep]; // Calculate inside callback
     
     // Universal voice commands for both tiers
     if (lowerCommand.includes('next') || lowerCommand.includes('next step')) {
@@ -277,7 +278,6 @@ const Cook = () => {
     
     if (lowerCommand.includes('repeat') || lowerCommand.includes('repeat that')) {
       const instruction = recipe.instructions[currentStep - 1];
-      const stepTip = optimizedTips[currentStep];
       
       // Use enhanced cooking instruction method
       speakCookingInstruction(instruction, mama.voiceId, currentStep, stepTip?.tip);
@@ -291,8 +291,8 @@ const Cook = () => {
       if (!isPremium || voiceMode === 'tts') {
         let helpMessage = `Don't worry! Take your time with step ${currentStep}. Let me repeat: ${recipe.instructions[currentStep - 1]}`;
         
-        if (currentStepTip) {
-          helpMessage += ` Here's my special tip: ${currentStepTip.tip}`;
+        if (stepTip) {
+          helpMessage += ` Here's my special tip: ${stepTip.tip}`;
         }
         
         speak(helpMessage, mama.voiceId, {
@@ -313,7 +313,7 @@ const Cook = () => {
       conversationMemory?.addUserQuestion(command);
       console.log('[Cook] Voice command logged for basic user:', command);
     }
-  }, [currentStep, totalSteps, conversationMemory, setCurrentStep, setTimerCompleted, recipe, optimizedTips, speakCookingInstruction, speak, mama.voiceId, isPremium, voiceMode, currentStepTip]);
+  }, [currentStep, totalSteps, conversationMemory, setCurrentStep, setTimerCompleted, recipe, optimizedTips, speakCookingInstruction, speak, mama.voiceId, isPremium, voiceMode]);
 
   const handleInterrupt = useCallback(async () => {
     conversationMemory?.handleInterruption();
