@@ -96,11 +96,6 @@ const Recipes = () => {
   return (
     <PageTransition>
       <div className="h-full flex flex-col space-y-6">
-        {/* Main Title */}
-        <h1 className="font-heading font-bold text-3xl text-foreground text-center">
-          Discover Recipes
-        </h1>
-
         {/* HERO: Tinder Card Stack */}
         {!searchQuery && stackRecipes.length > 0 && (
           <RecipeCardStack
