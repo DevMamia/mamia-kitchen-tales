@@ -24,9 +24,9 @@ const mamasDisplay = mamas.map(mama => ({
           mama.emoji === '🌶️' ? "grinding spices" : "pounding curry paste",
   watermark: mama.emoji === '🍷' ? Wine : mama.emoji === '🌶️' ? Flower2 : Leaf,
   accent: mama.emoji,
-  characterImage: mama.id === 1 ? "/lovable-uploads/f93a6daa-6445-4c83-aaf2-c75c2b4824bc.png" :
-                 mama.id === 2 ? "/lovable-uploads/95d2de88-6de2-4a87-b5e5-deda3096c455.png" :
-                 "/lovable-uploads/35c616ae-06a9-49cb-b3e3-287c89fb124d.png",
+  characterImage: mama.id === 1 ? "/lovable-uploads/Nonna.png" :
+                 mama.id === 2 ? "/lovable-uploads/Abuela.png" :
+                 "/lovable-uploads/Yai.png",
   // Cultural styling
   culturalTheme: mama.id === 1 ? 'italian' : mama.id === 2 ? 'mexican' : 'thai',
   culturalColors: mama.id === 1 ? {
@@ -120,16 +120,7 @@ const Mamas = () => {
                         <WatermarkIcon size={48} />
                       </div>
                       
-                      {/* Cultural name badge */}
-                      <div 
-                        className="absolute bottom-4 left-1/2 transform -translate-x-1/2 px-4 py-2 rounded-full backdrop-blur-sm text-xs font-semibold text-white shadow-lg"
-                        style={{ 
-                          background: `linear-gradient(135deg, ${mama.culturalColors.primary}80, ${mama.culturalColors.secondary}60)`,
-                          border: `1px solid ${mama.culturalColors.primary}40`
-                        }}
-                      >
-                        {mama.name}
-                      </div>
+                      {/* Name badge removed as requested */}
                     </div>
                   </div>
                 </CarouselItem>

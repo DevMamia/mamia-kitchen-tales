@@ -7,32 +7,32 @@
 /* MAMIA Design System - Warm Cooking App Colors */
 @layer base {
   :root {
-    --background: 37 20% 97%;  /* Lighter version of header cream */
+    --background: 43 100% 97%;  /* Updated to HSL(43, 100%, 97%) - warm off-white */
     --foreground: 14 26% 15%;  /* Rich brown #3E2723 */
 
-    --card: 37 20% 98%;
+    --card: 43 100% 98%;       /* Slightly lighter than background */
     --card-foreground: 14 26% 15%;
 
-    --popover: 37 20% 97%;
+    --popover: 43 100% 97%;    /* Match background */
     --popover-foreground: 14 26% 15%;
 
     --primary: 11 75% 55%;     /* Warm terracotta #E35336 */
-    --primary-foreground: 37 20% 97%;
+    --primary-foreground: 43 100% 97%;
 
-    --secondary: 37 15% 90%;
+    --secondary: 43 50% 90%;   /* Warm secondary based on new background */
     --secondary-foreground: 14 26% 15%;
 
-    --muted: 37 15% 92%;
+    --muted: 43 40% 92%;       /* Muted version of background */
     --muted-foreground: 14 16% 46%;
 
-    --accent: 37 15% 88%;
+    --accent: 43 30% 88%;      /* Accent based on background */
     --accent-foreground: 14 26% 15%;
 
     --destructive: 0 100% 27%;  /* Deep red #8B0000 */
-    --destructive-foreground: 37 20% 97%;
+    --destructive-foreground: 43 100% 97%;
 
-    --border: 37 20% 85%;
-    --input: 37 20% 85%;
+    --border: 43 60% 85%;      /* Border harmonized with background */
+    --input: 43 60% 85%;       /* Input border harmonized */
     --ring: 11 75% 55%;
 
     --radius: 0.75rem;
@@ -59,7 +59,7 @@
     --thai-sage: 140 30% 45%;         /* Sage green */
 
     /* Dynamic backgrounds */
-    --marble-texture: linear-gradient(45deg, hsl(37 20% 97%) 0%, hsl(37 20% 98%) 50%, hsl(37 20% 96%) 100%);
+    --marble-texture: linear-gradient(45deg, hsl(43 100% 97%) 0%, hsl(43 100% 98%) 50%, hsl(43 100% 96%) 100%);
     --tile-pattern: repeating-conic-gradient(hsl(18 90% 55%) 0deg 90deg, hsl(40 85% 50%) 90deg 180deg);
     --silk-texture: radial-gradient(ellipse at center, hsl(140 30% 45%) 0%, hsl(60 40% 50%) 70%, hsl(50 90% 55%) 100%);
 
@@ -76,13 +76,13 @@
     --pattern-checkered: linear-gradient(90deg, transparent 48%, rgba(139, 69, 19, 0.015) 48%, rgba(139, 69, 19, 0.015) 52%, transparent 52%),
                          linear-gradient(0deg, transparent 48%, rgba(139, 69, 19, 0.015) 48%, rgba(139, 69, 19, 0.015) 52%, transparent 52%);
 
-    --sidebar-background: 37 20% 97%;
+    --sidebar-background: 43 100% 97%;  /* Match new background */
     --sidebar-foreground: 14 26% 15%;
     --sidebar-primary: 11 75% 55%;
-    --sidebar-primary-foreground: 37 20% 97%;
-    --sidebar-accent: 37 15% 88%;
+    --sidebar-primary-foreground: 43 100% 97%;
+    --sidebar-accent: 43 30% 88%;
     --sidebar-accent-foreground: 14 26% 15%;
-    --sidebar-border: 37 20% 85%;
+    --sidebar-border: 43 60% 85%;
     --sidebar-ring: 11 75% 55%;
   }
 }
