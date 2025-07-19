@@ -1,12 +1,9 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Clock, Users, ChefHat, Plus, Minus, ShoppingCart, Timer } from 'lucide-react';
 import { recipes } from '@/data/recipes';
 import { getMamaById } from '@/data/mamas';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
 import { useShoppingList } from '@/contexts/ShoppingListContext';
 import ShoppingListModal from '@/components/ShoppingListModal';
@@ -16,8 +13,11 @@ import { IngredientAnimation, CelebrationEffects } from '@/components/Celebratio
 const RecipeDetail = () => {
   const { recipeId } = useParams();
   const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState<'ingredients' | 'instructions'>('ingredients');
   const [servings, setServings] = useState(4);
   const [checkedIngredients, setCheckedIngredients] = useState<Set<number>>(new Set());
+  const [isFavorited, setIsFavorited] = useState(false);
+  const [isSticky, setIsSticky] = useState(false);
   const [showShoppingModal, setShowShoppingModal] = useState(false);
   const [ingredientAnimations, setIngredientAnimations] = useState<Array<{
     ingredient: string;
@@ -25,6 +25,7 @@ const RecipeDetail = () => {
     position: { x: number; y: number };
     id: string;
   }>>([]);
+  const [showCelebration, setShowCelebration] = useState(false);
   const { user } = useAuth();
   const { addIngredientsToShoppingList } = useShoppingList();
 
@@ -37,31 +38,46 @@ const RecipeDetail = () => {
     }
   }, [recipe]);
 
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsSticky(window.scrollY > 300);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   if (!recipe) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-6">
-        <div className="text-center max-w-md">
-          <h2 className="font-heading text-2xl text-foreground mb-3">Recipe not found</h2>
-          <p className="text-muted-foreground mb-6 font-handwritten">The recipe you're looking for doesn't exist in our cookbook.</p>
-          <Button onClick={() => navigate('/recipes')} className="shadow-classical">
+      <div className="h-full flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="font-heading text-2xl text-foreground mb-2">Recipe not found</h2>
+          <p className="text-muted-foreground mb-4">The recipe you're looking for doesn't exist.</p>
+          <button 
+            onClick={() => navigate('/recipes')}
+            className="bg-primary text-primary-foreground px-6 py-2 rounded-xl font-heading font-bold"
+          >
             Back to Recipes
-          </Button>
+          </button>
         </div>
       </div>
     );
   }
 
   const adjustedIngredients = recipe.ingredients.map(ingredient => {
+    // Check if this is a section header (ends with colon)
     const isSectionHeader = ingredient.trim().endsWith(':');
     if (isSectionHeader) {
-      return ingredient;
+      return ingredient; // Don't adjust section headers
     }
     
+    // Enhanced quantity calculation using QuantityCalculationService
     try {
       const parsed = QuantityCalculationService.parseQuantity(ingredient);
       const scaled = QuantityCalculationService.scaleQuantity(parsed, servings / recipe.servings);
       const formatted = QuantityCalculationService.formatQuantity(scaled);
       
+      // Replace the quantity part while preserving the ingredient name
       const quantityPattern = /^([^a-zA-Z]*)/;
       const match = ingredient.match(quantityPattern);
       if (match && match[1].trim()) {
@@ -69,6 +85,7 @@ const RecipeDetail = () => {
       }
       return formatted + ' ' + ingredient.replace(/^[^a-zA-Z]*/, '');
     } catch (error) {
+      // Fallback to simple calculation if parsing fails
       const ratio = servings / recipe.servings;
       return ingredient.replace(/\d+/g, (match) => {
         const num = parseInt(match);
@@ -78,9 +95,12 @@ const RecipeDetail = () => {
   });
 
   const toggleIngredient = (index: number) => {
+    // Check if this is a section header (ends with colon)
     const ingredient = adjustedIngredients[index];
     const isSectionHeader = ingredient.trim().endsWith(':');
-    if (isSectionHeader) return;
+    if (isSectionHeader) {
+      return; // Don't toggle section headers
+    }
     
     const newChecked = new Set(checkedIngredients);
     if (newChecked.has(index)) {
@@ -89,6 +109,12 @@ const RecipeDetail = () => {
       newChecked.add(index);
     }
     setCheckedIngredients(newChecked);
+  };
+
+  const toggleFavorite = () => {
+    setIsFavorited(!isFavorited);
+    setShowCelebration(true);
+    setTimeout(() => setShowCelebration(false), 1500);
   };
 
   const handleStartCooking = () => {
@@ -124,9 +150,10 @@ const RecipeDetail = () => {
     const uncheckedIngredients = getUncheckedIngredients();
     if (uncheckedIngredients.length === 0) return;
 
+    // Create ingredient animations
     const animations = uncheckedIngredients.slice(0, 8).map((ingredient, index) => ({
       ingredient: ingredient.name,
-      category: 'pantry',
+      category: 'pantry', // Default category, would be determined by categorization service
       position: { 
         x: Math.random() * 200 - 100,
         y: Math.random() * 200 - 100
@@ -146,30 +173,35 @@ const RecipeDetail = () => {
   };
 
   const renderInstructions = (instruction: string, index: number) => {
+    // Check if this is a section header (ends with colon)
     const isSectionHeader = instruction.trim().endsWith(':');
     
+    // Use structured timer data if available, otherwise fall back to regex
     const stepTimer = recipe.stepTimers?.[index];
     const timerRegex = /(\d+\s*(?:minutes?|mins?|hours?|hrs?))/gi;
     const timerMatch = !stepTimer ? instruction.match(timerRegex) : null;
     
     if (isSectionHeader) {
       return (
-        <div key={index} className="mb-6 first:mt-0">
-          <h3 className="font-heading font-bold text-lg text-primary border-b border-border pb-2 mb-4">
-            {instruction}
-          </h3>
+        <div key={index} className="mb-4">
+          <div className="inline-flex items-center gap-2 bg-gradient-to-r from-primary/10 to-primary/5 border border-primary/20 rounded-lg px-4 py-2">
+            <div className="w-2 h-2 bg-primary rounded-full"></div>
+            <span className="font-heading font-bold text-primary text-sm uppercase tracking-wider">
+              {instruction}
+            </span>
+          </div>
         </div>
       );
     }
     
     return (
-      <div key={index} className="mb-6 flex gap-4">
-        <div className="relative flex-shrink-0">
-          <div className="w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-heading font-bold text-sm">
+      <div key={index} className="flex gap-4 mb-6">
+        <div className="relative">
+          <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-primary-foreground font-bold text-sm flex-shrink-0 mt-1">
             {index + 1}
           </div>
           {(stepTimer || timerMatch) && (
-            <div className="absolute -right-2 top-10 text-xs text-muted-foreground bg-card border border-border px-2 py-1 rounded shadow-paper whitespace-nowrap">
+            <div className="absolute -right-2 top-10 text-xs text-muted-foreground bg-muted px-2 py-1 rounded-md whitespace-nowrap">
               <Timer size={12} className="inline mr-1" />
               {stepTimer?.display || timerMatch?.[0]}
             </div>
@@ -184,224 +216,225 @@ const RecipeDetail = () => {
     );
   };
 
-  const getCulturalAccent = () => {
-    if (mama?.country === 'Italy') return 'italian';
-    if (mama?.country === 'Mexico') return 'mexican';
-    return 'thai';
-  };
-
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <div className="sticky top-0 z-10 bg-card border-b border-border shadow-paper">
-        <div className="flex items-center justify-between p-4">
+      {/* Hero Section */}
+      <div className="relative h-64 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-black/60"></div>
+        <img 
+          src={recipe.image} 
+          alt={recipe.title}
+          className="w-full h-full object-cover"
+        />
+        
+        {/* Header Controls */}
+        <div className="absolute top-4 left-4 right-4 flex items-center justify-between">
           <button 
             onClick={() => navigate(-1)}
-            className="w-10 h-10 bg-background border border-border rounded-full flex items-center justify-center text-foreground hover:bg-accent transition-colors"
+            className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/30 transition-colors"
           >
-            <ArrowLeft size={18} />
+            <ArrowLeft size={20} />
           </button>
-          <h1 className="font-heading font-bold text-lg text-foreground">Recipe</h1>
-          <div className="w-10"></div>
+        </div>
+
+        {/* Recipe Info Overlay */}
+        <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="text-2xl">{recipe.mamaEmoji}</span>
+            <span className="text-sm opacity-90">by {recipe.mamaName}</span>
+          </div>
+          <h1 className="font-heading font-bold text-3xl mb-4">{recipe.title}</h1>
+          
+          {/* Stats */}
+          <div className="flex gap-3">
+            <div className="bg-white/20 backdrop-blur-sm rounded-lg px-3 py-2 flex items-center gap-1">
+              <Clock size={16} />
+              <span className="text-sm font-medium">{recipe.cookingTime}</span>
+            </div>
+            <div className="bg-white/20 backdrop-blur-sm rounded-lg px-3 py-2 flex items-center gap-1">
+              <Users size={16} />
+              <span className="text-sm font-medium">{recipe.servings} servings</span>
+            </div>
+            <div className="bg-white/20 backdrop-blur-sm rounded-lg px-3 py-2 flex items-center gap-1">
+              <ChefHat size={16} />
+              <span className="text-sm font-medium">{recipe.difficulty}</span>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div className="p-6 space-y-8">
-        {/* Recipe Header Section */}
-        <div className="text-center space-y-4">
-          {/* Small Food Image */}
-          <div className="mx-auto w-20 h-20 rounded-full overflow-hidden border-4 border-card shadow-classical">
-            <img 
-              src={recipe.image} 
-              alt={recipe.title}
-              className="w-full h-full object-cover"
-            />
+      {/* Description */}
+      <div className="p-6 bg-white">
+        <p className="text-muted-foreground leading-relaxed font-handwritten text-lg">
+          {recipe.description}
+        </p>
+      </div>
+
+      {/* Start Cooking Button */}
+      <div className="px-6 pb-6 bg-white">
+        <button
+          onClick={handleStartCooking}
+          className={`w-full ${mama?.country === 'Italy' ? 'bg-gradient-to-r from-italian-marble to-italian-marble-warm' : 
+                     mama?.country === 'Mexico' ? 'bg-gradient-to-r from-mexican-tile to-mexican-tile-warm' :
+                     'bg-gradient-to-r from-thai-silk to-thai-silk-warm'} 
+                   text-white font-heading font-bold py-4 px-6 rounded-xl shadow-warm hover:shadow-elegant transition-all duration-300 
+                   flex items-center justify-center gap-3`}
+        >
+          <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
+            <span className="text-xl">{recipe.mamaEmoji}</span>
           </div>
+          <span className="text-lg">Let's cook together with {recipe.mamaName.split(' ')[0]}!</span>
+        </button>
+      </div>
 
-          {/* Title with Mama */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-center gap-2 text-muted-foreground">
-              <span className="text-2xl">{recipe.mamaEmoji}</span>
-              <span className="font-handwritten text-base">by {recipe.mamaName}</span>
-            </div>
-            <h1 className="font-heading font-bold text-3xl text-foreground leading-tight">
-              {recipe.title}
-            </h1>
-          </div>
-
-          {/* Description */}
-          <p className="text-muted-foreground leading-relaxed font-handwritten text-lg max-w-md mx-auto">
-            {recipe.description}
-          </p>
-
-          {/* Recipe Metadata */}
-          <div className="flex flex-wrap justify-center gap-2 pt-2">
-            <Badge variant="secondary" className="shadow-paper">
-              <Clock size={14} className="mr-1" />
-              {recipe.cookingTime}
-            </Badge>
-            <Badge variant="secondary" className="shadow-paper">
-              <Users size={14} className="mr-1" />
-              {recipe.servings} servings
-            </Badge>
-            <Badge variant="secondary" className="shadow-paper">
-              <ChefHat size={14} className="mr-1" />
-              {recipe.difficulty}
-            </Badge>
+      {/* Sticky Tab Navigation */}
+      <div className={`sticky top-0 z-10 bg-white border-b transition-all duration-200 ${
+        isSticky ? 'shadow-md' : ''
+      }`}>
+        <div className="p-4">
+          <div className="bg-muted rounded-lg p-1 flex">
+            <button
+              onClick={() => setActiveTab('ingredients')}
+              className={`flex-1 py-2 px-4 rounded-md font-heading font-bold text-sm transition-all duration-200 ${
+                activeTab === 'ingredients'
+                  ? 'bg-white text-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              Ingredients
+            </button>
+            <button
+              onClick={() => setActiveTab('instructions')}
+              className={`flex-1 py-2 px-4 rounded-md font-heading font-bold text-sm transition-all duration-200 ${
+                activeTab === 'instructions'
+                  ? 'bg-white text-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              Instructions
+            </button>
           </div>
         </div>
+      </div>
 
-        {/* Start Cooking CTA */}
-        <div className="text-center">
-          <Button
-            onClick={handleStartCooking}
-            size="lg"
-            className={`font-heading font-bold py-4 px-8 text-lg shadow-cookbook transition-all duration-200 hover:scale-105 ${
-              getCulturalAccent() === 'italian' ? 'bg-italian hover:bg-italian/90' :
-              getCulturalAccent() === 'mexican' ? 'bg-mexican hover:bg-mexican/90' :
-              'bg-thai hover:bg-thai/90'
-            }`}
-          >
-            <span className="text-xl mr-3">{recipe.mamaEmoji}</span>
-            Start Cooking with {recipe.mamaName.split(' ')[0]}!
-          </Button>
-        </div>
-
-        {/* Recipe Content Tabs */}
-        <div className="bg-card border border-border rounded-lg shadow-classical overflow-hidden">
-          <Tabs defaultValue="ingredients" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 bg-muted/50 border-b border-border rounded-none h-12">
-              <TabsTrigger value="ingredients" className="font-heading font-semibold">
-                Ingredients
-              </TabsTrigger>
-              <TabsTrigger value="instructions" className="font-heading font-semibold">
-                Instructions
-              </TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="ingredients" className="p-6 space-y-6">
-              {/* Serving Adjuster */}
-              <div className="bg-accent/30 rounded-lg p-4 border border-border">
-                <div className="flex items-center justify-between">
-                  <span className="font-heading font-semibold text-foreground">Servings</span>
-                  <div className="flex items-center gap-3">
-                    <button
-                      onClick={() => setServings(Math.max(1, servings - 1))}
-                      className="w-8 h-8 bg-background border border-border rounded-full flex items-center justify-center hover:bg-accent transition-colors"
-                    >
-                      <Minus size={16} />
-                    </button>
-                    <span className="font-heading font-bold text-xl w-8 text-center">{servings}</span>
-                    <button
-                      onClick={() => setServings(servings + 1)}
-                      className="w-8 h-8 bg-background border border-border rounded-full flex items-center justify-center hover:bg-accent transition-colors"
-                    >
-                      <Plus size={16} />
-                    </button>
-                  </div>
+      {/* Content */}
+      <div className="px-6 py-4">
+        {activeTab === 'ingredients' && (
+          <div className="space-y-6">
+            {/* Serving Adjuster */}
+            <div className="bg-white rounded-xl p-4 shadow-warm">
+              <div className="flex items-center justify-between">
+                <span className="font-heading font-bold text-foreground">Servings</span>
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => setServings(Math.max(1, servings - 1))}
+                    className="w-8 h-8 bg-muted rounded-full flex items-center justify-center hover:bg-muted/80 transition-colors"
+                  >
+                    <Minus size={16} />
+                  </button>
+                  <span className="font-heading font-bold text-xl w-8 text-center">{servings}</span>
+                  <button
+                    onClick={() => setServings(servings + 1)}
+                    className="w-8 h-8 bg-muted rounded-full flex items-center justify-center hover:bg-muted/80 transition-colors"
+                  >
+                    <Plus size={16} />
+                  </button>
                 </div>
               </div>
+            </div>
 
-              {/* Ingredients List */}
-              <div className="space-y-3">
-                {adjustedIngredients.map((ingredient, index) => {
-                  const isSectionHeader = ingredient.trim().endsWith(':');
-                  
-                  if (isSectionHeader) {
-                    return (
-                      <div key={index} className="pt-4 pb-2 border-b border-border first:pt-0">
-                        <h3 className="font-heading font-bold text-primary text-sm uppercase tracking-wide">
-                          {ingredient}
-                        </h3>
-                      </div>
-                    );
-                  }
-                  
+            {/* Ingredients List */}
+            <div className="space-y-3">
+              {adjustedIngredients.map((ingredient, index) => {
+                const isSectionHeader = ingredient.trim().endsWith(':');
+                
+                if (isSectionHeader) {
                   return (
-                    <div key={index} className="flex items-center gap-3 p-3 bg-background border border-border rounded-lg shadow-paper">
-                      <button
-                        onClick={() => toggleIngredient(index)}
-                        className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all duration-200 ${
-                          checkedIngredients.has(index)
-                            ? 'bg-primary border-primary text-primary-foreground'
-                            : 'border-muted-foreground/30 hover:border-primary'
-                        }`}
-                      >
-                        {checkedIngredients.has(index) && (
-                          <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-                            <polyline points="20,6 9,17 4,12"></polyline>
-                          </svg>
-                        )}
-                      </button>
-                      <span className={`flex-1 transition-all duration-200 ${
-                        checkedIngredients.has(index) 
-                          ? 'text-muted-foreground line-through' 
-                          : 'text-foreground'
-                      }`}>
-                        {ingredient}
-                      </span>
+                    <div key={index} className="mt-6 mb-3">
+                      <div className="inline-flex items-center gap-2 bg-gradient-to-r from-primary/10 to-primary/5 border border-primary/20 rounded-lg px-4 py-2">
+                        <div className="w-2 h-2 bg-primary rounded-full"></div>
+                        <span className="font-heading font-bold text-primary text-sm uppercase tracking-wider">
+                          {ingredient}
+                        </span>
+                      </div>
                     </div>
                   );
-                })}
-              </div>
-
-              {/* Add to Shopping List */}
-              <Button 
-                onClick={handleAddToShoppingList}
-                disabled={getUncheckedIngredients().length === 0}
-                className="w-full font-heading font-semibold py-3 shadow-classical"
-                variant={getUncheckedIngredients().length > 0 ? "default" : "outline"}
-              >
-                <ShoppingCart size={18} className="mr-2" />
-                {!user 
-                  ? 'Sign In to Add to Shopping List'
-                  : getUncheckedIngredients().length === 0 
-                    ? 'All Ingredients Checked'
-                    : `Add ${getUncheckedIngredients().length} Items to Shopping List`
                 }
-              </Button>
-            </TabsContent>
+                
+                return (
+                  <div key={index} className="flex items-center gap-3 p-3 bg-white rounded-lg shadow-sm">
+                    <button
+                      onClick={() => toggleIngredient(index)}
+                      className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all duration-200 ${
+                        checkedIngredients.has(index)
+                          ? 'bg-primary border-primary text-primary-foreground'
+                          : 'border-muted-foreground/30 hover:border-primary'
+                      }`}
+                    >
+                      {checkedIngredients.has(index) && (
+                        <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                          <polyline points="20,6 9,17 4,12"></polyline>
+                        </svg>
+                      )}
+                    </button>
+                    <span className={`flex-1 transition-all duration-200 ${
+                      checkedIngredients.has(index) 
+                        ? 'text-muted-foreground line-through' 
+                        : 'text-foreground'
+                    }`}>
+                      {ingredient}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
 
-            <TabsContent value="instructions" className="p-6 space-y-6">
-              {/* Display Tips */}
-              {recipe.displayTips && recipe.displayTips.length > 0 && (
-                <div className={`border-l-4 rounded-r-lg p-4 shadow-paper ${
-                  getCulturalAccent() === 'italian' ? 'bg-italian-subtle border-italian' :
-                  getCulturalAccent() === 'mexican' ? 'bg-mexican-subtle border-mexican' :
-                  'bg-thai-subtle border-thai'
-                }`}>
-                  <h3 className={`font-handwritten text-lg font-bold mb-3 flex items-center gap-2 ${
-                    getCulturalAccent() === 'italian' ? 'text-italian' :
-                    getCulturalAccent() === 'mexican' ? 'text-mexican' :
-                    'text-thai'
-                  }`}>
-                    <span className="text-xl">{recipe.mamaEmoji}</span>
-                    {recipe.mamaName}'s Essential Tips
-                  </h3>
-                  <ul className="space-y-2 font-handwritten text-foreground">
-                    {recipe.displayTips.map((tip, index) => (
-                      <li key={index} className="flex items-start gap-2">
-                        <span className={`mt-1 ${
-                          getCulturalAccent() === 'italian' ? 'text-italian' :
-                          getCulturalAccent() === 'mexican' ? 'text-mexican' :
-                          'text-thai'
-                        }`}>•</span>
-                        <span>{tip}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
+            {/* Add to Shopping List */}
+            <Button 
+              onClick={handleAddToShoppingList}
+              disabled={getUncheckedIngredients().length === 0}
+              className="w-full font-heading font-bold py-3 h-12 rounded-xl transition-all duration-200 flex items-center justify-center gap-2"
+              variant={getUncheckedIngredients().length > 0 ? "default" : "outline"}
+            >
+              <ShoppingCart size={20} />
+              {!user 
+                ? 'Sign In to Add to Shopping List'
+                : getUncheckedIngredients().length === 0 
+                  ? 'All Ingredients Checked'
+                  : `Add ${getUncheckedIngredients().length} Items to Shopping List`
+              }
+            </Button>
+          </div>
+        )}
 
-              {/* Instructions */}
-              <div className="space-y-6">
-                {recipe.instructions.map((instruction, index) => 
-                  renderInstructions(instruction, index)
-                )}
+        {activeTab === 'instructions' && (
+          <div className="space-y-6">
+            {/* Display Tips */}
+            {recipe.displayTips && recipe.displayTips.length > 0 && (
+              <div className="bg-gradient-to-br from-amber-50 to-orange-50 border-l-4 border-primary rounded-lg p-4">
+                <h3 className="font-handwritten text-lg text-primary font-bold mb-2 flex items-center gap-2">
+                  <span className="text-xl">{recipe.mamaEmoji}</span>
+                  {recipe.mamaName}'s Essential Tips
+                </h3>
+                <ul className="space-y-2 font-handwritten text-foreground">
+                  {recipe.displayTips.map((tip, index) => (
+                    <li key={index} className="flex items-start gap-2">
+                      <span className="text-primary mt-1">•</span>
+                      <span>{tip}</span>
+                    </li>
+                  ))}
+                </ul>
               </div>
-            </TabsContent>
-          </Tabs>
-        </div>
+            )}
+
+            {/* Instructions */}
+            <div className="space-y-6">
+              {recipe.instructions.map((instruction, index) => 
+                renderInstructions(instruction, index)
+              )}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Ingredient Animations */}
@@ -426,6 +459,13 @@ const RecipeDetail = () => {
         addedCount={getUncheckedIngredients().length}
         recipeName={recipe?.title || 'Unknown Recipe'}
         ingredientPositions={ingredientAnimations.map(a => a.position)}
+      />
+      
+      {/* Favorite Animation */}
+      <CelebrationEffects 
+        trigger={showCelebration} 
+        type="heart" 
+        cultural={mama?.id === 1 ? 'italian' : mama?.id === 2 ? 'mexican' : 'thai'} 
       />
     </div>
   );

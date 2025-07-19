@@ -1,4 +1,3 @@
-
 export interface Mama {
   id: number;
   name: string;
@@ -21,7 +20,7 @@ export const mamas: Mama[] = [
     emoji: '🍷',
     accent: 'Italian',
     voiceId: 'nonna_lucia', // Will map to VITE_NONNA_VOICE_ID
-    themeColor: 'hsl(15, 45%, 65%)', // Muted terracotta from new card
+    themeColor: 'hsl(25, 82%, 65%)', // Warm Italian orange
     country: 'Italy',
     specialties: ['Pasta', 'Risotto', 'Tiramisu'],
     philosophy: 'Cooking is an act of love, passed down through generations.',
@@ -35,7 +34,7 @@ export const mamas: Mama[] = [
     emoji: '🌶️',
     accent: 'Mexican',
     voiceId: 'abuela_rosa', // Will map to VITE_ABUELA_VOICE_ID
-    themeColor: 'hsl(10, 40%, 70%)', // Soft coral from new card
+    themeColor: 'hsl(350, 80%, 60%)', // Vibrant Mexican red
     country: 'Mexico',
     specialties: ['Mole', 'Tamales', 'Chiles Rellenos'],
     philosophy: 'Each spice tells a story, each dish carries our history.',
@@ -49,7 +48,7 @@ export const mamas: Mama[] = [
     emoji: '🌿',
     accent: 'Thai',
     voiceId: 'yai_malee', // Will map to ELEVENLABS_YAI_VOICE_ID
-    themeColor: 'hsl(95, 25%, 60%)', // Gentle sage from new card
+    themeColor: 'hsl(120, 60%, 50%)', // Fresh Thai green
     country: 'Thailand',
     specialties: ['Curry', 'Pad Thai', 'Som Tam'],
     philosophy: 'Balance is everything - sweet, sour, salty, spicy in harmony.',
