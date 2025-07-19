@@ -1,9 +1,11 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Clock, Users, Utensils } from 'lucide-react';
+import { Search, Heart, Clock, Sparkles, Utensils, Fish, Leaf, Home } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import { getRecipeOfWeek, getFeaturedRecipes, getRecipesByCategory, Recipe } from '@/data/recipes';
+import { getMamaById } from '@/data/mamas';
 import RecipeCardStack from '@/components/RecipeCardStack';
 import LoadingSkeleton from '@/components/LoadingSkeleton';
 import CulturalEmptyState from '@/components/CulturalEmptyState';
@@ -16,48 +18,58 @@ const Recipes = () => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('All');
   const [stackRecipes, setStackRecipes] = useState<Recipe[]>([]);
   const [likedRecipes, setLikedRecipes] = useState<Set<string>>(new Set());
   const [celebrationTrigger, setCelebrationTrigger] = useState(false);
   const [celebrationType, setCelebrationType] = useState<'heart' | 'confetti' | 'cultural'>('heart');
   const [culturalTheme, setCulturalTheme] = useState<'italian' | 'mexican' | 'thai' | undefined>(undefined);
 
+  const categories = [
+    { id: 'All', label: 'All Recipes', icon: Sparkles },
+    { id: 'Meat', label: 'Meat', icon: Utensils },
+    { id: 'Fish', label: 'Fish', icon: Fish },
+    { id: 'Vegetarian', label: 'Vegetarian', icon: Leaf },
+    { id: 'Quick', label: 'Quick Meals', icon: Clock },
+    { id: 'Weekend', label: 'Weekend', icon: Home },
+  ];
+
   useEffect(() => {
+    // Simulate loading time
     setLoading(true);
     setTimeout(() => {
       setLoading(false);
-    }, 800);
+    }, 1000);
   }, []);
 
   useEffect(() => {
     let recipesToShow: Recipe[] = [];
     
     if (searchQuery) {
-      // Search all recipes including category terms
+      // Independent search - search all recipes
       const allRecipes = [...getFeaturedRecipes(), ...getRecipesByCategory('Meat'), ...getRecipesByCategory('Fish'), ...getRecipesByCategory('Rice/Pasta'), ...getRecipesByCategory('Dessert')];
       const uniqueRecipes = allRecipes.filter((recipe, index, self) => 
         index === self.findIndex(r => r.id === recipe.id)
       );
       
-      recipesToShow = uniqueRecipes.filter(recipe => {
-        const searchLower = searchQuery.toLowerCase();
-        return (
-          recipe.title.toLowerCase().includes(searchLower) ||
-          recipe.mamaName.toLowerCase().includes(searchLower) ||
-          recipe.category.toLowerCase().includes(searchLower) ||
-          recipe.difficulty.toLowerCase().includes(searchLower) ||
-          recipe.ingredients.some(ingredient => 
-            ingredient.toLowerCase().includes(searchLower)
-          )
-        );
-      });
+      recipesToShow = uniqueRecipes.filter(recipe =>
+        recipe.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        recipe.mamaName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        recipe.ingredients.some(ingredient => 
+          ingredient.toLowerCase().includes(searchQuery.toLowerCase())
+        )
+      );
     } else {
-      // Show featured recipes by default
-      recipesToShow = getFeaturedRecipes();
+      // Category browsing with 3D stack
+      if (selectedCategory === 'All') {
+        recipesToShow = getFeaturedRecipes();
+      } else {
+        recipesToShow = getRecipesByCategory(selectedCategory);
+      }
     }
     
     setStackRecipes(recipesToShow);
-  }, [searchQuery]);
+  }, [searchQuery, selectedCategory]);
 
   const handleLikeRecipe = (recipe: Recipe) => {
     const newLiked = new Set(likedRecipes);
@@ -91,41 +103,42 @@ const Recipes = () => {
   };
 
   const recipeOfWeek = getRecipeOfWeek();
+  const recipeOfWeekMama = recipeOfWeek ? getMamaById(recipeOfWeek.mamaId) : null;
 
-  // Get cultural styling for Recipe of the Week
-  const getCulturalStyling = (mamaId: number) => {
+  // Cultural styling helper
+  const getCulturalStyles = (mamaId: number) => {
     switch (mamaId) {
       case 1: // Italian
         return {
-          bgGradient: 'bg-gradient-to-br from-orange-50 to-amber-50',
-          textColor: 'text-orange-900',
+          bgClass: 'bg-gradient-to-br from-amber-50 via-orange-50 to-red-50',
+          borderClass: 'border-l-4 border-l-orange-400',
           accentColor: 'text-orange-700',
-          borderColor: 'border-orange-200',
-          pattern: 'bg-italian-pattern'
+          pattern: 'bg-italian-pattern',
+          decorativeElement: '🍃'
         };
       case 2: // Mexican
         return {
-          bgGradient: 'bg-gradient-to-br from-red-50 to-orange-50',
-          textColor: 'text-red-900',
+          bgClass: 'bg-gradient-to-br from-red-50 via-orange-50 to-yellow-50',
+          borderClass: 'border-l-4 border-l-red-400',
           accentColor: 'text-red-700',
-          borderColor: 'border-red-200',
-          pattern: 'bg-mexican-pattern'
+          pattern: 'bg-mexican-pattern',
+          decorativeElement: '🌶️'
         };
       case 3: // Thai
         return {
-          bgGradient: 'bg-gradient-to-br from-emerald-50 to-yellow-50',
-          textColor: 'text-emerald-900',
-          accentColor: 'text-emerald-700',
-          borderColor: 'border-emerald-200',
-          pattern: 'bg-thai-pattern'
+          bgClass: 'bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50',
+          borderClass: 'border-l-4 border-l-green-400',
+          accentColor: 'text-green-700',
+          pattern: 'bg-thai-pattern',
+          decorativeElement: '🌿'
         };
       default:
         return {
-          bgGradient: 'bg-gradient-to-br from-primary/5 to-primary/10',
-          textColor: 'text-primary',
-          accentColor: 'text-primary/80',
-          borderColor: 'border-primary/20',
-          pattern: ''
+          bgClass: 'bg-gradient-to-br from-background to-muted/20',
+          borderClass: 'border-l-4 border-l-primary',
+          accentColor: 'text-primary',
+          pattern: '',
+          decorativeElement: '✨'
         };
     }
   };
@@ -136,7 +149,14 @@ const Recipes = () => {
         <div className="h-full flex flex-col">
           <LoadingSkeleton variant="hero" />
           <div className="flex-1 flex items-center justify-center">
-            <LoadingSkeleton variant="cooking" />
+            <LoadingSkeleton 
+              variant="cooking" 
+              cultural={selectedCategory === 'All' ? undefined : 
+                selectedCategory === 'Meat' ? 'italian' :
+                selectedCategory === 'Fish' ? 'thai' :
+                selectedCategory === 'Vegetarian' ? 'mexican' : undefined
+              }
+            />
           </div>
         </div>
       </PageTransition>
@@ -145,162 +165,214 @@ const Recipes = () => {
 
   return (
     <PageTransition>
-      <div className="h-full flex flex-col space-y-8">
-        {/* Enhanced Search Bar */}
+      <div className="h-full flex flex-col space-y-6">
+        {/* Search Bar */}
         <div className="relative">
-          <Search className="absolute left-4 top-4 h-5 w-5 text-muted-foreground" />
+          <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search recipes, ingredients, cuisine, difficulty..."
+            placeholder="Search recipes, ingredients..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-12 h-14 text-lg bg-card border-border focus:border-primary/30 focus:ring-2 focus:ring-primary/20 rounded-2xl shadow-sm"
+            className="pl-10 bg-card border-border focus:border-border focus:ring-1 focus:ring-border"
           />
         </div>
 
-        {/* Hero Tinder Card Stack */}
+        {/* Enhanced Category Carousel */}
         {!searchQuery && (
-          <div className="flex-1 flex flex-col items-center justify-center min-h-[500px] space-y-6">
-            <div className="text-center space-y-2">
-              <h2 className="font-heading font-bold text-3xl text-foreground">
-                Discover Your Next Favorite
-              </h2>
-              <p className="text-muted-foreground text-lg">
-                Swipe through authentic recipes from our mamas
-              </p>
-            </div>
-            
-            {stackRecipes.length > 0 ? (
-              <RecipeCardStack
-                recipes={stackRecipes}
-                onLike={handleLikeRecipe}
-                onDislike={handleDislikeRecipe}
-                onTap={handleRecipeClick}
-              />
-            ) : (
-              <CulturalEmptyState 
-                message="No recipes available right now."
-                className="py-12"
-              />
-            )}
-          </div>
-        )}
-
-        {/* Search Results */}
-        {searchQuery && (
-          <div className="space-y-6">
-            <div>
-              <h3 className="font-heading font-bold text-2xl text-foreground mb-2">
-                Search Results
-              </h3>
-              <p className="text-muted-foreground text-lg">
-                {stackRecipes.length} result{stackRecipes.length !== 1 ? 's' : ''} for "{searchQuery}"
-              </p>
-            </div>
-            
-            {stackRecipes.length > 0 ? (
-              <div className="grid gap-4">
-                {stackRecipes.map((recipe) => (
-                  <div 
-                    key={recipe.id}
-                    onClick={() => handleRecipeClick(recipe)}
-                    className="bg-card rounded-2xl p-6 shadow-sm hover:shadow-md cursor-pointer transition-all duration-300 border border-border hover:border-primary/20 group"
-                  >
-                    <div className="flex items-start gap-4">
-                      <div className="w-20 h-20 bg-muted rounded-xl flex-shrink-0 flex items-center justify-center group-hover:scale-105 transition-transform">
-                        <Utensils size={24} className="text-muted-foreground" />
-                      </div>
-                      <div className="flex-1 space-y-2">
-                        <div className="flex items-center gap-2">
-                          <span className="text-xl">{recipe.mamaEmoji}</span>
-                          <span className="text-sm text-muted-foreground">by {recipe.mamaName}</span>
-                        </div>
-                        <h4 className="font-heading font-bold text-xl text-foreground group-hover:text-primary transition-colors">
-                          {recipe.title}
-                        </h4>
-                        <div className="flex items-center gap-6 text-sm text-muted-foreground">
-                          <div className="flex items-center gap-1">
-                            <Clock size={16} />
-                            <span>{recipe.cookingTime}</span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <Users size={16} />
-                            <span>{recipe.servings} servings</span>
-                          </div>
-                          <span className="px-2 py-1 bg-muted rounded-full text-xs">
-                            {recipe.difficulty}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <CulturalEmptyState 
-                message="No recipes found matching your search. Try different keywords!"
-                className="py-12"
-              />
-            )}
-          </div>
-        )}
-
-        {/* Featured Recipe of the Week - Cultural Themed */}
-        {recipeOfWeek && !searchQuery && (
-          <div className="mt-auto">
-            <div className="text-center mb-4">
-              <p className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
-                Featured This Week
-              </p>
-            </div>
-            
-            <div 
-              className={`
-                relative rounded-3xl overflow-hidden shadow-warm border-2 cursor-pointer transition-all duration-300 hover:shadow-xl hover:scale-[1.02] group
-                ${getCulturalStyling(recipeOfWeek.mamaId).bgGradient}
-                ${getCulturalStyling(recipeOfWeek.mamaId).borderColor}
-                ${getCulturalStyling(recipeOfWeek.mamaId).pattern}
-              `}
-              onClick={() => handleRecipeClick(recipeOfWeek)}
+          <div className="relative">
+            <Carousel
+              opts={{
+                align: "start",
+                dragFree: true,
+                loop: true,
+              }}
+              className="w-full"
             >
-              <div className="flex items-center p-6">
-                {/* Recipe Photo Placeholder */}
-                <div className="w-24 h-24 bg-white/50 backdrop-blur-sm rounded-2xl flex-shrink-0 flex items-center justify-center mr-6 group-hover:scale-105 transition-transform">
-                  <Utensils size={28} className={getCulturalStyling(recipeOfWeek.mamaId).accentColor} />
-                </div>
-                
-                {/* Recipe Info */}
-                <div className="flex-1 space-y-2">
-                  <div className="flex items-center gap-2">
-                    <span className="text-2xl">{recipeOfWeek.mamaEmoji}</span>
-                    <span className={`text-sm font-medium ${getCulturalStyling(recipeOfWeek.mamaId).accentColor}`}>
-                      by {recipeOfWeek.mamaName}
-                    </span>
-                  </div>
-                  <h3 className={`font-heading font-bold text-2xl ${getCulturalStyling(recipeOfWeek.mamaId).textColor} group-hover:scale-[1.02] transition-transform origin-left`}>
-                    {recipeOfWeek.title}
-                  </h3>
-                  <div className={`flex items-center gap-4 text-sm ${getCulturalStyling(recipeOfWeek.mamaId).accentColor}`}>
-                    <div className="flex items-center gap-1">
-                      <Clock size={16} />
-                      <span>{recipeOfWeek.cookingTime}</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Users size={16} />
-                      <span>{recipeOfWeek.servings} servings</span>
-                    </div>
-                  </div>
-                </div>
+              <CarouselContent className="-ml-2 md:-ml-4">
+                {categories.map((category) => {
+                  const IconComponent = category.icon;
+                  const isSelected = selectedCategory === category.id;
+                  
+                  return (
+                    <CarouselItem key={category.id} className="pl-2 md:pl-4 basis-auto">
+                      <div
+                        className={`cursor-pointer px-4 py-3 rounded-xl transition-all duration-300 border min-w-[100px] text-center transform hover:scale-105 ${
+                          isSelected
+                            ? 'bg-primary text-primary-foreground border-primary shadow-lg scale-105'
+                            : 'bg-card hover:bg-muted border-border/50 hover:border-border shadow-sm hover:shadow-md'
+                        }`}
+                        onClick={() => setSelectedCategory(category.id)}
+                      >
+                        <div className="mb-1 flex justify-center">
+                          <IconComponent 
+                            size={18} 
+                            className={`transition-all duration-300 ${
+                              isSelected ? 'text-primary-foreground' : 'text-muted-foreground'
+                            }`} 
+                          />
+                        </div>
+                        <div className={`font-medium text-xs transition-all duration-300 ${
+                          isSelected ? 'text-primary-foreground' : 'text-foreground'
+                        }`}>
+                          {category.label}
+                        </div>
+                      </div>
+                    </CarouselItem>
+                  );
+                })}
+              </CarouselContent>
+              <CarouselPrevious className="hidden md:flex" />
+              <CarouselNext className="hidden md:flex" />
+            </Carousel>
+          </div>
+        )}
+
+        {/* Main Content */}
+        <div className="flex-1">
+          {searchQuery ? (
+            /* Search Results Mode */
+            <div>
+              <div className="mb-4">
+                <h3 className="font-heading font-bold text-xl text-foreground mb-2">
+                  Search Results
+                </h3>
+                <p className="text-muted-foreground">
+                  {stackRecipes.length} result{stackRecipes.length !== 1 ? 's' : ''} for "{searchQuery}"
+                </p>
               </div>
               
-              {/* Subtle cultural accent */}
-              <div className="absolute top-4 right-4 opacity-20 text-4xl">
-                {recipeOfWeek.mamaId === 1 && '🫒'}
-                {recipeOfWeek.mamaId === 2 && '🌶️'}
-                {recipeOfWeek.mamaId === 3 && '🌿'}
-              </div>
+              {stackRecipes.length > 0 ? (
+                <div className="grid gap-3">
+                  {stackRecipes.map((recipe) => (
+                    <div 
+                      key={recipe.id}
+                      onClick={() => handleRecipeClick(recipe)}
+                      className="bg-card rounded-lg p-4 shadow-sm hover:shadow-md cursor-pointer transition-all duration-200 border border-border hover:border-border"
+                    >
+                      <h4 className="font-heading font-bold text-lg text-foreground mb-1">{recipe.title}</h4>
+                      <p className="text-muted-foreground text-sm mb-2">by {recipe.mamaName}</p>
+                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                        <div className="flex items-center gap-1">
+                          <Clock size={14} />
+                          <span>{recipe.cookingTime}</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Heart size={14} />
+                          <span>{recipe.difficulty}</span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <CulturalEmptyState 
+                  message="No recipes found matching your search. Try different keywords!"
+                  className="py-12"
+                />
+              )}
             </div>
-          </div>
-        )}
+          ) : (
+            /* Category Browsing Mode - HERO: Tinder Stack */
+            <div className="space-y-8">
+              {/* HERO: Tinder Card Stack */}
+              {stackRecipes.length > 0 ? (
+                <div>
+                  <h3 className="font-heading font-bold text-xl text-foreground mb-6 flex items-center gap-2">
+                    <span className="flex items-center justify-center">
+                      {(() => {
+                        const category = categories.find(cat => cat.id === selectedCategory);
+                        if (category) {
+                          const IconComponent = category.icon;
+                          return <IconComponent size={20} className="text-primary" />;
+                        }
+                        return <Sparkles size={20} className="text-primary" />;
+                      })()}
+                    </span>
+                    {selectedCategory === 'All' ? 'Featured' : selectedCategory} Recipes
+                    <span className="text-sm text-muted-foreground font-normal">
+                      ({stackRecipes.length})
+                    </span>
+                  </h3>
+                  <RecipeCardStack
+                    recipes={stackRecipes}
+                    onLike={handleLikeRecipe}
+                    onDislike={handleDislikeRecipe}
+                    onTap={handleRecipeClick}
+                  />
+                </div>
+              ) : (
+                <CulturalEmptyState 
+                  cultural={
+                    selectedCategory === 'Meat' ? 'italian' :
+                    selectedCategory === 'Fish' ? 'thai' :
+                    selectedCategory === 'Vegetarian' ? 'mexican' : undefined
+                  }
+                  message={
+                    selectedCategory === 'All' 
+                      ? "No recipes available right now."
+                      : `No ${selectedCategory.toLowerCase()} recipes available yet.`
+                  }
+                />
+              )}
+
+              {/* Cultural Recipe of the Week Card */}
+              {recipeOfWeek && recipeOfWeekMama && (
+                <div className="mt-8">
+                  <div 
+                    className={`relative rounded-2xl overflow-hidden shadow-cultural cursor-pointer transition-all duration-300 hover:shadow-xl hover:scale-[1.02] ${
+                      getCulturalStyles(recipeOfWeek.mamaId).bgClass
+                    } ${getCulturalStyles(recipeOfWeek.mamaId).pattern} ${
+                      getCulturalStyles(recipeOfWeek.mamaId).borderClass
+                    }`}
+                    onClick={() => handleRecipeClick(recipeOfWeek)}
+                  >
+                    {/* Decorative Cultural Elements */}
+                    <div className="absolute top-4 right-4 text-2xl opacity-20">
+                      {getCulturalStyles(recipeOfWeek.mamaId).decorativeElement}
+                    </div>
+                    <div className="absolute bottom-4 left-4 text-6xl opacity-5">
+                      {getCulturalStyles(recipeOfWeek.mamaId).decorativeElement}
+                    </div>
+
+                    <div className="flex items-center p-6">
+                      {/* Recipe Photo */}
+                      <div className="w-24 h-24 bg-white/80 backdrop-blur-sm rounded-xl flex-shrink-0 flex items-center justify-center shadow-lg mr-6">
+                        <div className="w-16 h-16 bg-muted-foreground/20 rounded-lg flex items-center justify-center">
+                          <Utensils size={24} className="text-muted-foreground" />
+                        </div>
+                      </div>
+                      
+                      {/* Recipe Info */}
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Badge 
+                            variant="secondary" 
+                            className="bg-white/90 backdrop-blur-sm text-xs font-medium"
+                          >
+                            Recipe of the Week
+                          </Badge>
+                        </div>
+                        
+                        <h3 className={`font-heading font-bold text-2xl mb-2 ${
+                          getCulturalStyles(recipeOfWeek.mamaId).accentColor
+                        }`}>
+                          {recipeOfWeek.title}
+                        </h3>
+                        
+                        <div className="flex items-center gap-2">
+                          <span className="text-xl">{recipeOfWeekMama.emoji}</span>
+                          <p className="text-foreground/80 font-medium">
+                            by {recipeOfWeek.mamaName}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
 
         {/* Celebration Effects */}
         <CelebrationEffects
