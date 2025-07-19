@@ -19,13 +19,13 @@ export const Header = () => {
               boxShadow: '0 6px 16px -4px hsl(var(--logo-brown) / 0.4), 0 2px 8px -2px hsl(var(--logo-brown) / 0.2)'
             }}>
       <div className="flex items-center justify-between h-20 px-4">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <img 
             src="/lovable-uploads/LogoPrem.PNG" 
             alt="MAMIA Logo" 
             className="w-12 h-12 object-contain"
           />
-          <h1 className="font-cinzel font-bold text-2xl tracking-widest" 
+          <h1 className="font-cinzel font-bold text-3xl tracking-widest" 
               style={{ color: 'hsl(var(--logo-brown))' }}>
             MAMIA
           </h1>
