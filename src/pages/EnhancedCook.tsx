@@ -360,91 +360,209 @@ const EnhancedCook = () => {
     : null;
 
   return (
-    <div className="min-h-[calc(100vh-8rem)] bg-background">
-      {/* Simple Header */}
-      <div className="flex items-center justify-between p-4 border-b border-border">
+    <div className="min-h-[calc(100vh-8rem)] bg-gradient-to-b from-orange-50/20 to-background">
+      {/* Enhanced Header */}
+      <div className="flex items-center justify-between p-4 border-b border-border bg-background/95 backdrop-blur-sm sticky top-16 z-40">
         <Button
           variant="ghost"
-          onClick={() => navigate('/recipes')}
-          className="text-muted-foreground hover:text-foreground"
+          onClick={() => navigate('/')}
+          className="text-red-600 hover:text-red-700 hover:bg-red-50 text-lg"
         >
-          <ArrowLeft size={20} className="mr-2" />
-          {recipe.title}
+          <X size={20} className="mr-2" />
+          Exit Enhanced Mode
         </Button>
+        
+        <div className="flex items-center gap-2">
+          <Crown className="w-5 h-5 text-orange-500" />
+          <span className="text-sm font-medium text-orange-600">Enhanced Experience</span>
+        </div>
         
         <Button variant="ghost" size="sm">
           <Settings size={20} />
         </Button>
       </div>
 
-      {/* Simple Progress */}
-      <div className="p-4">
-        <div className="text-center mb-4">
-          <h1 className="text-xl font-medium text-foreground">Cooking Mode</h1>
-          <div className="w-full bg-muted rounded-full h-2 mt-2">
-            <div 
-              className="bg-orange-500 h-2 rounded-full transition-all duration-300"
-              style={{ width: `${(currentStep / totalSteps) * 100}%` }}
-            />
+      {/* Enhanced Progress Bar */}
+      <div className="p-4 bg-background/50">
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-lg font-medium text-foreground">Step {currentStep} of {totalSteps}</span>
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-muted-foreground">~{Math.ceil(totalSteps * 3 - currentStep * 3)} min left</span>
+            {conversationMemory?.shouldProvideDetailedGuidance() && (
+              <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">Detailed Mode</span>
+            )}
           </div>
-          <p className="text-sm text-muted-foreground mt-2">Step {currentStep} of {totalSteps}</p>
         </div>
+        <div className="w-full bg-muted rounded-full h-3">
+          <div 
+            className="bg-gradient-to-r from-orange-500 to-orange-600 h-3 rounded-full transition-all duration-300"
+            style={{ width: `${(currentStep / totalSteps) * 100}%` }}
+          />
+        </div>
+      </div>
 
-        {/* Main Instruction */}
-        <div className="bg-card rounded-lg p-4 mb-4 border border-border">
-          <h2 className="text-lg font-medium text-foreground mb-2">
+      {/* Main Instruction Card */}
+      <div className="p-4">
+        <div className="bg-card rounded-2xl p-6 shadow-lg border border-border w-full max-w-md mx-auto mb-6">
+          <h2 className="text-2xl font-heading font-bold text-foreground mb-4 leading-tight">
             {currentInstruction}
           </h2>
           
           {currentStepTimer && (
-            <div className="bg-muted rounded-lg p-3 mb-3">
-              <p className="text-sm text-foreground">
-                ⏱️ {currentStepTimer.display} - {currentStepTimer.description}
+            <div className="bg-orange-100 dark:bg-orange-900/30 rounded-lg p-3 mb-4">
+              <p className="text-orange-700 dark:text-orange-300 font-medium text-lg">
+                ⏰ This step takes {currentStepTimer.display}
+              </p>
+              <p className="text-orange-600 dark:text-orange-400 text-sm mt-1">
+                {currentStepTimer.description}
+              </p>
+            </div>
+          )}
+
+          {timerCompleted && (
+            <div className="bg-green-100 dark:bg-green-900/30 rounded-lg p-3 mb-4">
+              <p className="text-green-700 dark:text-green-300 font-medium text-lg">
+                ✅ Timer finished! Ready for the next step?
               </p>
             </div>
           )}
         </div>
 
-        {/* Voice Commands */}
-        <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 mb-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="font-medium text-blue-700 dark:text-blue-300">Voice Commands</h3>
-              <p className="text-sm text-blue-600 dark:text-blue-400">{mama?.name} speaking</p>
+        {/* Enhanced Tips Display */}
+        {(currentStepTip || fallbackTip) && (
+          <div className="bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 rounded-xl p-4 mx-4 mb-6 border-l-4 border-yellow-400">
+            <div className="flex items-start gap-3">
+              <div className="text-2xl">{mama?.emoji}</div>
+              <div>
+                <h3 className="font-handwritten text-lg text-yellow-800 dark:text-yellow-200 mb-1">
+                  {currentStepTip ? `${mama?.name}'s ${currentStepTip.category} tip` : `Wisdom from ${mama?.name}`}
+                </h3>
+                <p className="font-handwritten text-yellow-700 dark:text-yellow-300 text-lg leading-relaxed">
+                  "{currentStepTip?.tip || fallbackTip}"
+                </p>
+                {currentStepTip && (
+                  <div className="text-xs text-yellow-600 dark:text-yellow-400 mt-2 opacity-75">
+                    {currentStepTip.timing === 'before' ? '💡 Do this before starting the step' : 
+                     currentStepTip.timing === 'during' ? '⚡ Keep this in mind while cooking' : 
+                     '✅ Remember this for future cooking'}
+                  </div>
+                )}
+              </div>
             </div>
-            <Button 
-              size="sm" 
-              className="bg-blue-600 hover:bg-blue-700 text-white"
-              onClick={() => {}}
-            >
-              Tap to interrupt
-            </Button>
           </div>
-        </div>
+        )}
+      </div>
 
-        {/* Navigation Controls */}
-        <div className="flex items-center justify-center gap-4 mb-6">
+      {/* Context-Aware Voice Interface */}
+      <div className="px-4 mb-6">
+        <ContextAwareVoiceIndicator 
+          listeningState={listeningState}
+          cookingContext={cookingContext}
+          isPlaying={isPlaying}
+          queueLength={queueLength}
+          serviceStatus={serviceStatus}
+          showWakeWordPrompt={showWakeWordPrompt}
+          wakeWordPrompt={wakeWordPrompt}
+          mamaName={mama.name}
+        />
+        
+        {showWakeWordPrompt && (
+          <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-3 mb-4 text-center">
+            <p className="text-sm text-blue-700 dark:text-blue-300">
+              {wakeWordPrompt}
+            </p>
+          </div>
+        )}
+      </div>
+
+      {/* Smart Voice Command Suggestions */}
+      <div className="px-4 mb-6">
+        <SmartVoiceCommandSuggestions 
+          currentStep={currentStep}
+          totalSteps={totalSteps}
+          mamaName={mama.name}
+          cookingContext={cookingContext}
+          onCommandSuggested={handleVoiceCommand}
+        />
+      </div>
+
+      {/* Voice Status Indicator */}
+      <VoiceStatusIndicator className="justify-center" />
+
+      {/* Enhanced Controls */}
+      <div className="px-4 mb-6">
+        <div className="flex items-center justify-center gap-4">
           <Button
             onClick={() => currentStep > 1 && setCurrentStep(currentStep - 1)}
             disabled={currentStep === 1}
             variant="outline"
-            size="lg"
+            className="text-lg py-6 px-8 min-h-[56px]"
           >
-            <ChevronLeft size={20} className="mr-2" />
+            <ChevronLeft size={24} className="mr-2" />
             Previous
           </Button>
 
           <Button
-            onClick={() => currentStep < totalSteps && setCurrentStep(currentStep + 1)}
+            onClick={async () => {
+              const instruction = recipeData.recipe.instructions[currentStep - 1];
+              const stepTip = optimizedTips[currentStep];
+              await speakContextualInstruction(instruction, currentStep, stepTip?.tip);
+            }}
+            className="bg-orange-500 text-white hover:bg-orange-600 text-lg py-6 px-8 min-h-[56px] rounded-xl"
+          >
+            <Volume2 size={24} className="mr-2" />
+            Guide Me
+          </Button>
+
+          <Button
+            onClick={() => currentStep < totalSteps && (setCurrentStep(currentStep + 1), setTimerCompleted(false))}
             disabled={currentStep === totalSteps}
             variant="outline"
-            size="lg"
+            className="text-lg py-6 px-8 min-h-[56px]"
           >
             Next
-            <ChevronRight size={20} className="ml-2" />
+            <ChevronRight size={24} className="ml-2" />
           </Button>
         </div>
       </div>
+
+      {/* Enhanced Bottom Section - Update the photo share button */}
+      <div className="px-4 pb-6">
+        <Button
+          onClick={handlePhotoShare}
+          className="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white hover:from-orange-600 hover:to-red-600 text-xl py-6 rounded-2xl font-heading font-bold mb-4 min-h-[64px]"
+        >
+          <Camera size={24} className="mr-3" />
+          Share Progress with {mama?.name}
+        </Button>
+        
+        <p className="text-center text-sm text-muted-foreground font-handwritten">
+          Take a photo to get personalized feedback and encouragement from {mama?.name}!
+        </p>
+      </div>
+
+      {/* Enhanced Floating Timer */}
+      <EnhancedCookingTimer 
+        suggestedTimers={recipe.stepTimers}
+        currentStep={currentStep}
+        mamaId={mama.voiceId}
+        onTimerComplete={handleTimerComplete}
+        onSpeakAlert={handleTimerAlert}
+        isExpanded={timerExpanded}
+        onToggle={() => setTimerExpanded(!timerExpanded)}
+      />
+
+      {/* Photo Capture Modal */}
+      {showPhotoCapture && recipeData && (
+        <MamaPhotoCapture
+          isOpen={showPhotoCapture}
+          onClose={handlePhotoCaptureClose}
+          recipeId={recipeData.recipe.id}
+          currentStep={currentStep}
+          mamaId={recipeData.mama.id.toString()}
+          recipeName={recipeData.recipe.title}
+        />
+      )}
     </div>
   );
 };
