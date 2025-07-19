@@ -77,7 +77,7 @@ export const PreCookingChat = ({ recipe, mama, onStartCooking }: PreCookingChatP
       
       if (lowerQuestion.includes('ingredient') || lowerQuestion.includes('need')) {
         const ingredientCount = recipe.ingredients?.length || 0;
-        response = `For this ${recipe.title}, you'll need ${ingredientCount} main ingredients. Let me tell you about the key ones: ${recipe.ingredients?.slice(0, 3).join(', ')}.`;
+        response = `For this ${recipe.title}, you'll need ${ingredientCount} main ingredients. Let me tell you about the key ones: ${recipe.ingredients?.slice(0, 3).map(ing => ing.name).join(', ')}.`;
       } else if (lowerQuestion.includes('time') || lowerQuestion.includes('long')) {
         response = `This ${recipe.title} takes about ${recipe.cookingTime} total. It's perfect for ${recipe.category === 'QUICK' ? 'a quick meal' : recipe.category === 'WEEKEND' ? 'weekend cooking' : 'everyday cooking'}.`;
       } else if (lowerQuestion.includes('difficult') || lowerQuestion.includes('hard')) {
