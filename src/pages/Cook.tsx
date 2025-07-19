@@ -4,7 +4,6 @@ import { ArrowLeft, Volume2, ChevronLeft, ChevronRight, Settings } from 'lucide-
 import { Button } from '@/components/ui/button';
 import { VoiceStatusIndicator } from '@/components/VoiceStatusIndicator';
 import { CookingTimer } from '@/components/CookingTimer';
-import { ConversationInterface } from '@/components/ConversationInterface';
 import { PreCookingChat } from '@/components/PreCookingChat';
 import { getRecipeWithMama, recipes } from '@/data/recipes';
 import { getMamaById } from '@/data/mamas';
@@ -24,7 +23,6 @@ const Cook = () => {
   const [hasSpokenCurrentStep, setHasSpokenCurrentStep] = useState(false);
   const [timerCompleted, setTimerCompleted] = useState(false);
   const [timerExpanded, setTimerExpanded] = useState(false);
-  
   const [optimizedTips, setOptimizedTips] = useState<Record<number, TipPlacement>>({});
 
   // Enhanced voice service
@@ -88,11 +86,6 @@ const Cook = () => {
     }
   }, [conversationMemory, speak, setVoicePhase, recipeData, currentStep]);
 
-  const handleStartConversation = useCallback(async () => {
-    // Simplified conversation handling
-    console.log('[Cook] Would start conversation with', recipeData?.mama.name);
-  }, [recipeData]);
-
   const handleVoiceCommand = useCallback(async (command: string) => {
     if (!recipeData) return;
     
@@ -117,9 +110,9 @@ const Cook = () => {
       // Handle as conversation
       console.log('[Cook] Voice command:', command);
     }
-  }, [currentStep, conversationMemory, optimizedTips, speakCookingInstruction, isPremium, voiceMode, recipeData]);
+  }, [currentStep, conversationMemory, optimizedTips, speakCookingInstruction, recipeData]);
 
-  const handleInterrupt = useCallback(async () => {
+  const handleInterrupt = useCallback(() => {
     console.log('[Cook] Interrupt requested');
   }, []);
 
