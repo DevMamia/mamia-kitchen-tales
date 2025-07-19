@@ -1,17 +1,27 @@
+
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Volume2, VolumeX, Mic, MicOff, Settings, Play, Square } from 'lucide-react';
-import { useVoice } from '@/hooks/useVoice';
-import { MAMA_VOICES, MamaVoice } from '@/services/voiceService';
+import { Volume2, VolumeX, Mic, MicOff, Settings, Play, Square, Database, Trash2, RefreshCw } from 'lucide-react';
+import { useEnhancedVoice } from '@/hooks/useEnhancedVoice';
 
 export const VoiceConfigPanel = () => {
-  const { config, updateConfig, isPlaying, queueLength, clearQueue, stopSpeaking } = useVoice();
+  const { 
+    config, 
+    isPlaying, 
+    queueLength, 
+    serviceStatus, 
+    cacheStats,
+    updateConfig, 
+    clearQueue, 
+    stopSpeaking, 
+    clearCache,
+    toggleCaching
+  } = useEnhancedVoice();
   const [isExpanded, setIsExpanded] = useState(false);
 
   const handleModeChange = (mode: 'full' | 'essential' | 'text') => {
@@ -36,9 +46,9 @@ export const VoiceConfigPanel = () => {
   const getModeDescription = (mode: string) => {
     switch (mode) {
       case 'full':
-        return 'AI generates speech for all instructions';
+        return 'AI generates speech with smart caching';
       case 'essential':
-        return 'Pre-recorded phrases for common actions';
+        return 'Pre-cached phrases for common actions';
       case 'text':
         return 'Text-only with Mama character display';
       default:
@@ -65,7 +75,7 @@ export const VoiceConfigPanel = () => {
         <CardTitle className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Settings className="h-5 w-5" />
-            Voice Settings
+            Enhanced Voice Settings
           </div>
           <Button
             variant="ghost"
@@ -95,23 +105,72 @@ export const VoiceConfigPanel = () => {
             </span>
           </div>
           
-          {queueLength > 0 && (
-            <Badge variant="secondary">
-              {queueLength} in queue
-            </Badge>
-          )}
-          
-          {isPlaying && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={stopSpeaking}
-              className="h-7 px-2"
-            >
-              <Square className="h-3 w-3" />
-            </Button>
-          )}
+          <div className="flex items-center gap-2">
+            {queueLength > 0 && (
+              <Badge variant="secondary">
+                {queueLength} queued
+              </Badge>
+            )}
+            
+            {isPlaying && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={stopSpeaking}
+                className="h-7 px-2"
+              >
+                <Square className="h-3 w-3" />
+              </Button>
+            )}
+          </div>
         </div>
+
+        {/* Cache Status */}
+        {config.enabled && (
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Database className="h-4 w-4 text-muted-foreground" />
+                <Label className="text-sm font-medium">Phrase Cache</Label>
+              </div>
+              <div className="flex items-center gap-2">
+                <Badge variant="outline" className="text-xs">
+                  {cacheStats.size} phrases
+                </Badge>
+                <Badge variant="secondary" className="text-xs">
+                  {cacheStats.preGenerated} ready
+                </Badge>
+              </div>
+            </div>
+            
+            <div className="flex items-center justify-between">
+              <Switch
+                checked={config.useCaching}
+                onCheckedChange={toggleCaching}
+              />
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={clearCache}
+                className="h-7 px-2"
+                title="Clear cache"
+              >
+                <Trash2 className="h-3 w-3" />
+              </Button>
+            </div>
+            
+            {Object.keys(cacheStats.categories).length > 0 && (
+              <div className="grid grid-cols-2 gap-1 text-xs">
+                {Object.entries(cacheStats.categories).map(([category, count]) => (
+                  <div key={category} className="flex justify-between">
+                    <span className="capitalize text-muted-foreground">{category}:</span>
+                    <span className="font-medium">{count}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Voice Mode Selection */}
         <div className="space-y-3">
@@ -198,34 +257,24 @@ export const VoiceConfigPanel = () => {
                 />
               </div>
             )}
-
-            {/* Voice Preview */}
-            {config.enabled && config.mode !== 'text' && (
-              <div className="space-y-2">
-                <Label className="text-sm font-medium">Voice Preview</Label>
-                <div className="grid gap-2">
-                  {Object.values(MAMA_VOICES).map((mama) => (
-                    <Button
-                      key={mama.id}
-                      variant="outline"
-                      size="sm"
-                      className="justify-start"
-                      disabled={isPlaying}
-                    >
-                      <Play className="h-3 w-3 mr-2" />
-                      {mama.name} ({mama.accent})
-                    </Button>
-                  ))}
-                </div>
-              </div>
-            )}
           </>
         )}
 
-        {/* Configuration Info */}
+        {/* Service Status Info */}
         <div className="text-xs text-muted-foreground bg-muted/30 p-2 rounded">
-          <strong>Note:</strong> Voice features require ElevenLabs API key. 
-          Configure in environment variables when ready.
+          <div className="flex items-center justify-between">
+            <span>
+              <strong>Status:</strong> {serviceStatus}
+            </span>
+            {config.useCaching && (
+              <span>
+                <strong>Cache:</strong> {config.useCaching ? 'Active' : 'Disabled'}
+              </span>
+            )}
+          </div>
+          <div className="mt-1">
+            Enhanced voice features with intelligent phrase caching for optimal performance.
+          </div>
         </div>
       </CardContent>
     </Card>

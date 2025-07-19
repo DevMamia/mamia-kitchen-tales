@@ -1,13 +1,14 @@
-
-// Voice Service for ElevenLabs Integration
+// Voice Service for ElevenLabs Integration with Enhanced Phrase Caching
 import { getMamaById } from '@/data/mamas';
 import { supabase } from '@/integrations/supabase/client';
+import { PhraseCacheService, ENHANCED_CACHED_PHRASES } from './phraseCache';
 
 export interface VoiceConfig {
   mode: 'full' | 'essential' | 'text';
   volume: number;
   speed: number;
   enabled: boolean;
+  useCaching: boolean;
 }
 
 export interface MamaVoice {
@@ -39,38 +40,11 @@ export const MAMA_VOICES: Record<string, MamaVoice> = {
   }
 };
 
-// Pre-cached common phrases for Essential Mode
-const ESSENTIAL_PHRASES: Record<string, Record<string, string>> = {
-  'nonna_lucia': {
-    welcome: "Benvenuti nella mia cucina, cari!",
-    start_cooking: "Iniziamo a cucinare insieme!",
-    next_step: "Ora, il prossimo passo...",
-    well_done: "Bravissimi! Perfetto!",
-    timer_done: "Il tempo è finito, tesoro!",
-    taste_check: "Assaggia e dimmi com'è!"
-  },
-  'abuela_rosa': {
-    welcome: "¡Bienvenidos a mi cocina, mis queridos!",
-    start_cooking: "¡Vamos a cocinar juntos!",
-    next_step: "Ahora, el siguiente paso...",
-    well_done: "¡Muy bien! ¡Perfecto!",
-    timer_done: "¡Se acabó el tiempo, mi amor!",
-    taste_check: "¡Pruébalo y dime qué tal!"
-  },
-  'yai_malee': {
-    welcome: "Welcome to my kitchen, sugar!",
-    start_cooking: "Let's get cookin' together!",
-    next_step: "Now honey, the next step...",
-    well_done: "Well done, darlin'! Perfect!",
-    timer_done: "Time's up, sweet pea!",
-    taste_check: "Go ahead and taste that for me!"
-  }
-};
-
 export class VoiceService {
   private static instance: VoiceService;
+  private phraseCache: PhraseCacheService;
   private currentAudio: HTMLAudioElement | null = null;
-  private audioQueue: Array<{ text: string; voiceId: string }> = [];
+  private audioQueue: Array<{ text: string; voiceId: string; isCached?: boolean }> = [];
   private isProcessingQueue = false;
   private isCurrentlyPlayingState = false;
   private voiceIds: Record<string, string> = {};
@@ -79,12 +53,13 @@ export class VoiceService {
     mode: 'full',
     volume: 0.8,
     speed: 1.0,
-    enabled: true
+    enabled: true,
+    useCaching: true
   };
 
   private constructor() {
-    console.log('[VoiceService] Initializing voice service...');
-    // Initialize voice IDs immediately
+    console.log('[VoiceService] Initializing enhanced voice service with phrase caching...');
+    this.phraseCache = new PhraseCacheService();
     this.initializeVoiceIds();
   }
 
@@ -105,7 +80,7 @@ export class VoiceService {
           yai_malee: data.ELEVENLABS_YAI_VOICE_ID
         };
         this.voiceIdsInitialized = true;
-        console.log('[VoiceService] Voice IDs initialized successfully:', this.voiceIds);
+        console.log('[VoiceService] Voice IDs initialized successfully');
       } else {
         console.error('[VoiceService] Error fetching voice IDs:', error);
         // Set fallback voice IDs for development
@@ -150,7 +125,7 @@ export class VoiceService {
       return;
     }
 
-    console.log(`[VoiceService] Speak request - Text: "${text.substring(0, 50)}...", MamaId: ${mamaId}`);
+    console.log(`[VoiceService] Enhanced speak request - Text: "${text.substring(0, 50)}...", MamaId: ${mamaId}`);
 
     // Wait for voice IDs to be initialized if needed
     if (!this.voiceIdsInitialized) {
@@ -162,26 +137,94 @@ export class VoiceService {
     const resolvedMamaId = this.resolveMamaId(mamaId);
     console.log(`[VoiceService] Resolved mama ID: ${mamaId} -> ${resolvedMamaId}`);
 
-    // In essential mode, try pre-cached phrases first, then fall back to full TTS
-    if (this.config.mode === 'essential') {
-      const phrase = ESSENTIAL_PHRASES[resolvedMamaId]?.[text];
-      if (phrase) {
-        console.log(`[VoiceService] Playing cached phrase for ${resolvedMamaId}: ${phrase}`);
-        await this.playEssentialPhrase(phrase);
-        return;
+    // Smart caching logic - try cached phrases first
+    if (this.config.useCaching) {
+      const cachedPhrase = this.phraseCache.findMatchingPhrase(text, resolvedMamaId);
+      if (cachedPhrase) {
+        console.log(`[VoiceService] Using cached phrase: ${cachedPhrase.id}`);
+        
+        if (cachedPhrase.isPreGenerated && cachedPhrase.audioUrl) {
+          // Play pre-generated audio immediately
+          await this.playPreGeneratedAudio(cachedPhrase.audioUrl);
+          return;
+        } else {
+          // Use cached phrase text but generate fresh audio
+          await this.generateAndQueueAudio(cachedPhrase.text, resolvedMamaId, true);
+          return;
+        }
       }
-      console.log(`[VoiceService] No cached phrase found, falling back to full TTS`);
     }
 
-    // Fall back to full TTS mode for any text not in essential phrases
-    const actualVoiceId = this.voiceIds[resolvedMamaId];
-    console.log(`[VoiceService] Using voice ID: ${actualVoiceId} for ${resolvedMamaId}`);
+    // In essential mode, try legacy phrases for backward compatibility
+    if (this.config.mode === 'essential') {
+      const legacyPhrase = ENHANCED_CACHED_PHRASES[resolvedMamaId]?.[text];
+      if (legacyPhrase) {
+        console.log(`[VoiceService] Using legacy cached phrase for ${resolvedMamaId}`);
+        await this.generateAndQueueAudio(legacyPhrase.text, resolvedMamaId, true);
+        return;
+      }
+    }
+
+    // Fall back to full TTS mode for any text not in cache
+    console.log(`[VoiceService] No cached phrase found, using full TTS`);
+    await this.generateAndQueueAudio(text, resolvedMamaId, false);
+  }
+
+  private async generateAndQueueAudio(text: string, mamaId: string, isCached: boolean): Promise<void> {
+    const actualVoiceId = this.voiceIds[mamaId];
+    console.log(`[VoiceService] Generating audio - VoiceId: ${actualVoiceId}, Cached: ${isCached}`);
     
     if (actualVoiceId) {
-      this.addToQueue(text, actualVoiceId);
+      this.addToQueue(text, actualVoiceId, isCached);
     } else {
-      console.error(`[VoiceService] No voice ID found for ${resolvedMamaId}. Available IDs:`, this.voiceIds);
+      console.error(`[VoiceService] No voice ID found for ${mamaId}. Available IDs:`, this.voiceIds);
       console.error(`[VoiceService] Voice service failed - falling back to silent mode`);
+    }
+  }
+
+  private async playPreGeneratedAudio(audioUrl: string): Promise<void> {
+    console.log(`[VoiceService] Playing pre-generated audio: ${audioUrl}`);
+    
+    this.stopCurrentAudio();
+    this.isCurrentlyPlayingState = true;
+    
+    try {
+      this.currentAudio = new Audio(audioUrl);
+      
+      return new Promise((resolve, reject) => {
+        if (!this.currentAudio) {
+          this.isCurrentlyPlayingState = false;
+          reject(new Error('Failed to create audio element'));
+          return;
+        }
+
+        this.currentAudio.onended = () => {
+          console.log('[VoiceService] Pre-generated audio playback ended');
+          this.currentAudio = null;
+          this.isCurrentlyPlayingState = false;
+          resolve();
+        };
+
+        this.currentAudio.onerror = (error) => {
+          console.error('[VoiceService] Pre-generated audio playback error:', error);
+          this.currentAudio = null;
+          this.isCurrentlyPlayingState = false;
+          reject(new Error('Audio playback failed'));
+        };
+
+        this.currentAudio.volume = this.config.volume;
+        this.currentAudio.playbackRate = this.config.speed;
+        this.currentAudio.play().catch(error => {
+          console.error('[VoiceService] Failed to play pre-generated audio:', error);
+          this.currentAudio = null;
+          this.isCurrentlyPlayingState = false;
+          reject(error);
+        });
+      });
+    } catch (error) {
+      console.error('[VoiceService] Pre-generated audio setup failed:', error);
+      this.isCurrentlyPlayingState = false;
+      throw error;
     }
   }
 
@@ -189,10 +232,9 @@ export class VoiceService {
     const mama = getMamaById(parseInt(mamaId));
     if (!mama) return;
 
-    // This would fetch the recipe's voice intro from the data
-    // For now, we'll use a placeholder
-    const introText = `Welcome to ${mama.name}'s kitchen! Let's cook together with love.`;
-    await this.speak(introText, mamaId);
+    // Use enhanced greeting from phrase cache
+    const greeting = `Welcome to ${mama.name}'s kitchen! Let's cook together with love.`;
+    await this.speak(greeting, mamaId);
   }
 
   async speakVoiceTip(tip: string, mamaId: string): Promise<void> {
@@ -217,31 +259,9 @@ export class VoiceService {
     }
   }
 
-  private getCachedPhrase(text: string, mamaId: string): string | null {
-    const phrases = ESSENTIAL_PHRASES[mamaId];
-    if (!phrases) return null;
-
-    // Simple text matching for common phrases
-    const lowerText = text.toLowerCase();
-    for (const [key, phrase] of Object.entries(phrases)) {
-      if (lowerText.includes(key.replace('_', ' '))) {
-        return phrase;
-      }
-    }
-    return null;
-  }
-
-  private async playEssentialPhrase(phrase: string): Promise<void> {
-    // For now, just log the phrase - in production this would play pre-recorded audio
-    console.log(`[VoiceService] Playing essential phrase: ${phrase}`);
-    
-    // Simulate audio playback delay
-    await new Promise(resolve => setTimeout(resolve, phrase.length * 50));
-  }
-
-  private addToQueue(text: string, voiceId: string): void {
-    console.log(`[VoiceService] Adding to queue - Text: "${text.substring(0, 30)}...", VoiceId: ${voiceId}`);
-    this.audioQueue.push({ text, voiceId });
+  private addToQueue(text: string, voiceId: string, isCached = false): void {
+    console.log(`[VoiceService] Adding to queue - Text: "${text.substring(0, 30)}...", VoiceId: ${voiceId}, Cached: ${isCached}`);
+    this.audioQueue.push({ text, voiceId, isCached });
     if (!this.isProcessingQueue) {
       this.processQueue();
     }
@@ -252,14 +272,18 @@ export class VoiceService {
       return;
     }
 
-    console.log(`[VoiceService] Processing queue with ${this.audioQueue.length} items`);
+    console.log(`[VoiceService] Processing enhanced queue with ${this.audioQueue.length} items`);
     this.isProcessingQueue = true;
 
     while (this.audioQueue.length > 0) {
-      const { text, voiceId } = this.audioQueue.shift()!;
+      const { text, voiceId, isCached } = this.audioQueue.shift()!;
       
       try {
         await this.generateAndPlaySpeech(text, voiceId);
+        // If this was a successful cached phrase, consider pre-generating it
+        if (isCached && this.config.useCaching) {
+          console.log(`[VoiceService] Successfully played cached phrase, could pre-generate for future use`);
+        }
       } catch (error) {
         console.error('[VoiceService] Error processing queue item:', error);
         this.isCurrentlyPlayingState = false;
@@ -268,7 +292,7 @@ export class VoiceService {
     }
 
     this.isProcessingQueue = false;
-    console.log('[VoiceService] Queue processing completed');
+    console.log('[VoiceService] Enhanced queue processing completed');
   }
 
   private async generateAndPlaySpeech(text: string, voiceId: string): Promise<void> {
@@ -345,6 +369,8 @@ export class VoiceService {
           reject(new Error('Audio playback failed'));
         };
 
+        this.currentAudio.volume = this.config.volume;
+        this.currentAudio.playbackRate = this.config.speed;
         this.currentAudio.play().catch(error => {
           console.error('[VoiceService] Failed to play audio:', error);
           if (this.currentAudio) {
@@ -394,6 +420,15 @@ export class VoiceService {
     if (!this.voiceIdsInitialized) return 'loading';
     if (Object.keys(this.voiceIds).length === 0) return 'error';
     return 'ready';
+  }
+
+  public getCacheStats() {
+    return this.phraseCache.getCacheStats();
+  }
+
+  public clearPhraseCache(): void {
+    this.phraseCache.clearCache();
+    console.log('[VoiceService] Phrase cache cleared and reinitialized');
   }
 
   private resolveMamaId(mamaId: string): string {
