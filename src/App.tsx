@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -16,6 +15,7 @@ import MamaCookbook from "./pages/MamaCookbook";
 import Recipes from "./pages/Recipes";
 import RecipeDetail from "./pages/RecipeDetail";
 import Cook from "./pages/Cook";
+import EnhancedCook from "./pages/EnhancedCook";
 import Kitchen from "./pages/Kitchen";
 import Auth from "./pages/Auth";
 import ShoppingList from "./pages/ShoppingList";
@@ -42,6 +42,7 @@ const App = () => (
               <Route path="/recipe/:recipeId" element={<Layout><RecipeDetail /></Layout>} />
               <Route path="/cook" element={<Layout pageTitle="Cook" pageSubtitle="Choose a recipe to start cooking"><Cook /></Layout>} />
               <Route path="/cook/:recipeId" element={<Layout><Cook /></Layout>} />
+              <Route path="/enhanced-cook/:recipeId" element={<Layout><EnhancedCook /></Layout>} />
               <Route path="/kitchen" element={<Layout pageTitle="My Kitchen" pageSubtitle="Your personal cooking space"><Kitchen /></Layout>} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/shopping-list" element={<Layout pageTitle="Shopping List" pageSubtitle="Your ingredients for cooking"><ShoppingList /></Layout>} />

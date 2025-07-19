@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Volume2, ChevronLeft, ChevronRight, Upload, X, Settings, ChefHat, Crown, Camera } from 'lucide-react';
@@ -8,6 +7,7 @@ import { EnhancedCookingTimer } from '@/components/EnhancedCookingTimer';
 import { PreCookingChat } from '@/components/PreCookingChat';
 import { ContextAwareVoiceIndicator } from '@/components/ContextAwareVoiceIndicator';
 import { SmartVoiceCommandSuggestions } from '@/components/SmartVoiceCommandSuggestions';
+import { MamaPhotoCapture } from '@/components/MamaPhotoCapture';
 import { getRecipeWithMama, recipes } from '@/data/recipes';
 import { getMamaById } from '@/data/mamas';
 import { useEnhancedVoiceService } from '@/hooks/useEnhancedVoiceService';
@@ -31,6 +31,9 @@ const EnhancedCook = () => {
   const [photoMode, setPhotoMode] = useState(false);
   const [optimizedTips, setOptimizedTips] = useState<Record<number, TipPlacement>>({});
   const [hasSpokenCurrentStep, setHasSpokenCurrentStep] = useState(false);
+
+  // Add new state for photo mode
+  const [showPhotoCapture, setShowPhotoCapture] = useState(false);
 
   // Services
   const [unifiedConversation] = useState(() => UnifiedConversationService.getInstance());
@@ -235,13 +238,13 @@ const EnhancedCook = () => {
   }, [speakWithContext]);
 
   const handlePhotoShare = useCallback(async () => {
-    setPhotoMode(true);
-    // TODO: Implement camera integration
-    console.log('[EnhancedCook] Photo sharing mode activated');
-    
-    const photoResponse = getPhotoSharingResponse(recipeData?.mama.accent || 'Italian');
-    await speakWithContext(photoResponse, { contextual: true });
-  }, [speakWithContext, recipeData]);
+    setShowPhotoCapture(true);
+  }, []);
+
+  // Update the existing handlePhotoShare callback
+  const handlePhotoCaptureClose = useCallback(() => {
+    setShowPhotoCapture(false);
+  }, []);
 
   // Enhanced voice current step with cooking instruction method
   useEffect(() => {
@@ -523,7 +526,7 @@ const EnhancedCook = () => {
         </div>
       </div>
 
-      {/* Enhanced Bottom Section */}
+      {/* Enhanced Bottom Section - Update the photo share button */}
       <div className="px-4 pb-6">
         <Button
           onClick={handlePhotoShare}
@@ -548,6 +551,18 @@ const EnhancedCook = () => {
         isExpanded={timerExpanded}
         onToggle={() => setTimerExpanded(!timerExpanded)}
       />
+
+      {/* Photo Capture Modal */}
+      {showPhotoCapture && recipeData && (
+        <MamaPhotoCapture
+          isOpen={showPhotoCapture}
+          onClose={handlePhotoCaptureClose}
+          recipeId={recipeData.recipe.id}
+          currentStep={currentStep}
+          mamaId={recipeData.mama.id.toString()}
+          recipeName={recipeData.recipe.title}
+        />
+      )}
     </div>
   );
 };
