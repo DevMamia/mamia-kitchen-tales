@@ -80,7 +80,18 @@ export class VoiceService {
           yai_malee: data.ELEVENLABS_YAI_VOICE_ID
         };
         this.voiceIdsInitialized = true;
-        console.log('[VoiceService] Voice IDs initialized successfully');
+        console.log('[VoiceService] Voice IDs initialized successfully:', {
+          nonna_lucia: this.voiceIds.nonna_lucia ? 'SET' : 'MISSING',
+          abuela_rosa: this.voiceIds.abuela_rosa ? 'SET' : 'MISSING',
+          yai_malee: this.voiceIds.yai_malee ? 'SET' : 'MISSING'
+        });
+        
+        // Special debug for Yai's voice ID
+        if (!this.voiceIds.yai_malee) {
+          console.error('[VoiceService] YAI MALEE VOICE ID IS MISSING! This will cause voice failures.');
+        } else {
+          console.log('[VoiceService] Yai Malee voice ID found:', this.voiceIds.yai_malee);
+        }
       } else {
         console.error('[VoiceService] Error fetching voice IDs:', error);
         // Set fallback voice IDs for development
@@ -90,7 +101,7 @@ export class VoiceService {
           yai_malee: 'yai-fallback'
         };
         this.voiceIdsInitialized = true;
-        console.warn('[VoiceService] Using fallback voice IDs');
+        console.warn('[VoiceService] Using fallback voice IDs due to fetch error');
       }
     } catch (error) {
       console.warn('[VoiceService] Could not fetch voice IDs, using fallbacks:', error);
@@ -137,6 +148,13 @@ export class VoiceService {
     const resolvedMamaId = this.resolveMamaId(mamaId);
     console.log(`[VoiceService] Resolved mama ID: ${mamaId} -> ${resolvedMamaId}`);
 
+    // Special debug for Yai requests
+    if (resolvedMamaId === 'yai_malee') {
+      console.log('[VoiceService] YAI MALEE VOICE REQUEST DETECTED!');
+      console.log('[VoiceService] Yai voice ID available:', this.voiceIds.yai_malee || 'MISSING');
+      console.log('[VoiceService] Voice IDs initialized:', this.voiceIdsInitialized);
+    }
+
     // Smart caching logic - try cached phrases first
     if (this.config.useCaching) {
       const cachedPhrase = this.phraseCache.findMatchingPhrase(text, resolvedMamaId);
@@ -172,12 +190,22 @@ export class VoiceService {
 
   private async generateAndQueueAudio(text: string, mamaId: string, isCached: boolean): Promise<void> {
     const actualVoiceId = this.voiceIds[mamaId];
-    console.log(`[VoiceService] Generating audio - VoiceId: ${actualVoiceId}, Cached: ${isCached}`);
+    console.log(`[VoiceService] Generating audio - MamaId: ${mamaId}, VoiceId: ${actualVoiceId}, Cached: ${isCached}`);
+    
+    // Special debug for Yai
+    if (mamaId === 'yai_malee') {
+      console.log('[VoiceService] YAI MALEE AUDIO GENERATION ATTEMPT!');
+      console.log('[VoiceService] Yai voice ID:', actualVoiceId || 'UNDEFINED');
+      console.log('[VoiceService] All voice IDs:', this.voiceIds);
+    }
     
     if (actualVoiceId) {
       this.addToQueue(text, actualVoiceId, isCached);
     } else {
       console.error(`[VoiceService] No voice ID found for ${mamaId}. Available IDs:`, this.voiceIds);
+      if (mamaId === 'yai_malee') {
+        console.error('[VoiceService] YAI MALEE VOICE ID MISSING - THIS IS THE ROOT CAUSE!');
+      }
       console.error(`[VoiceService] Voice service failed - falling back to silent mode`);
     }
   }

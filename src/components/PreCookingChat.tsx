@@ -30,45 +30,37 @@ export const PreCookingChat = ({ recipe, mama, onStartCooking }: PreCookingChatP
   const { user } = useAuth();
   const { isPremium, voiceMode, setVoiceMode, usageCount, maxUsage, hasUsageLeft } = useUserTier();
 
-  // Enhanced auto-play voice greeting when component mounts
+  // Enhanced personalized greeting when component mounts
   useEffect(() => {
     if (!hasPlayedGreeting && serviceStatus === 'ready') {
-      console.log('[PreCookingChat] Voice service ready, preparing greeting...');
+      console.log('[PreCookingChat] Voice service ready, preparing personalized greeting...');
       
       const userName = user?.user_metadata?.display_name || user?.email?.split('@')[0] || 'friend';
       
-      // Mama-specific greetings with personality
-      const greetingVariations = {
-        'nonna_lucia': [
-          `Benvenuto ${userName}! Today we cook my beautiful ${recipe.title}. I'm so excited to share this with you, caro!`,
-          `Ciao ${userName}! Ready to make the most delicious ${recipe.title}? Nonna is here to guide you, tesoro!`,
-          `Hello ${userName}! Let's create magic with my ${recipe.title} recipe together. I can't wait to start!`
-        ],
-        'abuela_rosa': [
-          `¡Hola ${userName}! Today we're making my special ${recipe.title}. I'm so excited to cook with you, mi amor!`,
-          `Welcome ${userName}! Ready for some delicious ${recipe.title}? Abuela is here to help you, mija!`,
-          `¡Órale ${userName}! Let's make the most amazing ${recipe.title} together. I can't wait to begin!`
-        ],
-        'yai_malee': [
-          `Welcome ${userName}, dear! Today we find balance with my ${recipe.title}. I'm excited to share this journey with you!`,
-          `Hello ${userName}! Ready to create harmony with ${recipe.title}? Let's cook mindfully together!`,
-          `Greetings ${userName}! Today we blend flavors and wisdom with my ${recipe.title}. Shall we begin this beautiful journey?`
-        ]
+      // Personalized mama-specific greetings with recipe context
+      const createPersonalizedGreeting = (mamaVoiceId: string, userName: string, recipeTitle: string) => {
+        switch (mamaVoiceId) {
+          case 'nonna_lucia':
+            return `Welcome ${userName}! Today we cook my beautiful ${recipeTitle}. I'm so excited to share this with you, caro! Tell me when you're ready to start cooking.`;
+          case 'abuela_rosa':
+            return `¡Hola ${userName}! Today we're making my special ${recipeTitle}. I'm so excited to cook with you, mi amor! Tell me when you're ready to start cooking.`;
+          case 'yai_malee':
+            return `Welcome ${userName}, dear! Today we find balance with my ${recipeTitle}. I'm excited to share this journey with you! Tell me when you're ready to start cooking.`;
+          default:
+            return `Welcome ${userName}! Today we cook ${recipeTitle} together. I'm excited to guide you through this recipe! Tell me when you're ready to start cooking.`;
+        }
       };
       
-      const mamaGreetings = greetingVariations[mama.voiceId as keyof typeof greetingVariations] || greetingVariations['nonna_lucia'];
-      const randomGreeting = mamaGreetings[Math.floor(Math.random() * mamaGreetings.length)];
-      const finalGreeting = `${randomGreeting} Tell me when you're ready to start cooking!`;
+      const personalizedGreeting = createPersonalizedGreeting(mama.voiceId, userName, recipe.title);
       
-      console.log('[PreCookingChat] Playing enhanced greeting:', finalGreeting);
-      console.log('[PreCookingChat] Using mama voice ID:', mama.voiceId);
+      console.log('[PreCookingChat] Playing personalized greeting for', mama.voiceId, ':', personalizedGreeting);
       
       // Play greeting after a short delay
       setTimeout(() => {
-        speak(finalGreeting, mama.voiceId).then(() => {
-          console.log('[PreCookingChat] Greeting played successfully');
+        speak(personalizedGreeting, mama.voiceId).then(() => {
+          console.log('[PreCookingChat] Personalized greeting played successfully');
         }).catch(error => {
-          console.error('[PreCookingChat] Failed to play greeting:', error);
+          console.error('[PreCookingChat] Failed to play personalized greeting:', error);
         });
         setHasPlayedGreeting(true);
       }, 1000);

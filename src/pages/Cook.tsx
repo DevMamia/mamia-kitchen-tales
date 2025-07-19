@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Volume2, ChevronLeft, ChevronRight, Upload, X, Settings, ChefHat, Crown } from 'lucide-react';
 import { useConversation } from '@11labs/react';
@@ -34,23 +34,33 @@ const Cook = () => {
   const { isPremium, voiceMode, incrementUsage, hasUsageLeft } = useUserTier();
   const elevenlabsConversation = useConversation();
 
-  // Find the recipe with mama info
-  const recipeData = recipeId ? getRecipeWithMama(recipeId) : null;
+  // Memoize recipe data to prevent infinite loops
+  const recipeData = useMemo(() => {
+    return recipeId ? getRecipeWithMama(recipeId) : null;
+  }, [recipeId]);
   
-  // Initialize conversation memory
-  const conversationMemory = recipeData ? useConversationMemory(recipeData.recipe, recipeData.mama) : null;
+  // Initialize conversation memory with memoized data
+  const conversationMemory = useMemo(() => {
+    return recipeData ? useConversationMemory(recipeData.recipe, recipeData.mama) : null;
+  }, [recipeData]);
   
-  // Optimize tip placements when recipe data loads
-  useEffect(() => {
+  // Optimize tip placements when recipe data loads (memoized)
+  const memoizedOptimizedTips = useMemo(() => {
     if (recipeData?.recipe) {
       const optimized = TipAnalyzerService.optimizeTipPlacements(
         recipeData.recipe.stepVoiceTips,
         recipeData.recipe.instructions
       );
-      setOptimizedTips(optimized);
       console.log('[Cook] Optimized tip placements:', optimized);
+      return optimized;
     }
-  }, [recipeData]);
+    return {};
+  }, [recipeData?.recipe]);
+
+  // Update optimized tips state when memoized value changes
+  useEffect(() => {
+    setOptimizedTips(memoizedOptimizedTips);
+  }, [memoizedOptimizedTips]);
 
   // Store current recipe in localStorage when entering cooking mode
   useEffect(() => {
@@ -59,18 +69,19 @@ const Cook = () => {
     }
   }, [recipeId, recipeData]);
 
-  // Voice current step when cooking phase starts or step changes
+  // Voice current step when cooking phase starts or step changes (fixed dependencies)
   useEffect(() => {
     if (conversationPhase === 'cooking' && recipeData && !hasSpokenCurrentStep) {
       const speakCurrentStep = async () => {
+        console.log(`[Cook] Speaking step ${currentStep} for ${recipeData.mama.name}`);
         const instruction = recipeData.recipe.instructions[currentStep - 1];
         const currentStepTip = optimizedTips[currentStep];
         
         if (currentStepTip && currentStepTip.timing === 'before') {
-          // Speak tip with instruction using the enhanced voice method
+          console.log(`[Cook] Including contextual tip: ${currentStepTip.tip}`);
           await speakWithTip(instruction, currentStepTip.tip, recipeData.mama.voiceId, 'before');
         } else {
-          // Just speak the instruction
+          console.log(`[Cook] No contextual tip for step ${currentStep}, speaking instruction only`);
           await speak(instruction, recipeData.mama.voiceId);
         }
         
@@ -81,7 +92,7 @@ const Cook = () => {
       const timer = setTimeout(speakCurrentStep, 800);
       return () => clearTimeout(timer);
     }
-  }, [conversationPhase, currentStep, optimizedTips, recipeData, hasSpokenCurrentStep, speak, speakWithTip]);
+  }, [conversationPhase, currentStep, recipeData, optimizedTips, hasSpokenCurrentStep, speak, speakWithTip]);
 
   // Reset spoken flag when step changes
   useEffect(() => {
@@ -160,7 +171,8 @@ const Cook = () => {
     };
   }, [conversationPhase]);
 
-  const handleStartCooking = async () => {
+  const handleStartCooking = useCallback(async () => {
+    console.log('[Cook] Starting cooking mode');
     setConversationPhase('cooking');
     conversationMemory?.startCookingPhase(currentStep);
     
@@ -170,12 +182,13 @@ const Cook = () => {
       incrementUsage();
     }
     
-    // Initial welcome message
-    const welcomeMessage = "Ok let's begin cooking together!";
+    // Welcome message before first step
+    const welcomeMessage = "Ok, let's begin cooking together!";
+    console.log(`[Cook] Speaking welcome message for ${mama.name}: ${welcomeMessage}`);
     await speak(welcomeMessage, mama.voiceId);
     
-    // The useEffect will handle speaking the first step with its tip
-  };
+    // The useEffect will handle speaking the first step with its tip after a delay
+  }, [conversationMemory, currentStep, isPremium, voiceMode, hasUsageLeft, agentService, elevenlabsConversation, incrementUsage, speak, mama.voiceId]);
 
   if (conversationPhase === 'pre-cooking') {
     // Phase 1: Pre-Cooking Chat Interface
@@ -202,12 +215,12 @@ const Cook = () => {
     ? recipe.voiceTips[(currentStep - Math.ceil(totalSteps / 2)) % recipe.voiceTips.length]
     : null;
 
-  const handleTimerComplete = () => {
+  const handleTimerComplete = useCallback(() => {
     setTimerCompleted(true);
     // Could add notification sound here
-  };
+  }, []);
 
-  const handleStartConversation = async () => {
+  const handleStartConversation = useCallback(async () => {
     if (!recipe || !mama) return;
     
     // For premium users with conversational mode
@@ -227,9 +240,9 @@ const Cook = () => {
       const agentId = 'agent-' + mama.voiceId;
       await agentService.startConversation(agentConfig, agentId);
     }
-  };
+  }, [recipe, mama, isPremium, voiceMode, hasUsageLeft, user, currentStep, agentService]);
 
-  const handleVoiceCommand = (command: string) => {
+  const handleVoiceCommand = useCallback((command: string) => {
     const lowerCommand = command.toLowerCase();
     
     // Universal voice commands for both tiers
@@ -289,16 +302,49 @@ const Cook = () => {
       conversationMemory?.addUserQuestion(command);
       console.log('[Cook] Voice command logged for basic user:', command);
     }
-  };
+  }, [currentStep, totalSteps, conversationMemory, setCurrentStep, setTimerCompleted, recipe, optimizedTips, speakWithTip, speak, mama.voiceId, isPremium, voiceMode, currentStepTip]);
 
-  const handleInterrupt = async () => {
+  const handleInterrupt = useCallback(async () => {
     conversationMemory?.handleInterruption();
     
     // Stop both TTS and conversational AI
     if (isPremium && voiceMode === 'conversational') {
       await agentService.endConversation();
     }
-  };
+  }, [conversationMemory, isPremium, voiceMode, agentService]);
+
+  const handleNavigatePrevious = useCallback(() => {
+    const prevStep = Math.max(1, currentStep - 1);
+    if (prevStep < currentStep) {
+      setCurrentStep(prevStep);
+      setTimerCompleted(false);
+      // The useEffect will handle speaking the previous step
+    }
+  }, [currentStep]);
+
+  const handleNavigateNext = useCallback(() => {
+    const nextStep = Math.min(totalSteps, currentStep + 1);
+    if (nextStep > currentStep) {
+      setCurrentStep(nextStep);
+      setTimerCompleted(false);
+      // The useEffect will handle speaking the next step with its tip
+    }
+  }, [currentStep, totalSteps]);
+
+  const handleRepeat = useCallback(() => {
+    const instruction = recipe.instructions[currentStep - 1];
+    const stepTip = optimizedTips[currentStep];
+    
+    console.log(`[Cook] Repeat button - Step ${currentStep}, has tip:`, !!stepTip);
+    
+    if (stepTip && stepTip.timing === 'before') {
+      console.log(`[Cook] Repeating with contextual tip: ${stepTip.tip}`);
+      speakWithTip(instruction, stepTip.tip, mama.voiceId, 'before');
+    } else {
+      console.log(`[Cook] Repeating instruction only: ${instruction}`);
+      speak(instruction, mama.voiceId);
+    }
+  }, [recipe.instructions, currentStep, optimizedTips, speakWithTip, speak, mama.voiceId]);
 
   return (
     <div className="min-h-[calc(100vh-8rem)] bg-gradient-to-b from-orange-50/20 to-background">
@@ -454,14 +500,7 @@ const Cook = () => {
       <div className="px-4 mb-6">
         <div className="flex items-center justify-center gap-4">
           <Button
-            onClick={() => {
-              const prevStep = Math.max(1, currentStep - 1);
-              if (prevStep < currentStep) {
-                setCurrentStep(prevStep);
-                setTimerCompleted(false);
-                // The useEffect will handle speaking the previous step
-              }
-            }}
+            onClick={handleNavigatePrevious}
             disabled={currentStep === 1}
             variant="outline"
             className="text-lg py-6 px-8 min-h-[56px]"
@@ -471,16 +510,7 @@ const Cook = () => {
           </Button>
 
           <Button
-            onClick={() => {
-              const instruction = recipe.instructions[currentStep - 1];
-              const stepTip = optimizedTips[currentStep];
-              
-              if (stepTip && stepTip.timing === 'before') {
-                speakWithTip(instruction, stepTip.tip, mama.voiceId, 'before');
-              } else {
-                speak(instruction, mama.voiceId);
-              }
-            }}
+            onClick={handleRepeat}
             className="bg-orange-500 text-white hover:bg-orange-600 text-lg py-6 px-8 min-h-[56px] rounded-xl"
           >
             <Volume2 size={24} className="mr-2" />
@@ -488,14 +518,7 @@ const Cook = () => {
           </Button>
 
           <Button
-            onClick={() => {
-              const nextStep = Math.min(totalSteps, currentStep + 1);
-              if (nextStep > currentStep) {
-                setCurrentStep(nextStep);
-                setTimerCompleted(false);
-                // The useEffect will handle speaking the next step with its tip
-              }
-            }}
+            onClick={handleNavigateNext}
             disabled={currentStep === totalSteps}
             variant="outline"
             className="text-lg py-6 px-8 min-h-[56px]"
