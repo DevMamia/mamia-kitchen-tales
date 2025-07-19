@@ -56,20 +56,34 @@ export const useContextAwareVoice = () => {
     stepNumber: number,
     tip?: string
   ) => {
-    console.log(`[useContextAwareVoice] Cooking instruction for step ${stepNumber}:`, instruction.substring(0, 30) + '...');
+    console.log(`[useContextAwareVoice] Cooking instruction for step ${stepNumber}:`, {
+      instruction: instruction.substring(0, 50) + '...',
+      hasTip: !!tip,
+      tip: tip ? tip.substring(0, 50) + '...' : 'none'
+    });
     
     // Update context to show current step
     updateContext({ currentStep: stepNumber });
     
     let fullInstruction = instruction;
     if (tip) {
+      console.log('[useContextAwareVoice] Adding tip to instruction:', tip);
       fullInstruction += ` Here's a tip: ${tip}`;
     }
     
-    return speakWithContext(fullInstruction, {
-      priority: 'high',
-      contextual: true
-    });
+    console.log('[useContextAwareVoice] Final instruction text:', fullInstruction.substring(0, 100) + '...');
+    
+    try {
+      const result = await speakWithContext(fullInstruction, {
+        priority: 'high',
+        contextual: true
+      });
+      console.log('[useContextAwareVoice] Instruction spoken successfully');
+      return result;
+    } catch (error) {
+      console.error('[useContextAwareVoice] Failed to speak instruction:', error);
+      throw error;
+    }
   }, [speakWithContext, updateContext]);
 
   const encourageUser = useCallback(async () => {

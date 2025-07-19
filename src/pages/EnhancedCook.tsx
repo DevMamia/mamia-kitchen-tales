@@ -139,10 +139,12 @@ const EnhancedCook = () => {
     setVoicePhase('cooking');
     conversationMemory?.startCookingSession();
     
-    // Enhanced welcome message with cultural flair
+    // Use personalized recipe intro instead of generic welcome
     try {
-      const welcomeMessage = getEnhancedWelcomeMessage(recipeData.mama.accent, recipeData.recipe.title);
-      await speakWithContext(welcomeMessage, {
+      const personalizedIntro = recipeData.recipe.voiceIntro || getEnhancedWelcomeMessage(recipeData.mama.accent, recipeData.recipe.title);
+      console.log('[EnhancedCook] Using personalized intro:', personalizedIntro);
+      
+      await speakWithContext(personalizedIntro, {
         priority: 'high',
         contextual: true
       });
@@ -241,12 +243,11 @@ const EnhancedCook = () => {
     setShowPhotoCapture(true);
   }, []);
 
-  // Update the existing handlePhotoShare callback
   const handlePhotoCaptureClose = useCallback(() => {
     setShowPhotoCapture(false);
   }, []);
 
-  // Enhanced voice current step with cooking instruction method
+  // Enhanced voice current step with cooking instruction method - IMPROVED TIMING
   useEffect(() => {
     if (conversationPhase === 'cooking' && recipeData && !hasSpokenCurrentStep && voiceInitialized) {
       const speakCurrentStep = async () => {
@@ -254,18 +255,40 @@ const EnhancedCook = () => {
         const instruction = recipeData.recipe.instructions[currentStep - 1];
         const currentStepTip = optimizedTips[currentStep];
         
+        console.log('[EnhancedCook] Step instruction:', instruction);
+        console.log('[EnhancedCook] Step tip:', currentStepTip);
+        console.log('[EnhancedCook] Voice service status:', { isPlaying, queueLength, serviceStatus });
+        
         try {
+          // Add detailed logging for tip processing
+          if (currentStepTip?.tip) {
+            console.log('[EnhancedCook] Processing step with tip:', {
+              stepNumber: currentStep,
+              instruction: instruction.substring(0, 50) + '...',
+              tip: currentStepTip.tip.substring(0, 50) + '...',
+              timing: currentStepTip.timing,
+              category: currentStepTip.category
+            });
+          } else {
+            console.log('[EnhancedCook] Processing step without tip:', {
+              stepNumber: currentStep,
+              instruction: instruction.substring(0, 50) + '...'
+            });
+          }
+          
           await speakContextualInstruction(instruction, currentStep, currentStepTip?.tip);
           setHasSpokenCurrentStep(true);
+          console.log('[EnhancedCook] Step instruction completed successfully');
         } catch (error) {
           console.error('[EnhancedCook] Failed to speak current step:', error);
         }
       };
 
-      const timer = setTimeout(speakCurrentStep, 800);
+      // Improved timing - wait for intro to complete, then add natural pause
+      const timer = setTimeout(speakCurrentStep, 1500); // Increased from 800ms to 1500ms
       return () => clearTimeout(timer);
     }
-  }, [conversationPhase, currentStep, recipeData, optimizedTips, hasSpokenCurrentStep, voiceInitialized, speakContextualInstruction]);
+  }, [conversationPhase, currentStep, recipeData, optimizedTips, hasSpokenCurrentStep, voiceInitialized, speakContextualInstruction, isPlaying, queueLength, serviceStatus]);
 
   // Reset spoken flag when step changes
   useEffect(() => {
