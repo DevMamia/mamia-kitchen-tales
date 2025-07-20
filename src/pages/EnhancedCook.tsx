@@ -302,7 +302,7 @@ const EnhancedCook = () => {
 
   const getAudioStatus = () => {
     if (isPlaying || isEnhancedPlaying) return 'Talking';
-    if (listeningState === 'listening') return 'Listening';
+    if (listeningState === 'always_listening' || listeningState === 'processing') return 'Listening';
     return 'Waiting';
   };
 
