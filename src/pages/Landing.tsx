@@ -26,7 +26,7 @@ const Landing = () => {
         className="w-full max-w-sm cursor-pointer transform transition-transform duration-200 hover:scale-105 active:scale-95"
       >
         <img 
-          src="/lovable-uploads/9975ff1b-4219-48d1-8464-290df9a084dd.png" 
+          src="/lovable-uploads/b259d40e-5bfb-417a-a08d-ba26724ff629.png" 
           alt="MAMIA - Join our Kitchen" 
           className="w-full h-auto object-contain rounded-2xl shadow-2xl"
         />
