@@ -33,7 +33,7 @@ const Landing = () => {
         aria-label="Join MAMIA - Tap to get started"
       >
         <img 
-          src="/lovable-uploads/b259d40e-5bfb-417a-a08d-ba26724ff629.png" 
+          src="/lovable-uploads/Landingapge.png" 
           alt="MAMIA - Join our Kitchen" 
           className="w-full h-auto rounded-2xl shadow-2xl"
         />
