@@ -37,6 +37,15 @@ export const ProfileModal = ({ isOpen, onClose }: ProfileModalProps) => {
         
         if (!error && data) {
           setProfile(data);
+        } else if (error) {
+          console.error('Error fetching profile:', error);
+          // If no profile exists, set basic defaults
+          setProfile({
+            username: user.email?.split('@')[0] || 'Cooking Enthusiast',
+            cooking_level: 'beginner',
+            subscription_tier: 'free',
+            dietary_preferences: []
+          });
         }
       } catch (error) {
         console.error('Error fetching profile:', error);

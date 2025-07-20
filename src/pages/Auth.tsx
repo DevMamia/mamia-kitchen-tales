@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -9,10 +9,10 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { ChefHat, Mail, Lock, User, ArrowLeft } from 'lucide-react';
-import { useEffect } from 'react';
 
 export default function Auth() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { signIn, signUp, user } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
@@ -21,9 +21,10 @@ export default function Auth() {
   // Redirect if already authenticated
   useEffect(() => {
     if (user) {
-      navigate('/');
+        const from = (location.state as any)?.from?.pathname || '/app';
+        navigate(from, { replace: true });
     }
-  }, [user, navigate]);
+  }, [user, navigate, location]);
 
   const [signInForm, setSignInForm] = useState({
     email: '',
@@ -56,7 +57,8 @@ export default function Auth() {
         title: "Welcome back!",
         description: "You've successfully signed in."
       });
-      navigate('/');
+        const from = (location.state as any)?.from?.pathname || '/app';
+        navigate(from, { replace: true });
     }
     
     setLoading(false);
@@ -93,7 +95,8 @@ export default function Auth() {
         title: "Account Created!",
         description: "Welcome to MAMIA! You can now start cooking with our grandmothers."
       });
-      navigate('/');
+      const from = (location.state as any)?.from?.pathname || '/app';
+      navigate(from, { replace: true });
     }
     
     setLoading(false);

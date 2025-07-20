@@ -4,10 +4,10 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { Heart, BookOpen, ChefHat, Home } from 'lucide-react';
 
 const navItems = [
-  { id: 'mamas', label: 'Mamas', icon: Heart, path: '/' },
-  { id: 'recipes', label: 'Recipes', icon: BookOpen, path: '/recipes' },
-  { id: 'cook', label: 'Cook', icon: ChefHat, path: '/cook' },
-  { id: 'kitchen', label: 'My Kitchen', icon: Home, path: '/kitchen' },
+  { id: 'mamas', label: 'Mamas', icon: Heart, path: '/app' },
+  { id: 'recipes', label: 'Recipes', icon: BookOpen, path: '/app/recipes' },
+  { id: 'cook', label: 'Cook', icon: ChefHat, path: '/app/cook' },
+  { id: 'kitchen', label: 'My Kitchen', icon: Home, path: '/app/kitchen' },
 ];
 
 export const BottomNavigation = () => {
@@ -23,10 +23,13 @@ export const BottomNavigation = () => {
          }}>
       <div className="flex items-center justify-around h-20 px-2">
         {navItems.map((item) => {
-          // Special handling for Cook tab to include both /cook and /cook/:recipeId
+          // Special handling for Cook tab and legacy routes
           const isActive = item.id === 'cook' 
-            ? location.pathname === item.path || location.pathname.startsWith('/cook/')
-            : location.pathname === item.path;
+            ? location.pathname === item.path || location.pathname.startsWith('/cook/') || location.pathname.startsWith('/app/cook/')
+            : location.pathname === item.path || 
+              (item.id === 'mamas' && (location.pathname === '/' || location.pathname === '/app')) ||
+              (item.id === 'recipes' && location.pathname === '/recipes') ||
+              (item.id === 'kitchen' && location.pathname === '/kitchen');
           const Icon = item.icon;
           
           return (
@@ -37,10 +40,10 @@ export const BottomNavigation = () => {
                   // Check for stored recipe first
                   const lastRecipeId = localStorage.getItem('lastCookingRecipe');
                   if (lastRecipeId) {
-                    navigate(`/cook/${lastRecipeId}`);
+                    navigate(`/app/cook/${lastRecipeId}`);
                   } else {
                     // First time user - redirect to recipes
-                    navigate('/recipes');
+                    navigate('/app/recipes');
                   }
                 } else {
                   navigate(item.path);

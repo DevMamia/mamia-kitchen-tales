@@ -10,6 +10,8 @@ import PWAInstallPrompt from "./components/PWAInstallPrompt";
 import PWAUpdateNotification from "./components/PWAUpdateNotification";
 import OfflineIndicator from "./components/OfflineIndicator";
 import PWADebugPanel from "./components/PWADebugPanel";
+import ProtectedRoute from "./components/ProtectedRoute";
+import Landing from "./pages/Landing";
 import Mamas from "./pages/Mamas";
 import MamaCookbook from "./pages/MamaCookbook";
 import Recipes from "./pages/Recipes";
@@ -36,18 +38,79 @@ const App = () => (
           <PWADebugPanel />
           <BrowserRouter>
             <Routes>
-              <Route path="/" element={<Layout pageTitle="Choose Your Cooking Guide" pageSubtitle="Learn authentic recipes from traditional cooks"><Mamas /></Layout>} />
-              <Route path="/mama/:mamaId" element={<Layout><MamaCookbook /></Layout>} />
-              <Route path="/recipes" element={<Layout pageTitle="Discover Recipes" pageSubtitle="Find the perfect dish for any occasion"><Recipes /></Layout>} />
-              <Route path="/recipe/:recipeId" element={<Layout><RecipeDetail /></Layout>} />
-              <Route path="/cook" element={<Layout pageTitle="Cook" pageSubtitle="Choose a recipe to start cooking"><Cook /></Layout>} />
-              <Route path="/cook/:recipeId" element={<Layout><Cook /></Layout>} />
-              <Route path="/enhanced-cook/:recipeId" element={<Layout><EnhancedCook /></Layout>} />
-              <Route path="/kitchen" element={<Layout pageTitle="My Kitchen" pageSubtitle="Your personal cooking space"><Kitchen /></Layout>} />
+              {/* Public Routes */}
+              <Route path="/" element={<Landing />} />
               <Route path="/auth" element={<Auth />} />
-              <Route path="/shopping-list" element={<Layout pageTitle="Shopping List" pageSubtitle="Your ingredients for cooking"><ShoppingList /></Layout>} />
+              
+              {/* Protected App Routes */}
+              <Route path="/app" element={
+                <ProtectedRoute>
+                  <Layout pageTitle="Choose Your Cooking Guide" pageSubtitle="Learn authentic recipes from traditional cooks">
+                    <Mamas />
+                  </Layout>
+                </ProtectedRoute>
+              } />
+              <Route path="/app/mama/:mamaId" element={
+                <ProtectedRoute>
+                  <Layout><MamaCookbook /></Layout>
+                </ProtectedRoute>
+              } />
+              <Route path="/app/recipes" element={
+                <ProtectedRoute>
+                  <Layout pageTitle="Discover Recipes" pageSubtitle="Find the perfect dish for any occasion">
+                    <Recipes />
+                  </Layout>
+                </ProtectedRoute>
+              } />
+              <Route path="/app/recipe/:recipeId" element={
+                <ProtectedRoute>
+                  <Layout><RecipeDetail /></Layout>
+                </ProtectedRoute>
+              } />
+              <Route path="/app/cook" element={
+                <ProtectedRoute>
+                  <Layout pageTitle="Cook" pageSubtitle="Choose a recipe to start cooking">
+                    <Cook />
+                  </Layout>
+                </ProtectedRoute>
+              } />
+              <Route path="/app/cook/:recipeId" element={
+                <ProtectedRoute>
+                  <Layout><Cook /></Layout>
+                </ProtectedRoute>
+              } />
+              <Route path="/app/enhanced-cook/:recipeId" element={
+                <ProtectedRoute>
+                  <Layout><EnhancedCook /></Layout>
+                </ProtectedRoute>
+              } />
+              <Route path="/app/kitchen" element={
+                <ProtectedRoute>
+                  <Layout pageTitle="My Kitchen" pageSubtitle="Your personal cooking space">
+                    <Kitchen />
+                  </Layout>
+                </ProtectedRoute>
+              } />
+              <Route path="/app/shopping-list" element={
+                <ProtectedRoute>
+                  <Layout pageTitle="Shopping List" pageSubtitle="Your ingredients for cooking">
+                    <ShoppingList />
+                  </Layout>
+                </ProtectedRoute>
+              } />
+              
+              {/* Legacy redirects for backward compatibility */}
+              <Route path="/mama/:mamaId" element={<ProtectedRoute><Layout><MamaCookbook /></Layout></ProtectedRoute>} />
+              <Route path="/recipes" element={<ProtectedRoute><Layout pageTitle="Discover Recipes" pageSubtitle="Find the perfect dish for any occasion"><Recipes /></Layout></ProtectedRoute>} />
+              <Route path="/recipe/:recipeId" element={<ProtectedRoute><Layout><RecipeDetail /></Layout></ProtectedRoute>} />
+              <Route path="/cook" element={<ProtectedRoute><Layout pageTitle="Cook" pageSubtitle="Choose a recipe to start cooking"><Cook /></Layout></ProtectedRoute>} />
+              <Route path="/cook/:recipeId" element={<ProtectedRoute><Layout><Cook /></Layout></ProtectedRoute>} />
+              <Route path="/enhanced-cook/:recipeId" element={<ProtectedRoute><Layout><EnhancedCook /></Layout></ProtectedRoute>} />
+              <Route path="/kitchen" element={<ProtectedRoute><Layout pageTitle="My Kitchen" pageSubtitle="Your personal cooking space"><Kitchen /></Layout></ProtectedRoute>} />
+              <Route path="/shopping-list" element={<ProtectedRoute><Layout pageTitle="Shopping List" pageSubtitle="Your ingredients for cooking"><ShoppingList /></Layout></ProtectedRoute>} />
+              
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-              <Route path="*" element={<Layout><NotFound /></Layout>} />
+              <Route path="*" element={<ProtectedRoute><Layout><NotFound /></Layout></ProtectedRoute>} />
             </Routes>
           </BrowserRouter>
         </ShoppingListProvider>
