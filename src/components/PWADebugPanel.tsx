@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { usePWA } from '@/hooks/usePWA';
 import { useOfflineShoppingList } from '@/hooks/useOfflineShoppingList';
