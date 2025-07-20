@@ -21,7 +21,7 @@ export default function Auth() {
   // Redirect if already authenticated
   useEffect(() => {
     if (user) {
-        const from = (location.state as any)?.from?.pathname || '/app';
+        const from = (location?.state as any)?.from?.pathname || '/app';
         navigate(from, { replace: true });
     }
   }, [user, navigate, location]);
@@ -57,7 +57,7 @@ export default function Auth() {
         title: "Welcome back!",
         description: "You've successfully signed in."
       });
-        const from = (location.state as any)?.from?.pathname || '/app';
+        const from = (location?.state as any)?.from?.pathname || '/app';
         navigate(from, { replace: true });
     }
     
@@ -95,7 +95,7 @@ export default function Auth() {
         title: "Account Created!",
         description: "Welcome to MAMIA! You can now start cooking with our grandmothers."
       });
-      const from = (location.state as any)?.from?.pathname || '/app';
+      const from = (location?.state as any)?.from?.pathname || '/app';
       navigate(from, { replace: true });
     }
     
