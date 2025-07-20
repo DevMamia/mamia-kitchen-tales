@@ -1,12 +1,9 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Volume2, ChevronLeft, ChevronRight, Upload, X, Settings, ChefHat, Crown, Camera } from 'lucide-react';
+import { ArrowLeft, Volume2, ChevronLeft, ChevronRight, X, ChefHat, Camera } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { VoiceStatusIndicator } from '@/components/VoiceStatusIndicator';
 import { EnhancedCookingTimer } from '@/components/EnhancedCookingTimer';
 import { PreCookingChat } from '@/components/PreCookingChat';
-import { ContextAwareVoiceIndicator } from '@/components/ContextAwareVoiceIndicator';
-import { SmartVoiceCommandSuggestions } from '@/components/SmartVoiceCommandSuggestions';
 import { MamaPhotoCapture } from '@/components/MamaPhotoCapture';
 import { getRecipeWithMama, recipes } from '@/data/recipes';
 import { getMamaById } from '@/data/mamas';
@@ -28,12 +25,9 @@ const EnhancedCook = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [timerExpanded, setTimerExpanded] = useState(false);
   const [timerCompleted, setTimerCompleted] = useState(false);
-  const [photoMode, setPhotoMode] = useState(false);
+  const [showPhotoCapture, setShowPhotoCapture] = useState(false);
   const [optimizedTips, setOptimizedTips] = useState<Record<number, TipPlacement>>({});
   const [hasSpokenCurrentStep, setHasSpokenCurrentStep] = useState(false);
-
-  // Add new state for photo mode
-  const [showPhotoCapture, setShowPhotoCapture] = useState(false);
 
   // Services
   const [unifiedConversation] = useState(() => UnifiedConversationService.getInstance());
@@ -58,8 +52,6 @@ const EnhancedCook = () => {
     speakWithContext,
     speakCookingInstruction: speakContextualInstruction,
     listeningState,
-    showWakeWordPrompt,
-    wakeWordPrompt,
     isPlaying,
     queueLength,
     serviceStatus
@@ -89,59 +81,21 @@ const EnhancedCook = () => {
         recipeData.recipe.stepVoiceTips,
         recipeData.recipe.instructions
       );
-      console.log('[EnhancedCook] Optimized tip placements:', optimized);
       return optimized;
     }
     return {};
   }, [recipeData]);
 
-  // Initialize services
-  useEffect(() => {
-    if (recipeData) {
-      // Configure unified conversation service
-      unifiedConversation.updateConfig({
-        mamaId: recipeData.mama.voiceId,
-        recipeContext: recipeData.recipe.title,
-        currentStep,
-        userSkillLevel: 'intermediate',
-        culturalContext: true
-      });
-
-      // Configure voice command service
-      voiceCommandService.updateContext({
-        currentStep,
-        totalSteps: recipeData.recipe.instructions.length,
-        cookingPhase: conversationPhase,
-        mamaId: recipeData.mama.voiceId,
-        strugglingSteps: conversationMemory?.context.cookingProgress.strugglingSteps || [],
-        recentCommands: []
-      });
-
-      // Update context-aware voice
-      updateVoiceContext({
-        cookingContext: conversationPhase === 'pre-cooking' ? 'pre_cooking' : 
-                       conversationPhase === 'cooking' ? 'active_cooking' : 'completed',
-        currentStep,
-        totalSteps: recipeData.recipe.instructions.length,
-        mamaId: recipeData.mama.voiceId,
-        recipeId: recipeData.recipe.id,
-        userStruggling: conversationMemory?.isUserStruggling() || false
-      });
-    }
-  }, [recipeData, currentStep, conversationPhase, unifiedConversation, voiceCommandService, updateVoiceContext, conversationMemory]);
-
   // Callback functions
   const handleStartCooking = useCallback(async () => {
     if (!recipeData) return;
     
-    console.log('[EnhancedCook] Starting enhanced cooking mode');
     setConversationPhase('cooking');
     setVoicePhase('cooking');
     conversationMemory?.startCookingSession();
     
-    // Enhanced welcome message with cultural flair
     try {
-      const welcomeMessage = getEnhancedWelcomeMessage(recipeData.mama.accent, recipeData.recipe.title);
+      const welcomeMessage = `Let's create beautiful ${recipeData.recipe.title} together! I'll guide you with my special tips and stories.`;
       await speakWithContext(welcomeMessage, {
         priority: 'high',
         contextual: true
@@ -153,8 +107,6 @@ const EnhancedCook = () => {
 
   const handleVoiceCommand = useCallback(async (command: string) => {
     if (!recipeData) return;
-    
-    console.log('[EnhancedCook] Processing voice command:', command);
     
     const commandResult = voiceCommandService.processVoiceInput(command);
     
@@ -181,39 +133,11 @@ const EnhancedCook = () => {
           await speakContextualInstruction(instruction, currentStep, stepTip?.tip);
           break;
           
-        case 'emergency_help':
-          conversationMemory?.requestHelp(command, currentStep);
-          const emergencyResponse = await unifiedConversation.handleUserInput(
-            `Emergency help needed: ${command}`, 
-            { priority: 'high' }
-          );
-          await speakWithContext(emergencyResponse, { priority: 'high', interruption: true });
-          break;
-          
-        case 'timing_question':
-        case 'temperature_question':
-        case 'substitution_question':
+        default:
           const queryResponse = await unifiedConversation.handleUserInput(command, { priority: 'normal' });
           await speakWithContext(queryResponse, { priority: 'normal', contextual: true });
-          break;
-          
-        case 'positive_feedback':
-          const encouragementResponse = getEncouragementResponse(recipeData.mama.accent);
-          await speakWithContext(encouragementResponse, { priority: 'normal' });
-          break;
-          
-        case 'cultural_story':
-          const storyResponse = getCulturalStoryResponse(recipeData.mama.accent, recipeData.recipe.title);
-          await speakWithContext(storyResponse, { priority: 'normal', contextual: true });
-          break;
-          
-        default:
-          // Handle as general conversation
-          const generalResponse = await unifiedConversation.handleUserInput(command);
-          await speakWithContext(generalResponse, { contextual: true });
       }
     } else {
-      // No specific command found, handle as conversation
       conversationMemory?.requestHelp(command, currentStep);
       const conversationResponse = await unifiedConversation.handleUserInput(command);
       await speakWithContext(conversationResponse, { contextual: true });
@@ -221,7 +145,6 @@ const EnhancedCook = () => {
   }, [currentStep, conversationMemory, optimizedTips, speakContextualInstruction, speakWithContext, unifiedConversation, voiceCommandService, recipeData]);
 
   const handleTimerComplete = useCallback((stepNumber: number, timerName: string) => {
-    console.log(`[EnhancedCook] Timer completed: ${timerName} for step ${stepNumber}`);
     setTimerCompleted(true);
     
     if (stepNumber === currentStep) {
@@ -241,16 +164,51 @@ const EnhancedCook = () => {
     setShowPhotoCapture(true);
   }, []);
 
-  // Update the existing handlePhotoShare callback
   const handlePhotoCaptureClose = useCallback(() => {
     setShowPhotoCapture(false);
   }, []);
+
+  // Initialize services
+  useEffect(() => {
+    if (recipeData) {
+      unifiedConversation.updateConfig({
+        mamaId: recipeData.mama.voiceId,
+        recipeContext: recipeData.recipe.title,
+        currentStep,
+        userSkillLevel: 'intermediate',
+        culturalContext: true
+      });
+
+      voiceCommandService.updateContext({
+        currentStep,
+        totalSteps: recipeData.recipe.instructions.length,
+        cookingPhase: conversationPhase,
+        mamaId: recipeData.mama.voiceId,
+        strugglingSteps: conversationMemory?.context.cookingProgress.strugglingSteps || [],
+        recentCommands: []
+      });
+
+      updateVoiceContext({
+        cookingContext: conversationPhase === 'pre-cooking' ? 'pre_cooking' : 
+                       conversationPhase === 'cooking' ? 'active_cooking' : 'completed',
+        currentStep,
+        totalSteps: recipeData.recipe.instructions.length,
+        mamaId: recipeData.mama.voiceId,
+        recipeId: recipeData.recipe.id,
+        userStruggling: conversationMemory?.isUserStruggling() || false
+      });
+    }
+  }, [recipeData, currentStep, conversationPhase, unifiedConversation, voiceCommandService, updateVoiceContext, conversationMemory]);
+
+  // Update optimized tips state
+  useEffect(() => {
+    setOptimizedTips(memoizedOptimizedTips);
+  }, [memoizedOptimizedTips]);
 
   // Enhanced voice current step with cooking instruction method
   useEffect(() => {
     if (conversationPhase === 'cooking' && recipeData && !hasSpokenCurrentStep && voiceInitialized) {
       const speakCurrentStep = async () => {
-        console.log(`[EnhancedCook] Speaking enhanced cooking instruction for step ${currentStep}`);
         const instruction = recipeData.recipe.instructions[currentStep - 1];
         const currentStepTip = optimizedTips[currentStep];
         
@@ -271,11 +229,6 @@ const EnhancedCook = () => {
   useEffect(() => {
     setHasSpokenCurrentStep(false);
   }, [currentStep]);
-
-  // Update optimized tips state
-  useEffect(() => {
-    setOptimizedTips(memoizedOptimizedTips);
-  }, [memoizedOptimizedTips]);
 
   // Handle no recipe ID
   if (!recipeId) {
@@ -311,14 +264,9 @@ const EnhancedCook = () => {
                       {recipe.title}
                     </h3>
                     <p className="text-sm text-muted-foreground">
-                      Enhanced experience with {mama?.name} {mama?.emoji} • {recipe.cookingTime}
+                      Enhanced experience with {mama?.name} • {recipe.cookingTime}
                     </p>
-                    <div className="flex items-center gap-2 mt-1">
-                      <Crown className="w-3 h-3 text-orange-500" />
-                      <span className="text-xs text-orange-600">Enhanced Voice • Smart Tips • Cultural Stories</span>
-                    </div>
                   </div>
-                  <ChevronRight className="text-muted-foreground group-hover:text-orange-500 transition-colors" />
                 </div>
               </div>
             );
@@ -335,10 +283,6 @@ const EnhancedCook = () => {
   const { recipe, mama } = recipeData;
   const totalSteps = recipe.instructions.length;
 
-  // Create cooking context after recipe data is available
-  const cookingContext = conversationPhase === 'pre-cooking' ? 'pre_cooking' : 
-                         conversationPhase === 'cooking' ? 'active_cooking' : 'completed';
-
   if (conversationPhase === 'pre-cooking') {
     return (
       <div className="min-h-[calc(100vh-8rem)]">
@@ -351,154 +295,120 @@ const EnhancedCook = () => {
     );
   }
 
-  // Enhanced cooking interface
+  // Simplified enhanced cooking interface
   const currentInstruction = recipe.instructions[currentStep - 1];
   const currentStepTimer = recipe.stepTimers?.[currentStep - 1];
   const currentStepTip = optimizedTips[currentStep];
-  const fallbackTip = recipe.voiceTips && recipe.voiceTips.length > 0 && currentStep >= Math.ceil(totalSteps / 2)
-    ? recipe.voiceTips[(currentStep - Math.ceil(totalSteps / 2)) % recipe.voiceTips.length]
-    : null;
+
+  const getAudioStatus = () => {
+    if (isPlaying || isEnhancedPlaying) return 'Talking';
+    if (listeningState === 'listening') return 'Listening';
+    return 'Waiting';
+  };
 
   return (
-    <div className="min-h-[calc(100vh-8rem)] bg-gradient-to-b from-orange-50/20 to-background">
-      {/* Enhanced Header */}
-      <div className="flex items-center justify-between p-4 border-b border-border bg-background/95 backdrop-blur-sm sticky top-16 z-40">
+    <div className="min-h-[calc(100vh-8rem)] bg-background pb-20">
+      {/* Simplified Header */}
+      <div className="flex items-center justify-between p-4 border-b border-border bg-background sticky top-16 z-40">
         <Button
           variant="ghost"
           onClick={() => navigate('/')}
-          className="text-red-600 hover:text-red-700 hover:bg-red-50 text-lg"
+          className="text-red-600 hover:text-red-700 hover:bg-red-50"
         >
           <X size={20} className="mr-2" />
-          Exit Enhanced Mode
+          Exit
         </Button>
         
-        <div className="flex items-center gap-2">
-          <Crown className="w-5 h-5 text-orange-500" />
-          <span className="text-sm font-medium text-orange-600">Enhanced Experience</span>
-        </div>
+        <h1 className="text-lg font-heading font-semibold text-foreground">
+          {mama?.name}'s Kitchen
+        </h1>
         
-        <Button variant="ghost" size="sm">
-          <Settings size={20} />
-        </Button>
+        <div className="w-16" />
       </div>
 
-      {/* Enhanced Progress Bar */}
-      <div className="p-4 bg-background/50">
+      {/* Simple Progress Bar */}
+      <div className="p-4">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-lg font-medium text-foreground">Step {currentStep} of {totalSteps}</span>
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-muted-foreground">~{Math.ceil(totalSteps * 3 - currentStep * 3)} min left</span>
-            {conversationMemory?.shouldProvideDetailedGuidance() && (
-              <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">Detailed Mode</span>
-            )}
-          </div>
+          <span className="text-sm font-medium text-foreground">Step {currentStep} of {totalSteps}</span>
+          <span className="text-sm text-muted-foreground">{recipe.cookingTime}</span>
         </div>
-        <div className="w-full bg-muted rounded-full h-3">
+        <div className="w-full bg-muted rounded-full h-2">
           <div 
-            className="bg-gradient-to-r from-orange-500 to-orange-600 h-3 rounded-full transition-all duration-300"
+            className="bg-orange-500 h-2 rounded-full transition-all duration-300"
             style={{ width: `${(currentStep / totalSteps) * 100}%` }}
           />
         </div>
       </div>
 
-      {/* Main Instruction Card */}
+      {/* Simple Instruction Card */}
       <div className="p-4">
-        <div className="bg-card rounded-2xl p-6 shadow-lg border border-border w-full max-w-md mx-auto mb-6">
-          <h2 className="text-2xl font-heading font-bold text-foreground mb-4 leading-tight">
+        <div className="bg-card rounded-lg p-6 shadow-sm border border-border max-w-md mx-auto mb-6">
+          <h2 className="text-xl font-heading font-semibold text-foreground mb-4">
             {currentInstruction}
           </h2>
           
           {currentStepTimer && (
-            <div className="bg-orange-100 dark:bg-orange-900/30 rounded-lg p-3 mb-4">
-              <p className="text-orange-700 dark:text-orange-300 font-medium text-lg">
-                ⏰ This step takes {currentStepTimer.display}
+            <div className="bg-orange-50 rounded-lg p-3 mb-4 border border-orange-200">
+              <p className="text-orange-700 font-medium">
+                ⏰ {currentStepTimer.display}
               </p>
-              <p className="text-orange-600 dark:text-orange-400 text-sm mt-1">
-                {currentStepTimer.description}
-              </p>
+              {currentStepTimer.description && (
+                <p className="text-orange-600 text-sm mt-1">
+                  {currentStepTimer.description}
+                </p>
+              )}
             </div>
           )}
 
           {timerCompleted && (
-            <div className="bg-green-100 dark:bg-green-900/30 rounded-lg p-3 mb-4">
-              <p className="text-green-700 dark:text-green-300 font-medium text-lg">
-                ✅ Timer finished! Ready for the next step?
+            <div className="bg-green-50 rounded-lg p-3 mb-4 border border-green-200">
+              <p className="text-green-700 font-medium">
+                ✅ Timer finished!
               </p>
             </div>
           )}
         </div>
 
-        {/* Enhanced Tips Display */}
-        {(currentStepTip || fallbackTip) && (
-          <div className="bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 rounded-xl p-4 mx-4 mb-6 border-l-4 border-yellow-400">
+        {/* Simple Tips Display */}
+        {currentStepTip && (
+          <div className="bg-yellow-50 rounded-lg p-4 mx-4 mb-6 border border-yellow-200">
             <div className="flex items-start gap-3">
-              <div className="text-2xl">{mama?.emoji}</div>
+              <div className="text-xl">{mama?.emoji}</div>
               <div>
-                <h3 className="font-handwritten text-lg text-yellow-800 dark:text-yellow-200 mb-1">
-                  {currentStepTip ? `${mama?.name}'s ${currentStepTip.category} tip` : `Wisdom from ${mama?.name}`}
+                <h3 className="font-medium text-yellow-800 mb-1">
+                  {mama?.name}'s tip
                 </h3>
-                <p className="font-handwritten text-yellow-700 dark:text-yellow-300 text-lg leading-relaxed">
-                  "{currentStepTip?.tip || fallbackTip}"
+                <p className="text-yellow-700">
+                  "{currentStepTip.tip}"
                 </p>
-                {currentStepTip && (
-                  <div className="text-xs text-yellow-600 dark:text-yellow-400 mt-2 opacity-75">
-                    {currentStepTip.timing === 'before' ? '💡 Do this before starting the step' : 
-                     currentStepTip.timing === 'during' ? '⚡ Keep this in mind while cooking' : 
-                     '✅ Remember this for future cooking'}
-                  </div>
-                )}
               </div>
             </div>
           </div>
         )}
       </div>
 
-      {/* Context-Aware Voice Interface */}
+      {/* Simple Voice Status */}
       <div className="px-4 mb-6">
-        <ContextAwareVoiceIndicator 
-          listeningState={listeningState}
-          cookingContext={cookingContext}
-          isPlaying={isPlaying}
-          queueLength={queueLength}
-          serviceStatus={serviceStatus}
-          showWakeWordPrompt={showWakeWordPrompt}
-          wakeWordPrompt={wakeWordPrompt}
-          mamaName={mama.name}
-        />
-        
-        {showWakeWordPrompt && (
-          <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-3 mb-4 text-center">
-            <p className="text-sm text-blue-700 dark:text-blue-300">
-              {wakeWordPrompt}
-            </p>
+        <div className="bg-muted/50 rounded-lg p-4 text-center">
+          <div className="text-sm text-muted-foreground mb-2">
+            Enhanced Voice: {getAudioStatus()}
           </div>
-        )}
+          <div className="text-xs text-muted-foreground">
+            Natural conversation and smart commands available
+          </div>
+        </div>
       </div>
 
-      {/* Smart Voice Command Suggestions */}
-      <div className="px-4 mb-6">
-        <SmartVoiceCommandSuggestions 
-          currentStep={currentStep}
-          totalSteps={totalSteps}
-          mamaName={mama.name}
-          cookingContext={cookingContext}
-          onCommandSuggested={handleVoiceCommand}
-        />
-      </div>
-
-      {/* Voice Status Indicator */}
-      <VoiceStatusIndicator className="justify-center" />
-
-      {/* Enhanced Controls */}
+      {/* Simple Controls */}
       <div className="px-4 mb-6">
         <div className="flex items-center justify-center gap-4">
           <Button
             onClick={() => currentStep > 1 && setCurrentStep(currentStep - 1)}
             disabled={currentStep === 1}
             variant="outline"
-            className="text-lg py-6 px-8 min-h-[56px]"
+            size="lg"
           >
-            <ChevronLeft size={24} className="mr-2" />
+            <ChevronLeft size={20} className="mr-2" />
             Previous
           </Button>
 
@@ -508,9 +418,10 @@ const EnhancedCook = () => {
               const stepTip = optimizedTips[currentStep];
               await speakContextualInstruction(instruction, currentStep, stepTip?.tip);
             }}
-            className="bg-orange-500 text-white hover:bg-orange-600 text-lg py-6 px-8 min-h-[56px] rounded-xl"
+            className="bg-orange-500 text-white hover:bg-orange-600"
+            size="lg"
           >
-            <Volume2 size={24} className="mr-2" />
+            <Volume2 size={20} className="mr-2" />
             Guide Me
           </Button>
 
@@ -518,27 +429,40 @@ const EnhancedCook = () => {
             onClick={() => currentStep < totalSteps && (setCurrentStep(currentStep + 1), setTimerCompleted(false))}
             disabled={currentStep === totalSteps}
             variant="outline"
-            className="text-lg py-6 px-8 min-h-[56px]"
+            size="lg"
           >
             Next
-            <ChevronRight size={24} className="ml-2" />
+            <ChevronRight size={20} className="ml-2" />
           </Button>
         </div>
       </div>
 
-      {/* Enhanced Bottom Section - Update the photo share button */}
-      <div className="px-4 pb-6">
+      {/* Photo Share Button */}
+      <div className="px-4 mb-6">
         <Button
           onClick={handlePhotoShare}
-          className="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white hover:from-orange-600 hover:to-red-600 text-xl py-6 rounded-2xl font-heading font-bold mb-4 min-h-[64px]"
+          className="w-full bg-orange-500 text-white hover:bg-orange-600"
+          size="lg"
         >
-          <Camera size={24} className="mr-3" />
+          <Camera size={20} className="mr-2" />
           Share Progress with {mama?.name}
         </Button>
-        
-        <p className="text-center text-sm text-muted-foreground font-handwritten">
-          Take a photo to get personalized feedback and encouragement from {mama?.name}!
-        </p>
+      </div>
+
+      {/* Fixed Audio Control at Bottom */}
+      <div className="fixed bottom-0 left-0 right-0 bg-background border-t border-border p-4 z-50">
+        <div className="max-w-md mx-auto">
+          <div className="flex items-center justify-center gap-3">
+            <div className="text-sm font-medium text-foreground">
+              Status of Audio - {mama?.name} {getAudioStatus()}
+            </div>
+            <div className={`w-3 h-3 rounded-full ${
+              getAudioStatus() === 'Talking' ? 'bg-green-500 animate-pulse' :
+              getAudioStatus() === 'Listening' ? 'bg-blue-500 animate-pulse' :
+              'bg-gray-400'
+            }`} />
+          </div>
+        </div>
       </div>
 
       {/* Enhanced Floating Timer */}
@@ -566,68 +490,5 @@ const EnhancedCook = () => {
     </div>
   );
 };
-
-// Helper functions
-function getEnhancedWelcomeMessage(accent: string, recipeName: string): string {
-  switch (accent) {
-    case 'Italian':
-      return `Perfetto! Let's create beautiful ${recipeName} together, tesoro! I'll guide you every step of the way with my special tips and stories from Nonna's kitchen!`;
-    case 'Mexican':
-      return `¡Órale! We're going to make delicious ${recipeName}, mijo! I'll share all my secrets and help you cook like a true mexicana!`;
-    case 'Thai':
-      return `Wonderful! Let's prepare amazing ${recipeName} together, dear! I'll teach you the Thai way with mindfulness and beautiful flavors!`;
-    default:
-      return `Let's start cooking this wonderful ${recipeName} together! I'm here to guide you with love and wisdom!`;
-  }
-}
-
-function getEncouragementResponse(accent: string): string {
-  const responses = {
-    Italian: [
-      "Bravissimo! You're cooking with such passion, just like a true Italian!",
-      "Madonna! Your cooking spirit is beautiful! Keep going, tesoro!",
-      "Perfetto! I can feel the amore you're putting into every step!"
-    ],
-    Mexican: [
-      "¡Qué bueno! You're cooking with your heart, just like Abuela taught you!",
-      "¡Órale! Your sazón is getting stronger with every dish, mijo!",
-      "¡Perfecto! You have the gift of good hands in the kitchen!"
-    ],
-    Thai: [
-      "Sabai! Your cooking energy is so positive and mindful!",
-      "Excellent! You're finding the balance and harmony in each step!",
-      "Beautiful! Your patience and care show in every movement!"
-    ]
-  };
-
-  const accentResponses = responses[accent as keyof typeof responses] || responses.Italian;
-  return accentResponses[Math.floor(Math.random() * accentResponses.length)];
-}
-
-function getCulturalStoryResponse(accent: string, recipeName: string): string {
-  switch (accent) {
-    case 'Italian':
-      return `Ah, ${recipeName}! This reminds me of my nonna in Tuscany. She used to say that every grain of pasta carries the love of the famiglia who makes it. This recipe has been passed down through generations of Italian mammas, each adding their own touch of amore!`;
-    case 'Mexican':
-      return `¡Ay, ${recipeName}! This takes me back to my pueblo in Michoacán. My abuela would wake up before dawn to prepare the masa, and the whole neighborhood would smell the magic happening in our cocina. Each family has their secret, but the love is always the same!`;
-    case 'Thai':
-      return `Ah, ${recipeName}! In Thailand, we believe that cooking is meditation in motion. My grandmother taught me that each ingredient has its own spirit, and when we cook with mindfulness and respect, the flavors dance together in perfect harmony. This recipe connects us to centuries of Thai wisdom!`;
-    default:
-      return `This ${recipeName} has such a wonderful story! It's been lovingly prepared by families for generations, each cook adding their own special touch while keeping the tradition alive!`;
-  }
-}
-
-function getPhotoSharingResponse(accent: string): string {
-  switch (accent) {
-    case 'Italian':
-      return "Madonna! Show me your beautiful creation, tesoro! I want to see how magnifico it looks! Maybe we can add a little extra touch to make it even more perfetto!";
-    case 'Mexican':
-      return "¡Órale! Let me see your masterpiece, mijo! I'm so excited to see how beautiful your dish looks! Maybe Abuela has some extra consejos to make it even better!";
-    case 'Thai':
-      return "Wonderful! Please show me your creation, dear! I'd love to see the colors and textures. Perhaps we can add some final touches to make it even more beautiful!";
-    default:
-      return "I'm so excited to see how your dish is coming along! Show me your progress and I'll help you make it even better!";
-  }
-}
 
 export default EnhancedCook;
