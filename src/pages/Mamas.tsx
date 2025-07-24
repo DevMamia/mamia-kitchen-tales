@@ -22,17 +22,17 @@ const Mamas = () => {
   }, [api]);
 
   return (
-    <div className="h-full flex flex-col pb-4">
-      <div className="flex-1 relative">
+    <div className="h-full flex flex-col px-4">
+      <div className="flex-1 relative py-4">
         <Carousel
           setApi={setApi}
-          className="w-full h-full"
+          className="w-full"
           opts={{
             align: "center",
             loop: true,
           }}
         >
-          <CarouselContent className="h-[55vh] max-h-[480px] min-h-[400px]">
+          <CarouselContent className="h-[70vh] max-h-[600px] min-h-[500px]">
             {mamas.map((mama) => (
               <CarouselItem key={mama.id} className="basis-[85%] pl-4">
                 <div 
@@ -43,7 +43,7 @@ const Mamas = () => {
                   <img 
                     src={mama.avatar} 
                     alt={`${mama.name} Character Card`}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-contain"
                   />
                 </div>
               </CarouselItem>
@@ -52,7 +52,7 @@ const Mamas = () => {
         </Carousel>
 
         {/* Progress dots */}
-        <div className="flex justify-center gap-2 mt-4">
+        <div className="flex justify-center gap-2 mt-6">
           {mamas.map((_, index) => (
             <button
               key={index}
