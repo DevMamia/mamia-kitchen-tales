@@ -7,6 +7,13 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
+  // Temporary bypass for guest mode
+  const BYPASS_AUTH = true;
+  
+  if (BYPASS_AUTH) {
+    return <>{children}</>;
+  }
+
   const { user, loading } = useAuth();
   const location = useLocation();
 

@@ -10,24 +10,8 @@ const Kitchen = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
 
-  if (!user) {
-    return (
-      <div className="text-center py-12">
-        <div className="bg-muted/30 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
-          <LogIn className="h-8 w-8 text-muted-foreground" />
-        </div>
-        <h3 className="text-lg font-heading font-semibold text-warm-brown mb-2">
-          Sign in to access your kitchen
-        </h3>
-        <p className="text-muted-foreground mb-4">
-          Save recipes, create shopping lists, and track your cooking journey
-        </p>
-        <Button onClick={() => navigate('/auth')}>
-          Sign In
-        </Button>
-      </div>
-    );
-  }
+  // Temporary guest mode - show content for all users
+  const BYPASS_AUTH = true;
 
   return (
     <div className="space-y-6">
@@ -37,11 +21,15 @@ const Kitchen = () => {
           <h2 className="text-xl font-heading font-bold text-warm-brown">
             Welcome back!
           </h2>
-          <p className="text-muted-foreground text-sm">{user.email}</p>
+          <p className="text-muted-foreground text-sm">
+            {BYPASS_AUTH ? "Guest User" : user?.email}
+          </p>
         </div>
-        <Button variant="outline" size="sm" onClick={signOut}>
-          Sign Out
-        </Button>
+        {!BYPASS_AUTH && (
+          <Button variant="outline" size="sm" onClick={signOut}>
+            Sign Out
+          </Button>
+        )}
       </div>
 
       {/* Shopping List Card - First Priority */}

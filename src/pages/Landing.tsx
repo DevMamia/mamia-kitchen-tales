@@ -15,7 +15,7 @@ const Landing = () => {
   }, [user, navigate]);
 
   const handleImageClick = () => {
-    navigate('/auth');
+    navigate('/app');
   };
 
   return (
